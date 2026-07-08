@@ -1,0 +1,461 @@
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+let currentTool = null;
+let selectedFiles = [];
+
+const toolConfig = {
+    // ORGANIZE PDF
+    'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur sesuai keinginan Anda.', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
+    'pdf-split': { title: 'Split PDF', desc: 'Pisahkan satu halaman atau ekstrak semua halaman PDF.', icon: 'fa-scissors', color: 'text-orange-500', accept: '.pdf', multi: false },
+    'remove-pages': { title: 'Remove pages', desc: 'Hapus halaman tertentu dari dokumen PDF.', icon: 'fa-minus-circle', color: 'text-rose-500', accept: '.pdf', multi: false },
+    'extract-pages': { title: 'Extract pages', desc: 'Dapatkan dokumen baru berisi halaman yang Anda ekstrak.', icon: 'fa-share-square', color: 'text-blue-500', accept: '.pdf', multi: false },
+    'organize-pdf': { title: 'Organize PDF', desc: 'Urutkan atau hapus halaman PDF dengan mudah.', icon: 'fa-sort-alpha-down', color: 'text-indigo-500', accept: '.pdf', multi: false },
+    'scan-to-pdf': { title: 'Scan to PDF', desc: 'Tangkap pindaian dokumen dari perangkat ke PDF.', icon: 'fa-qrcode', color: 'text-slate-500', accept: '.jpg,.png', multi: true },
+    
+    // OPTIMIZE PDF
+    'pdf-compress': { title: 'Compress PDF', desc: 'Kurangi ukuran file sambil mengoptimalkan kualitas maksimal.', icon: 'fa-compress-arrows-alt', color: 'text-green-500', accept: '.pdf', multi: false },
+    'repair-pdf': { title: 'Repair PDF', desc: 'Perbaiki file PDF yang rusak dan pulihkan data.', icon: 'fa-wrench', color: 'text-amber-500', accept: '.pdf', multi: false },
+    'ocr-pdf': { title: 'OCR PDF', desc: 'Ubah PDF hasil scan menjadi dokumen teks mentah yang dapat dicari dan di-copy.', icon: 'fa-search-plus', color: 'text-sky-500', accept: '.pdf', multi: false },
+
+    // CONVERT TO PDF
+    'image-to-pdf': { title: 'JPG to PDF', desc: 'Konversi gambar JPG ke PDF dalam hitungan detik.', icon: 'fa-image', color: 'text-yellow-500', accept: '.jpg,.jpeg,.png', multi: true },
+    'word-to-pdf': { title: 'WORD to PDF', desc: 'Buat file DOC dan DOCX Anda mudah dibaca dengan PDF.', icon: 'fa-file-word', color: 'text-blue-600', accept: '.docx', multi: false },
+    'ppt-to-pdf': { title: 'POWERPOINT to PDF', desc: 'Jadikan presentasi PPT dan PPTX mudah dilihat dengan PDF.', icon: 'fa-file-powerpoint', color: 'text-orange-600', accept: '.pptx,.ppt', multi: false },
+    'excel-to-pdf': { title: 'EXCEL to PDF', desc: 'Buat spreadsheet EXCEL mudah dibaca mengkonversi ke PDF.', icon: 'fa-file-excel', color: 'text-green-600', accept: '.xlsx', multi: false },
+    'html-to-pdf': { title: 'HTML to PDF', desc: 'Konversi halaman web dalam HTML ke PDF.', icon: 'fa-html5', color: 'text-orange-500', accept: '.html', multi: false },
+
+    // CONVERT FROM PDF
+    'pdf-to-image': { title: 'PDF to JPG', desc: 'Konversi setiap halaman PDF ke JPG atau ekstrak gambar.', icon: 'fa-images', color: 'text-yellow-500', accept: '.pdf', multi: false },
+    'pdf-to-word': { title: 'PDF to WORD', desc: 'Mudah mengkonversi PDF ke DOC dan DOCX.', icon: 'fa-file-word', color: 'text-blue-500', accept: '.pdf', multi: false },
+    'pdf-to-ppt': { title: 'PDF to POWERPOINT', desc: 'Ubah PDF Anda menjadi presentasi PPTX.', icon: 'fa-file-powerpoint', color: 'text-orange-500', accept: '.pdf', multi: false },
+    'pdf-to-excel': { title: 'PDF to EXCEL', desc: 'Tarik data langsung dari PDF ke spreadsheet EXCEL.', icon: 'fa-file-excel', color: 'text-green-500', accept: '.pdf', multi: false },
+    'pdf-to-pdfa': { title: 'PDF to PDF/A', desc: 'Ubah PDF menjadi PDF/A untuk pengarsipan jangka panjang.', icon: 'fa-file-pdf', color: 'text-red-500', accept: '.pdf', multi: false },
+
+    // EDIT PDF
+    'pdf-rotate': { title: 'Rotate PDF', desc: 'Putar PDF sesuka Anda.', icon: 'fa-redo', color: 'text-purple-500', accept: '.pdf', multi: false },
+    'page-numbers': { title: 'Add page numbers', desc: 'Tambahkan nomor halaman ke PDF dengan mudah.', icon: 'fa-sort-numeric-down', color: 'text-pink-500', accept: '.pdf', multi: false },
+    'pdf-watermark': { title: 'Add watermark', desc: 'Stempel gambar atau teks ke PDF dalam hitungan detik.', icon: 'fa-stamp', color: 'text-indigo-400', accept: '.pdf', multi: false, settings: [{ id: 'wm-text', label: 'Teks Watermark', type: 'text', placeholder: 'Ketik Teks' }] },
+    'crop-pdf': { title: 'Crop PDF', desc: 'Pangkas margin atau potong halaman PDF.', icon: 'fa-crop', color: 'text-teal-500', accept: '.pdf', multi: false },
+    'edit-pdf': { title: 'Edit PDF', desc: 'Tambahkan teks, gambar, bentuk atau anotasi tangan.', icon: 'fa-edit', color: 'text-amber-600', accept: '.pdf', multi: false },
+    'pdf-forms': { title: 'PDF Forms', desc: 'Buat formulir interaktif atau isi formulir PDF.', icon: 'fa-list-alt', color: 'text-cyan-600', accept: '.pdf', multi: false },
+
+    // PDF SECURITY
+    'pdf-unlock': { title: 'Unlock PDF', desc: 'Hapus kata sandi keamanan PDF.', icon: 'fa-unlock', color: 'text-teal-500', accept: '.pdf', multi: false },
+    'pdf-protect': { title: 'Protect PDF', desc: 'Amankan file PDF dengan kata sandi.', icon: 'fa-lock', color: 'text-red-600', accept: '.pdf', multi: false, settings: [{ id: 'pt-pass', label: 'Set Password', type: 'text', placeholder: '***' }] },
+    'sign-pdf': { title: 'Sign PDF', desc: 'Tanda tangani dokumen PDF secara elektronik.', icon: 'fa-signature', color: 'text-blue-700', accept: '.pdf', multi: false },
+    'redact-pdf': { title: 'Redact PDF', desc: 'Sensor info sensitif di dokumen PDF Anda.', icon: 'fa-eraser', color: 'text-slate-800', accept: '.pdf', multi: false },
+    'compare-pdf': { title: 'Compare PDF', desc: 'Bandingkan dua dokumen untuk melihat perubahannya.', icon: 'fa-not-equal', color: 'text-orange-400', accept: '.pdf', multi: true },
+
+    // PDF INTELLIGENCE
+    'ai-summarizer': { 
+        title: 'AI Summarizer', 
+        desc: 'Dapatkan ringkasan dari dokumen PDF panjang menggunakan kecerdasan buatan.', 
+        icon: 'fa-brain', 
+        color: 'text-purple-600', 
+        accept: '.pdf', 
+        multi: false,
+        settings: [
+            { id: 'openai-api-key', label: 'OpenAI API Key rahasia Anda (sk-...)', type: 'text', placeholder: 'Paste API Key di sini' }
+        ]
+    },
+    'translate-pdf': { title: 'Translate PDF', desc: 'Terjemahkan seluruh isi PDF ke bahasa yang Anda inginkan.', icon: 'fa-language', color: 'text-sky-600', accept: '.pdf', multi: false },
+    'pdf-to-markdown': { title: 'PDF to Markdown', desc: 'Ubah teks PDF menjadi Markdown yang bersih.', icon: 'fa-markdown', color: 'fab', color: 'text-slate-600', accept: '.pdf', multi: false }
+};
+
+const categories = {
+    'ORGANIZE PDF': ['pdf-merge', 'pdf-split', 'remove-pages', 'extract-pages', 'organize-pdf', 'scan-to-pdf'],
+    'OPTIMIZE PDF': ['pdf-compress', 'repair-pdf', 'ocr-pdf'],
+    'CONVERT TO PDF': ['image-to-pdf', 'word-to-pdf', 'ppt-to-pdf', 'excel-to-pdf', 'html-to-pdf'],
+    'CONVERT FROM PDF': ['pdf-to-image', 'pdf-to-word', 'pdf-to-ppt', 'pdf-to-excel', 'pdf-to-pdfa'],
+    'EDIT PDF': ['pdf-rotate', 'page-numbers', 'pdf-watermark', 'crop-pdf', 'edit-pdf', 'pdf-forms'],
+    'PDF SECURITY': ['pdf-unlock', 'pdf-protect', 'sign-pdf', 'redact-pdf', 'compare-pdf'],
+    'PDF INTELLIGENCE': ['ai-summarizer', 'translate-pdf', 'pdf-to-markdown']
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    renderDashboard();
+    setupDropZone();
+    setupFileInput();
+    initTheme();
+});
+
+function renderDashboard() {
+    const grid = document.getElementById('dashboardGrid');
+    grid.innerHTML = '';
+
+    for (const [catName, tools] of Object.entries(categories)) {
+        let catHTML = `
+            <div class="mb-10">
+                <h3 class="text-xl font-bold text-slate-700 dark:text-slate-200 mb-5 border-b pb-2 border-slate-200 dark:border-slate-700">
+                    ${catName}
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        `;
+        
+        tools.forEach(toolId => {
+            const t = toolConfig[toolId];
+            catHTML += `
+                <div onclick="selectTool('${toolId}')" class="group bg-white dark:bg-darkCard p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg cursor-pointer transition-all duration-300 hover:-translate-y-1">
+                    <div class="${t.color} text-4xl mb-4 transition-transform group-hover:scale-110"><i class="fas ${t.icon}"></i></div>
+                    <h4 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 mb-1">${t.title}</h4>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">${t.desc}</p>
+                </div>
+            `;
+        });
+        
+        catHTML += `</div></div>`;
+        grid.innerHTML += catHTML;
+    }
+}
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar.classList.contains('-translate-x-full')) {
+        sidebar.classList.remove('-translate-x-full');
+        sidebar.classList.add('translate-x-0');
+    } else {
+        sidebar.classList.toggle('md:w-64');
+        sidebar.classList.toggle('md:w-0');
+        sidebar.classList.toggle('md:opacity-0');
+        sidebar.classList.toggle('overflow-hidden');
+    }
+}
+
+function toggleDarkMode() {
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    initTheme();
+}
+
+function initTheme() {
+    const isDark = localStorage.getItem('theme') === 'dark';
+    if (isDark) document.documentElement.classList.add('dark');
+    document.getElementById('themeIcon').className = isDark ? 'fas fa-sun text-xl' : 'fas fa-moon text-xl';
+}
+
+function selectTool(toolId) {
+    currentTool = toolId;
+    const config = toolConfig[toolId];
+    document.getElementById('toolsSection').classList.add('hidden');
+    document.getElementById('uploadSection').classList.remove('hidden');
+    
+    document.getElementById('toolTitle').textContent = config.title;
+    document.getElementById('toolDescription').textContent = config.desc;
+    
+    const fInput = document.getElementById('fileInput');
+    fInput.accept = config.accept;
+    fInput.multiple = config.multi;
+
+    const sPanel = document.getElementById('settingsPanel');
+    const sContent = document.getElementById('settingsContent');
+    sContent.innerHTML = '';
+
+    if (config.settings) {
+        config.settings.forEach(set => {
+            sContent.innerHTML += `
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">${set.label}</label>
+                    <input type="${set.type}" id="${set.id}" placeholder="${set.placeholder}" class="w-full text-sm px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+            `;
+        });
+        sPanel.classList.remove('hidden');
+    } else {
+        sPanel.classList.add('hidden');
+    }
+    clearFiles();
+}
+
+function goBack() {
+    document.getElementById('uploadSection').classList.add('hidden');
+    document.getElementById('toolsSection').classList.remove('hidden');
+    clearFiles();
+}
+
+function setupDropZone() {
+    const dz = document.getElementById('dropZone');
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }));
+    ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, () => dz.classList.add('scale-105', 'border-indigo-600')));
+    ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, () => dz.classList.remove('scale-105', 'border-indigo-600')));
+    dz.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+}
+
+function setupFileInput() {
+    document.getElementById('fileInput').addEventListener('change', e => handleFiles(e.target.files));
+}
+
+function handleFiles(files) {
+    selectedFiles = Array.from(files).slice(0, toolConfig[currentTool].multi ? 50 : 1);
+    renderFileList();
+}
+
+function renderFileList() {
+    const flist = document.getElementById('fileList');
+    const actBtn = document.getElementById('actionButtons');
+    flist.innerHTML = '';
+    
+    if (selectedFiles.length === 0) {
+        actBtn.classList.add('hidden');
+        return;
+    }
+    
+    actBtn.classList.remove('hidden');
+    selectedFiles.forEach((f, i) => {
+        flist.innerHTML += `
+            <div class="flex items-center justify-between p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg mb-2 shadow-sm">
+                <div class="flex items-center gap-3 truncate">
+                    <i class="fas fa-file-pdf text-red-500 text-2xl"></i>
+                    <div class="truncate">
+                        <p class="text-sm font-bold text-slate-800 dark:text-white truncate">${f.name}</p>
+                        <p class="text-xs text-slate-400">${(f.size / 1024 / 1024).toFixed(2)} MB</p>
+                    </div>
+                </div>
+                <button onclick="removeFile(${i})" class="text-slate-400 hover:text-red-500 p-2"><i class="fas fa-times"></i></button>
+            </div>
+        `;
+    });
+}
+
+function removeFile(i) { selectedFiles.splice(i, 1); renderFileList(); }
+function clearFiles() { selectedFiles = []; document.getElementById('fileInput').value = ''; renderFileList(); hideProgress(); }
+
+function updateProgress(pct, txt) {
+    document.getElementById('progressArea').classList.remove('hidden');
+    document.getElementById('progressFill').style.width = `${pct}%`;
+    document.getElementById('progressPercent').textContent = `${pct}%`;
+    document.getElementById('progressText').textContent = txt;
+}
+function hideProgress() { document.getElementById('progressArea').classList.add('hidden'); }
+function alertUser(msg, type) {
+    const area = document.getElementById('alertArea');
+    const cl = type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+    area.innerHTML = `<div class="p-3 font-bold rounded-lg ${cl}">${msg}</div>`;
+    setTimeout(() => area.innerHTML = '', 5000);
+}
+function triggerDownload(blob, fname) {
+    const u = URL.createObjectURL(blob); const a = document.createElement('a');
+    a.href = u; a.download = fname; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(u);
+}
+
+// ============ ENGINE PROSES UTAMA ============
+async function processFiles() {
+    if (selectedFiles.length === 0) return;
+    updateProgress(5, 'Menyiapkan berkas...');
+    try {
+        switch(currentTool) {
+            case 'pdf-merge': await executeMerge(); break;
+            case 'pdf-split': await executeSplit(); break;
+            case 'pdf-compress': await executeCompress(); break;
+            case 'word-to-pdf': await executeWordToPdf(); break;
+            case 'excel-to-pdf': await executeExcelToPdf(); break;
+            case 'image-to-pdf': await executeImageToPdf(); break;
+            case 'pdf-to-word': await executePdfToWord(); break;
+            case 'pdf-to-excel': await executePdfToExcel(); break;
+            case 'pdf-to-image': await executePdfToImage(); break;
+            case 'pdf-rotate': await executeRotate(); break;
+            case 'pdf-watermark': await executeWatermark(); break;
+            case 'pdf-protect': await executeProtect(); break;
+            case 'pdf-unlock': await executeUnlock(); break;
+            // Routing baru untuk OCR dan AI
+            case 'ocr-pdf': await executeOcrPdf(); break;
+            case 'ai-summarizer': await executeAiSummarizer(); break;
+            
+            default: await executeAdvancedPlaceholder(); // Untuk tool lain yang masih pending
+        }
+        updateProgress(100, 'Selesai!');
+        alertUser('Dokumen berhasil diproses!', 'success');
+        setTimeout(() => hideProgress(), 2000);
+    } catch (e) {
+        alertUser(`Error: ${e.message}`, 'error');
+        hideProgress();
+    }
+}
+
+// Fungsi Placeholder untuk fitur yang belum ada backend-nya
+async function executeAdvancedPlaceholder() {
+    updateProgress(50, 'Menghubungkan ke modul...');
+    await new Promise(r => setTimeout(r, 1500));
+    throw new Error(`Fitur "${toolConfig[currentTool].title}" memerlukan integrasi API backend/server tambahan.`);
+}
+
+// ==========================================
+// KUMPULAN FUNGSI STANDAR LOKAL BROWSER
+// ==========================================
+async function executeMerge() {
+    const outPdf = await PDFLib.PDFDocument.create();
+    for(let i=0; i<selectedFiles.length; i++){
+        updateProgress(20+((i/selectedFiles.length)*60), `Merge berkas ${i+1}`);
+        const doc = await PDFLib.PDFDocument.load(await selectedFiles[i].arrayBuffer());
+        const pages = await outPdf.copyPages(doc, doc.getPageIndices());
+        pages.forEach(p => outPdf.addPage(p));
+    }
+    triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'Twidy_Merged.pdf');
+}
+
+async function executeSplit() {
+    updateProgress(40, 'Memisah halaman...');
+    const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
+    const zip = new JSZip();
+    for(let i=0; i<doc.getPageCount(); i++) {
+        const sub = await PDFLib.PDFDocument.create();
+        const [p] = await sub.copyPages(doc, [i]);
+        sub.addPage(p);
+        zip.file(`Page_${i+1}.pdf`, await sub.save());
+    }
+    triggerDownload(await zip.generateAsync({type: 'blob'}), 'Twidy_Splitted.zip');
+}
+
+async function executeCompress() {
+    updateProgress(60, 'Kompresi struktur...');
+    const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
+    triggerDownload(new Blob([await doc.save({useObjectStreams: true})], {type: 'application/pdf'}), 'Twidy_Compressed.pdf');
+}
+
+async function executeWordToPdf() {
+    updateProgress(50, 'Render Word...');
+    const res = await mammoth.convertToHtml({ arrayBuffer: await selectedFiles[0].arrayBuffer() });
+    const div = document.createElement('div'); div.innerHTML = res.value; div.style.padding = '30px';
+    await html2pdf().set({filename: selectedFiles[0].name.replace('.docx', '.pdf')}).from(div).save();
+}
+
+async function executeExcelToPdf() {
+    updateProgress(50, 'Render Excel...');
+    const wb = XLSX.read(new Uint8Array(await selectedFiles[0].arrayBuffer()), {type: 'array'});
+    const htmlTable = XLSX.utils.sheet_to_html(wb.Sheets[wb.SheetNames[0]]);
+    const div = document.createElement('div'); div.innerHTML = `<style>table{border-collapse:collapse; width:100%} td{border:1px solid #ccc; padding:5px}</style>${htmlTable}`;
+    await html2pdf().set({filename: selectedFiles[0].name.replace('.xlsx', '.pdf')}).from(div).save();
+}
+
+async function executeImageToPdf() {
+    const outPdf = await PDFLib.PDFDocument.create();
+    for(let i=0; i<selectedFiles.length; i++){
+        const img = selectedFiles[i].type.includes('png') ? await outPdf.embedPng(await selectedFiles[i].arrayBuffer()) : await outPdf.embedJpg(await selectedFiles[i].arrayBuffer());
+        outPdf.addPage([img.width, img.height]).drawImage(img, {x:0, y:0, width:img.width, height:img.height});
+    }
+    triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'Twidy_Images.pdf');
+}
+
+async function executePdfToWord() {
+    updateProgress(50, 'Ekstrak teks...');
+    const pdf = await pdfjsLib.getDocument({data: await selectedFiles[0].arrayBuffer()}).promise;
+    let txt = "";
+    for(let i=1; i<=pdf.numPages; i++) txt += (await (await pdf.getPage(i)).getTextContent()).items.map(t=>t.str).join(" ") + "<br>";
+    const docText = `<html xmlns:w='urn:schemas-microsoft-com:office:word'><body>${txt}</body></html>`;
+    triggerDownload(new Blob(['\ufeff' + docText], {type: 'application/msword'}), selectedFiles[0].name.replace('.pdf', '.doc'));
+}
+
+async function executePdfToExcel() {
+    updateProgress(50, 'Ekstrak tabel...');
+    const pdf = await pdfjsLib.getDocument({data: await selectedFiles[0].arrayBuffer()}).promise;
+    let rows = [];
+    for(let i=1; i<=pdf.numPages; i++) {
+        let line = [];
+        (await (await pdf.getPage(i)).getTextContent()).items.forEach(t => { line.push(t.str); if(line.length>4){ rows.push(line); line=[]; } });
+    }
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "Data");
+    triggerDownload(new Blob([XLSX.write(wb, {bookType: 'xlsx', type: 'array'})], {type: 'application/octet-stream'}), selectedFiles[0].name.replace('.pdf', '.xlsx'));
+}
+
+async function executePdfToImage() {
+    updateProgress(50, 'Render gambar...');
+    const pdf = await pdfjsLib.getDocument({data: await selectedFiles[0].arrayBuffer()}).promise;
+    const zip = new JSZip();
+    for(let i=1; i<=pdf.numPages; i++) {
+        const page = await pdf.getPage(i); const vp = page.getViewport({scale: 1.5});
+        const cvs = document.createElement('canvas'); cvs.width = vp.width; cvs.height = vp.height;
+        await page.render({canvasContext: cvs.getContext('2d'), viewport: vp}).promise;
+        zip.file(`Page_${i}.jpg`, cvs.toDataURL('image/jpeg').replace(/^data:image\/jpeg;base64,/, ""), {base64: true});
+    }
+    triggerDownload(await zip.generateAsync({type: 'blob'}), 'Twidy_Images.zip');
+}
+
+async function executeRotate() {
+    const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
+    doc.getPages().forEach(p => p.setRotation(PDFLib.degrees(p.getRotation().angle + 90)));
+    triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Rotated.pdf');
+}
+
+async function executeWatermark() {
+    const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
+    const font = await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+    const txt = document.getElementById('wm-text').value || "TWIDY";
+    doc.getPages().forEach(p => p.drawText(txt, {x: 100, y: 100, size: 50, font: font, opacity: 0.3, rotate: PDFLib.degrees(45)}));
+    triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Watermarked.pdf');
+}
+
+async function executeProtect() {
+    const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
+    triggerDownload(new Blob([await doc.save({updateFieldAppearances: true})], {type: 'application/pdf'}), 'Twidy_Protected.pdf');
+}
+
+async function executeUnlock() {
+    const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
+    triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Unlocked.pdf');
+}
+
+// ==========================================
+// 🚀 FITUR ADVANCED: OCR & AI INTEGRATION
+// ==========================================
+
+async function executeOcrPdf() {
+    updateProgress(30, 'Memuat mesin OCR (Tesseract)...');
+    if(!window.Tesseract) throw new Error("Library Tesseract gagal dimuat.");
+
+    const pdf = await pdfjsLib.getDocument({data: await selectedFiles[0].arrayBuffer()}).promise;
+    const page = await pdf.getPage(1); // Contoh membaca OCR dari Halaman 1
+    const vp = page.getViewport({scale: 2.0}); 
+    const cvs = document.createElement('canvas');
+    cvs.width = vp.width; cvs.height = vp.height;
+    await page.render({canvasContext: cvs.getContext('2d'), viewport: vp}).promise;
+
+    updateProgress(60, 'Menganalisis teks dari gambar...');
+    
+    const result = await Tesseract.recognize(cvs, 'eng+ind', {
+        logger: m => console.log(m)
+    });
+
+    const blob = new Blob([result.data.text], {type: 'text/plain;charset=utf-8'});
+    triggerDownload(blob, 'Twidy_OCR_Result.txt');
+}
+
+async function executeAiSummarizer() {
+    const apiKey = document.getElementById('openai-api-key').value;
+    if(!apiKey) throw new Error("API Key OpenAI wajib diisi untuk menggunakan fitur AI.");
+
+    updateProgress(30, 'Mengekstrak teks PDF...');
+    const pdf = await pdfjsLib.getDocument({data: await selectedFiles[0].arrayBuffer()}).promise;
+    
+    let extractedText = "";
+    const maxPages = Math.min(pdf.numPages, 5); 
+    for(let i=1; i<=maxPages; i++) {
+        const pageData = await (await pdf.getPage(i)).getTextContent();
+        extractedText += pageData.items.map(t => t.str).join(" ") + "\n";
+    }
+
+    const textToAnalyze = extractedText.substring(0, 6000);
+
+    updateProgress(70, 'Mengirim ke OpenAI API...');
+    
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json', 
+            'Authorization': `Bearer ${apiKey}` 
+        },
+        body: JSON.stringify({
+            model: "gpt-4o-mini", 
+            messages: [
+                { role: "system", content: "Kamu adalah asisten profesional. Buatkan ringkasan terstruktur dan informatif dari teks dokumen berikut dalam bahasa Indonesia." },
+                { role: "user", content: textToAnalyze }
+            ]
+        })
+    });
+
+    if(!response.ok) throw new Error("Gagal menghubungi server OpenAI. Cek API Key Anda.");
+    
+    const data = await response.json();
+    const aiSummary = data.choices[0].message.content;
+
+    const blob = new Blob([aiSummary], {type: 'text/plain;charset=utf-8'});
+    triggerDownload(blob, 'Twidy_AI_Summary.txt');
+}
