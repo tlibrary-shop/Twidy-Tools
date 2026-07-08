@@ -95,21 +95,23 @@ function renderDashboard() {
     grid.innerHTML = '';
 
     for (const [catName, tools] of Object.entries(categories)) {
+        // REVISI GRID: grid-cols-2 sebagai grid dasar paling kecil (Mobile)
         let catHTML = `
             <div class="mb-8 sm:mb-10">
-                <h3 class="text-lg sm:text-xl font-bold text-slate-700 dark:text-slate-200 mb-4 sm:mb-5 border-b pb-2 border-slate-200 dark:border-slate-700">
+                <h3 class="text-base sm:text-xl font-bold text-slate-700 dark:text-slate-200 mb-3 sm:mb-5 border-b pb-2 border-slate-200 dark:border-slate-700">
                     ${catName}
                 </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
         `;
         
         tools.forEach(toolId => {
             const t = toolConfig[toolId];
+            // REVISI PADDING & TEKS: Dibuat lebih proporsional untuk 2 kolom di HP
             catHTML += `
-                <div onclick="selectTool('${toolId}')" class="group bg-white dark:bg-darkCard p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg cursor-pointer transition-all duration-300 hover:-translate-y-1">
-                    <div class="${t.color} text-3xl sm:text-4xl mb-3 sm:mb-4 transition-transform group-hover:scale-110"><i class="fas ${t.icon}"></i></div>
-                    <h4 class="font-bold text-base sm:text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 mb-1">${t.title}</h4>
-                    <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm leading-relaxed">${t.desc}</p>
+                <div onclick="selectTool('${toolId}')" class="group bg-white dark:bg-darkCard p-3 sm:p-6 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col justify-start">
+                    <div class="${t.color} text-2xl sm:text-4xl mb-2 sm:mb-4 transition-transform group-hover:scale-110"><i class="fas ${t.icon}"></i></div>
+                    <h4 class="font-bold text-sm sm:text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 mb-1 leading-tight">${t.title}</h4>
+                    <p class="text-slate-500 dark:text-slate-400 text-[10px] sm:text-sm leading-snug line-clamp-3 sm:line-clamp-none">${t.desc}</p>
                 </div>
             `;
         });
@@ -119,26 +121,21 @@ function renderDashboard() {
     }
 }
 
-// Logika Toggle Sidebar khusus Mobile (menangani Overlay)
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('mobile-overlay');
     
-    // Deteksi jika diakses melalui layar kecil (Mobile)
     if (window.innerWidth < 768) {
         if (sidebar.classList.contains('-translate-x-full')) {
-            // Buka sidebar
             sidebar.classList.remove('-translate-x-full');
             sidebar.classList.add('translate-x-0');
             if (overlay) overlay.classList.remove('hidden');
         } else {
-            // Tutup sidebar
             sidebar.classList.add('-translate-x-full');
             sidebar.classList.remove('translate-x-0');
             if (overlay) overlay.classList.add('hidden');
         }
     } else {
-        // Logika untuk Desktop (Minimize)
         sidebar.classList.toggle('md:w-64');
         sidebar.classList.toggle('md:w-0');
         sidebar.classList.toggle('md:opacity-0');
@@ -191,7 +188,6 @@ function selectTool(toolId) {
     
     clearFiles();
     
-    // Tutup sidebar otomatis di mobile setelah memilih tool
     if (window.innerWidth < 768) {
         const sidebar = document.getElementById('sidebar');
         if (!sidebar.classList.contains('-translate-x-full')) {
@@ -205,7 +201,6 @@ function goBack() {
     document.getElementById('toolsSection').classList.remove('hidden');
     clearFiles();
     
-    // Tutup sidebar otomatis di mobile setelah kembali ke Dashboard
     if (window.innerWidth < 768) {
         const sidebar = document.getElementById('sidebar');
         if (!sidebar.classList.contains('-translate-x-full')) {
@@ -229,7 +224,6 @@ function setupFileInput() {
 function handleFiles(files) {
     selectedFiles = Array.from(files).slice(0, toolConfig[currentTool].multi ? 100 : 1);
     
-    // Auto-sort files naturally ketika pertama kali diupload
     if (selectedFiles.length > 1) {
         selectedFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
     }
@@ -238,7 +232,6 @@ function handleFiles(files) {
 }
 
 function sortFiles(order) {
-    // Natural Sort agar 2 muncul sebelum 10
     selectedFiles.sort((a, b) => {
         return order === 'asc' 
             ? a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }) 
