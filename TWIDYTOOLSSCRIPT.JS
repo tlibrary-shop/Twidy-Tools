@@ -84,7 +84,10 @@ document.addEventListener('DOMContentLoaded', function() {
 function updateDateTime() {
     const now = new Date();
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
-    document.getElementById('liveDateTime').textContent = now.toLocaleDateString('id-ID', options).replace(/\./g, ':');
+    const dtElement = document.getElementById('liveDateTime');
+    if (dtElement) {
+        dtElement.textContent = now.toLocaleDateString('id-ID', options).replace(/\./g, ':');
+    }
 }
 
 function renderDashboard() {
@@ -93,8 +96,8 @@ function renderDashboard() {
 
     for (const [catName, tools] of Object.entries(categories)) {
         let catHTML = `
-            <div class="mb-10">
-                <h3 class="text-xl font-bold text-slate-700 dark:text-slate-200 mb-5 border-b pb-2 border-slate-200 dark:border-slate-700">
+            <div class="mb-8 sm:mb-10">
+                <h3 class="text-lg sm:text-xl font-bold text-slate-700 dark:text-slate-200 mb-4 sm:mb-5 border-b pb-2 border-slate-200 dark:border-slate-700">
                     ${catName}
                 </h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -103,10 +106,10 @@ function renderDashboard() {
         tools.forEach(toolId => {
             const t = toolConfig[toolId];
             catHTML += `
-                <div onclick="selectTool('${toolId}')" class="group bg-white dark:bg-darkCard p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg cursor-pointer transition-all duration-300 hover:-translate-y-1">
-                    <div class="${t.color} text-4xl mb-4 transition-transform group-hover:scale-110"><i class="fas ${t.icon}"></i></div>
-                    <h4 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 mb-1">${t.title}</h4>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">${t.desc}</p>
+                <div onclick="selectTool('${toolId}')" class="group bg-white dark:bg-darkCard p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg cursor-pointer transition-all duration-300 hover:-translate-y-1">
+                    <div class="${t.color} text-3xl sm:text-4xl mb-3 sm:mb-4 transition-transform group-hover:scale-110"><i class="fas ${t.icon}"></i></div>
+                    <h4 class="font-bold text-base sm:text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 mb-1">${t.title}</h4>
+                    <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm leading-relaxed">${t.desc}</p>
                 </div>
             `;
         });
@@ -116,12 +119,26 @@ function renderDashboard() {
     }
 }
 
+// Logika Toggle Sidebar khusus Mobile (menangani Overlay)
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
-    if (sidebar.classList.contains('-translate-x-full')) {
-        sidebar.classList.remove('-translate-x-full');
-        sidebar.classList.add('translate-x-0');
+    const overlay = document.getElementById('mobile-overlay');
+    
+    // Deteksi jika diakses melalui layar kecil (Mobile)
+    if (window.innerWidth < 768) {
+        if (sidebar.classList.contains('-translate-x-full')) {
+            // Buka sidebar
+            sidebar.classList.remove('-translate-x-full');
+            sidebar.classList.add('translate-x-0');
+            if (overlay) overlay.classList.remove('hidden');
+        } else {
+            // Tutup sidebar
+            sidebar.classList.add('-translate-x-full');
+            sidebar.classList.remove('translate-x-0');
+            if (overlay) overlay.classList.add('hidden');
+        }
     } else {
+        // Logika untuk Desktop (Minimize)
         sidebar.classList.toggle('md:w-64');
         sidebar.classList.toggle('md:w-0');
         sidebar.classList.toggle('md:opacity-0');
@@ -171,13 +188,30 @@ function selectTool(toolId) {
     } else {
         sPanel.classList.add('hidden');
     }
+    
     clearFiles();
+    
+    // Tutup sidebar otomatis di mobile setelah memilih tool
+    if (window.innerWidth < 768) {
+        const sidebar = document.getElementById('sidebar');
+        if (!sidebar.classList.contains('-translate-x-full')) {
+            toggleSidebar();
+        }
+    }
 }
 
 function goBack() {
     document.getElementById('uploadSection').classList.add('hidden');
     document.getElementById('toolsSection').classList.remove('hidden');
     clearFiles();
+    
+    // Tutup sidebar otomatis di mobile setelah kembali ke Dashboard
+    if (window.innerWidth < 768) {
+        const sidebar = document.getElementById('sidebar');
+        if (!sidebar.classList.contains('-translate-x-full')) {
+            toggleSidebar();
+        }
+    }
 }
 
 function setupDropZone() {
@@ -195,7 +229,7 @@ function setupFileInput() {
 function handleFiles(files) {
     selectedFiles = Array.from(files).slice(0, toolConfig[currentTool].multi ? 100 : 1);
     
-    // Auto-sort files naturally when they are first uploaded
+    // Auto-sort files naturally ketika pertama kali diupload
     if (selectedFiles.length > 1) {
         selectedFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
     }
@@ -203,8 +237,8 @@ function handleFiles(files) {
     renderFileList();
 }
 
-// REVISI TERBARU: Menggunakan Natural Sort (numeric: true) agar Page_2 muncul sebelum Page_10
 function sortFiles(order) {
+    // Natural Sort agar 2 muncul sebelum 10
     selectedFiles.sort((a, b) => {
         return order === 'asc' 
             ? a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }) 
@@ -243,15 +277,15 @@ function renderFileList() {
         li.dataset.index = i;
         li.className = "flex items-center justify-between p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm cursor-move transition-transform";
         li.innerHTML = `
-            <div class="flex items-center gap-3 truncate">
-                <i class="fas fa-grip-vertical text-slate-400 cursor-grab hover:text-indigo-500 text-lg px-2"></i>
-                <i class="fas fa-file-pdf text-red-500 text-2xl"></i>
+            <div class="flex items-center gap-2 sm:gap-3 truncate w-[85%]">
+                <i class="fas fa-grip-vertical text-slate-400 cursor-grab hover:text-indigo-500 text-base sm:text-lg px-1 sm:px-2"></i>
+                <i class="fas fa-file-pdf text-red-500 text-xl sm:text-2xl"></i>
                 <div class="truncate">
-                    <p class="text-sm font-bold text-slate-800 dark:text-white truncate">${f.name}</p>
-                    <p class="text-xs text-slate-400">${(f.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <p class="text-xs sm:text-sm font-bold text-slate-800 dark:text-white truncate">${f.name}</p>
+                    <p class="text-[10px] sm:text-xs text-slate-400">${(f.size / 1024 / 1024).toFixed(2)} MB</p>
                 </div>
             </div>
-            <button onclick="removeFile(${i})" class="text-slate-400 hover:text-red-500 p-2"><i class="fas fa-times"></i></button>
+            <button onclick="removeFile(${i})" class="text-slate-400 hover:text-red-500 p-2 ml-1"><i class="fas fa-times text-base sm:text-lg"></i></button>
         `;
         listEl.appendChild(li);
     });
@@ -282,7 +316,7 @@ function hideProgress() { document.getElementById('progressArea').classList.add(
 function alertUser(msg, type) {
     const area = document.getElementById('alertArea');
     const cl = type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-    area.innerHTML = `<div class="p-3 font-bold rounded-lg ${cl}">${msg}</div>`;
+    area.innerHTML = `<div class="p-3 font-bold rounded-lg text-sm sm:text-base ${cl}">${msg}</div>`;
     setTimeout(() => area.innerHTML = '', 5000);
 }
 function triggerDownload(blob, fname) {
