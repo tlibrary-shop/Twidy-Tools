@@ -28,17 +28,20 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        .sortable-ghost { opacity: 0.4; background-color: #f8fafc; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-darkBg text-slate-800 dark:text-slate-100 sidebar-transition font-sans">
 
     <div class="flex h-screen overflow-hidden">
         
+        <!-- SIDEBAR MENU -->
         <aside id="sidebar" class="sidebar-transition w-64 bg-white dark:bg-darkCard border-r border-slate-200 dark:border-slate-700 flex flex-col z-30 fixed inset-y-0 left-0 md:relative transform -translate-x-full md:translate-x-0">
             <div class="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-700">
-                <span class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-2">
+                <!-- REVISI: Logo kini bisa diklik sebagai tombol Home -->
+                <button onclick="goBack()" class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-2 hover:opacity-80 transition-opacity">
                     <i class="fas fa-toolbox text-indigo-600"></i> TwidyTools
-                </span>
+                </button>
                 <button onclick="toggleSidebar()" class="md:hidden text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
                     <i class="fas fa-times text-xl"></i>
                 </button>
@@ -128,6 +131,7 @@
             </div>
         </aside>
 
+        <!-- MAIN AREA CONTAINER -->
         <div class="flex-1 flex flex-col h-full overflow-hidden">
             
             <header class="h-16 bg-white dark:bg-darkCard border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-6 z-20 flex-shrink-0">
@@ -135,9 +139,11 @@
                     <button onclick="toggleSidebar()" class="text-slate-600 dark:text-slate-300 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
-                    <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-200 hidden sm:block">Powerful Tools for Your Digital Documents</h2>
+                    <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-200 hidden sm:block">Every Tool You Need for PDF and Documents in One Place</h2>
                 </div>
                 <div class="flex items-center gap-4">
+                    <!-- REVISI: Tanggal dan Waktu Setempat -->
+                    <div id="liveDateTime" class="hidden sm:block text-sm font-medium text-slate-500 dark:text-slate-400 mr-2"></div>
                     <button onclick="toggleDarkMode()" class="text-slate-600 dark:text-slate-300 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
                         <i id="themeIcon" class="fas fa-moon text-xl"></i>
                     </button>
@@ -149,7 +155,7 @@
                 <div id="toolsSection">
                     <div class="mb-8">
                         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Set Alat PDF Lengkap</h1>
-                        <p class="text-slate-500 dark:text-slate-400 mt-1">Setiap alat yang Anda butuhkan untuk menggunakan PDF, ada di ujung jari Anda. Semuanya 100% GRATIS dan diproses secara aman di sisi klien.</p>
+                        <p class="text-slate-500 dark:text-slate-400 mt-1">Setiap alat yang Anda butuhkan untuk menggunakan PDF, ada di ujung jari Anda. Semuanya 100% GRATIS dan diproses secara aman.</p>
                     </div>
 
                     <div id="dashboardGrid" class="space-y-10"></div>
@@ -168,7 +174,7 @@
 
                         <div id="dropZone" class="border-2 border-dashed border-indigo-300 dark:border-indigo-500/50 bg-indigo-50/30 dark:bg-indigo-900/10 rounded-2xl p-12 text-center transition-all cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/30" onclick="document.getElementById('fileInput').click()">
                             <i class="fas fa-file-upload text-6xl text-indigo-400 mb-4 drop-shadow-sm"></i>
-                            <h3 class="text-xl font-bold text-slate-800 dark:text-slate-200">Pilih Berkas PDF</h3>
+                            <h3 class="text-xl font-bold text-slate-800 dark:text-slate-200">Pilih Berkas</h3>
                             <p class="text-slate-400 text-sm mt-1">atau jatuhkan berkas di sini</p>
                             <p id="fileTypeInfo" class="hidden"></p>
                             <input type="file" id="fileInput" class="hidden" multiple>
@@ -206,6 +212,7 @@
         </div>
     </div>
 
+    <!-- Libraries Utama -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -213,8 +220,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
+    <!-- Library untuk OCR -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
+    <!-- REVISI: Library untuk Drag and Drop Urutan -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 
+    <!-- File Script -->
     <script src="TWIDYTOOLSSCRIPT.JS"></script>
 </body>
 </html>

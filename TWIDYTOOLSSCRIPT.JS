@@ -5,8 +5,11 @@ let selectedFiles = [];
 
 const toolConfig = {
     // ORGANIZE PDF
-    'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur sesuai keinginan Anda.', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
-    'pdf-split': { title: 'Split PDF', desc: 'Pisahkan satu halaman atau ekstrak semua halaman PDF.', icon: 'fa-scissors', color: 'text-orange-500', accept: '.pdf', multi: false },
+    'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop).', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
+    'pdf-split': { 
+        title: 'Split PDF', desc: 'Pisahkan satu halaman atau ekstrak rentang halaman PDF.', icon: 'fa-scissors', color: 'text-orange-500', accept: '.pdf', multi: false,
+        settings: [{ id: 'split-range', label: 'Rentang Halaman (Contoh: 1-3, 5)', type: 'text', placeholder: 'Kosongkan jika ingin memisah semua' }]
+    },
     'remove-pages': { title: 'Remove pages', desc: 'Hapus halaman tertentu dari dokumen PDF.', icon: 'fa-minus-circle', color: 'text-rose-500', accept: '.pdf', multi: false },
     'extract-pages': { title: 'Extract pages', desc: 'Dapatkan dokumen baru berisi halaman yang Anda ekstrak.', icon: 'fa-share-square', color: 'text-blue-500', accept: '.pdf', multi: false },
     'organize-pdf': { title: 'Organize PDF', desc: 'Urutkan atau hapus halaman PDF dengan mudah.', icon: 'fa-sort-alpha-down', color: 'text-indigo-500', accept: '.pdf', multi: false },
@@ -49,14 +52,12 @@ const toolConfig = {
     // PDF INTELLIGENCE
     'ai-summarizer': { 
         title: 'AI Summarizer', 
-        desc: 'Dapatkan ringkasan dari dokumen PDF panjang menggunakan kecerdasan buatan.', 
+        desc: 'Dapatkan ringkasan dari dokumen PDF panjang menggunakan kecerdasan buatan (Backend/Gemini).', 
         icon: 'fa-brain', 
         color: 'text-purple-600', 
         accept: '.pdf', 
-        multi: false,
-        settings: [
-            { id: 'openai-api-key', label: 'OpenAI API Key rahasia Anda (sk-...)', type: 'text', placeholder: 'Paste API Key di sini' }
-        ]
+        multi: false
+        // REVISI: Dihapus pengaturan API Key untuk keamanan
     },
     'translate-pdf': { title: 'Translate PDF', desc: 'Terjemahkan seluruh isi PDF ke bahasa yang Anda inginkan.', icon: 'fa-language', color: 'text-sky-600', accept: '.pdf', multi: false },
     'pdf-to-markdown': { title: 'PDF to Markdown', desc: 'Ubah teks PDF menjadi Markdown yang bersih.', icon: 'fa-markdown', color: 'fab', color: 'text-slate-600', accept: '.pdf', multi: false }
@@ -77,7 +78,16 @@ document.addEventListener('DOMContentLoaded', function() {
     setupDropZone();
     setupFileInput();
     initTheme();
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
 });
+
+// REVISI: Jam dan Tanggal Live
+function updateDateTime() {
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+    document.getElementById('liveDateTime').textContent = now.toLocaleDateString('id-ID', options).replace(/\./g, ':');
+}
 
 function renderDashboard() {
     const grid = document.getElementById('dashboardGrid');
@@ -185,10 +195,11 @@ function setupFileInput() {
 }
 
 function handleFiles(files) {
-    selectedFiles = Array.from(files).slice(0, toolConfig[currentTool].multi ? 50 : 1);
+    selectedFiles = Array.from(files).slice(0, toolConfig[currentTool].multi ? 100 : 1);
     renderFileList();
 }
 
+// REVISI: Tampilan File List dengan Drag & Drop
 function renderFileList() {
     const flist = document.getElementById('fileList');
     const actBtn = document.getElementById('actionButtons');
@@ -200,20 +211,38 @@ function renderFileList() {
     }
     
     actBtn.classList.remove('hidden');
+    flist.innerHTML = `<ul id="sortable-list" class="space-y-2"></ul>`;
+    const listEl = document.getElementById('sortable-list');
+
     selectedFiles.forEach((f, i) => {
-        flist.innerHTML += `
-            <div class="flex items-center justify-between p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg mb-2 shadow-sm">
-                <div class="flex items-center gap-3 truncate">
-                    <i class="fas fa-file-pdf text-red-500 text-2xl"></i>
-                    <div class="truncate">
-                        <p class="text-sm font-bold text-slate-800 dark:text-white truncate">${f.name}</p>
-                        <p class="text-xs text-slate-400">${(f.size / 1024 / 1024).toFixed(2)} MB</p>
-                    </div>
+        const li = document.createElement('li');
+        li.dataset.index = i;
+        li.className = "flex items-center justify-between p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm cursor-move transition-transform";
+        li.innerHTML = `
+            <div class="flex items-center gap-3 truncate">
+                <i class="fas fa-grip-vertical text-slate-400 cursor-grab hover:text-indigo-500 text-lg px-2"></i>
+                <i class="fas fa-file-pdf text-red-500 text-2xl"></i>
+                <div class="truncate">
+                    <p class="text-sm font-bold text-slate-800 dark:text-white truncate">${f.name}</p>
+                    <p class="text-xs text-slate-400">${(f.size / 1024 / 1024).toFixed(2)} MB</p>
                 </div>
-                <button onclick="removeFile(${i})" class="text-slate-400 hover:text-red-500 p-2"><i class="fas fa-times"></i></button>
             </div>
+            <button onclick="removeFile(${i})" class="text-slate-400 hover:text-red-500 p-2"><i class="fas fa-times"></i></button>
         `;
+        listEl.appendChild(li);
     });
+
+    if (toolConfig[currentTool].multi) {
+        new Sortable(listEl, {
+            animation: 150,
+            handle: '.fa-grip-vertical',
+            ghostClass: 'sortable-ghost',
+            onEnd: function (evt) {
+                const item = selectedFiles.splice(evt.oldIndex, 1)[0];
+                selectedFiles.splice(evt.newIndex, 0, item);
+            }
+        });
+    }
 }
 
 function removeFile(i) { selectedFiles.splice(i, 1); renderFileList(); }
@@ -256,11 +285,10 @@ async function processFiles() {
             case 'pdf-watermark': await executeWatermark(); break;
             case 'pdf-protect': await executeProtect(); break;
             case 'pdf-unlock': await executeUnlock(); break;
-            // Routing baru untuk OCR dan AI
             case 'ocr-pdf': await executeOcrPdf(); break;
             case 'ai-summarizer': await executeAiSummarizer(); break;
             
-            default: await executeAdvancedPlaceholder(); // Untuk tool lain yang masih pending
+            default: await executeAdvancedPlaceholder();
         }
         updateProgress(100, 'Selesai!');
         alertUser('Dokumen berhasil diproses!', 'success');
@@ -271,16 +299,12 @@ async function processFiles() {
     }
 }
 
-// Fungsi Placeholder untuk fitur yang belum ada backend-nya
 async function executeAdvancedPlaceholder() {
     updateProgress(50, 'Menghubungkan ke modul...');
     await new Promise(r => setTimeout(r, 1500));
-    throw new Error(`Fitur "${toolConfig[currentTool].title}" memerlukan integrasi API backend/server tambahan.`);
+    throw new Error(`Fitur "${toolConfig[currentTool].title}" memerlukan integrasi backend.`);
 }
 
-// ==========================================
-// KUMPULAN FUNGSI STANDAR LOKAL BROWSER
-// ==========================================
 async function executeMerge() {
     const outPdf = await PDFLib.PDFDocument.create();
     for(let i=0; i<selectedFiles.length; i++){
@@ -292,11 +316,29 @@ async function executeMerge() {
     triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'Twidy_Merged.pdf');
 }
 
+// REVISI: Split Halaman Spesifik
 async function executeSplit() {
-    updateProgress(40, 'Memisah halaman...');
+    updateProgress(30, 'Membaca dokumen...');
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
+    const rangeInput = document.getElementById('split-range')?.value || ""; 
     const zip = new JSZip();
-    for(let i=0; i<doc.getPageCount(); i++) {
+    const pagesToSplit = [];
+    
+    if (!rangeInput) {
+        for(let i=0; i<doc.getPageCount(); i++) pagesToSplit.push(i);
+    } else {
+        rangeInput.split(',').forEach(part => {
+            if(part.includes('-')) {
+                const [start, end] = part.split('-').map(Number);
+                for(let i=start-1; i<end; i++) pagesToSplit.push(i);
+            } else {
+                pagesToSplit.push(parseInt(part.trim())-1);
+            }
+        });
+    }
+
+    for(let i of pagesToSplit) {
+        if(i < 0 || i >= doc.getPageCount()) continue;
         const sub = await PDFLib.PDFDocument.create();
         const [p] = await sub.copyPages(doc, [i]);
         sub.addPage(p);
@@ -393,35 +435,26 @@ async function executeUnlock() {
     triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Unlocked.pdf');
 }
 
-// ==========================================
-// 🚀 FITUR ADVANCED: OCR & AI INTEGRATION
-// ==========================================
-
 async function executeOcrPdf() {
     updateProgress(30, 'Memuat mesin OCR (Tesseract)...');
     if(!window.Tesseract) throw new Error("Library Tesseract gagal dimuat.");
 
     const pdf = await pdfjsLib.getDocument({data: await selectedFiles[0].arrayBuffer()}).promise;
-    const page = await pdf.getPage(1); // Contoh membaca OCR dari Halaman 1
+    const page = await pdf.getPage(1);
     const vp = page.getViewport({scale: 2.0}); 
     const cvs = document.createElement('canvas');
     cvs.width = vp.width; cvs.height = vp.height;
     await page.render({canvasContext: cvs.getContext('2d'), viewport: vp}).promise;
 
     updateProgress(60, 'Menganalisis teks dari gambar...');
-    
-    const result = await Tesseract.recognize(cvs, 'eng+ind', {
-        logger: m => console.log(m)
-    });
+    const result = await Tesseract.recognize(cvs, 'eng+ind', { logger: m => console.log(m) });
 
     const blob = new Blob([result.data.text], {type: 'text/plain;charset=utf-8'});
     triggerDownload(blob, 'Twidy_OCR_Result.txt');
 }
 
+// REVISI: AI Summarizer Tanpa API Key Client-Side (Request ke server sendiri)
 async function executeAiSummarizer() {
-    const apiKey = document.getElementById('openai-api-key').value;
-    if(!apiKey) throw new Error("API Key OpenAI wajib diisi untuk menggunakan fitur AI.");
-
     updateProgress(30, 'Mengekstrak teks PDF...');
     const pdf = await pdfjsLib.getDocument({data: await selectedFiles[0].arrayBuffer()}).promise;
     
@@ -434,27 +467,19 @@ async function executeAiSummarizer() {
 
     const textToAnalyze = extractedText.substring(0, 6000);
 
-    updateProgress(70, 'Mengirim ke OpenAI API...');
+    updateProgress(70, 'Memproses ringkasan...');
     
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Pastikan Anda membuat file backend route/API ini (misal di Vercel atau Google Apps Script)
+    const response = await fetch('/api/gemini', {
         method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json', 
-            'Authorization': `Bearer ${apiKey}` 
-        },
-        body: JSON.stringify({
-            model: "gpt-4o-mini", 
-            messages: [
-                { role: "system", content: "Kamu adalah asisten profesional. Buatkan ringkasan terstruktur dan informatif dari teks dokumen berikut dalam bahasa Indonesia." },
-                { role: "user", content: textToAnalyze }
-            ]
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: textToAnalyze })
     });
 
-    if(!response.ok) throw new Error("Gagal menghubungi server OpenAI. Cek API Key Anda.");
+    if(!response.ok) throw new Error("Gagal terhubung ke layanan AI (Pastikan route /api/gemini sudah Anda buat).");
     
     const data = await response.json();
-    const aiSummary = data.choices[0].message.content;
+    const aiSummary = data.result || "Ringkasan berhasil dibuat.";
 
     const blob = new Blob([aiSummary], {type: 'text/plain;charset=utf-8'});
     triggerDownload(blob, 'Twidy_AI_Summary.txt');
