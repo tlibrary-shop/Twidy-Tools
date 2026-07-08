@@ -38,7 +38,7 @@
         <div id="mobile-overlay" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 z-20 hidden md:hidden backdrop-blur-sm transition-opacity" onclick="toggleSidebar()"></div>
 
         <aside id="sidebar" class="sidebar-transition w-64 bg-white dark:bg-darkCard border-r border-slate-200 dark:border-slate-700 flex flex-col z-30 fixed inset-y-0 left-0 md:relative transform -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none">
-            <div class="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-700">
+            <div class="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
                 <button onclick="goBack()" class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-2 hover:opacity-80 transition-opacity">
                     <i class="fas fa-toolbox text-indigo-600"></i> TwidyTools
                 </button>
@@ -134,13 +134,13 @@
         <div class="flex-1 flex flex-col h-full overflow-hidden w-full relative z-10">
             
             <header class="h-16 bg-white dark:bg-darkCard border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 sm:px-6 z-20 flex-shrink-0">
-                <div class="flex items-center gap-2 sm:gap-4">
-                    <button onclick="toggleSidebar()" class="text-slate-600 dark:text-slate-300 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+                    <button onclick="toggleSidebar()" class="shrink-0 text-slate-600 dark:text-slate-300 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
-                    <h2 class="text-base sm:text-lg font-semibold text-slate-800 dark:text-slate-200 truncate">Every Tool You Need for PDF and Documents in One Place</h2>
+                    <h2 class="text-sm sm:text-lg font-semibold text-slate-800 dark:text-slate-200 truncate">Every Tool You Need for PDF and Documents in One Place</h2>
                 </div>
-                <div class="flex items-center gap-2 sm:gap-4">
+                <div class="flex items-center gap-2 sm:gap-4 shrink-0 pl-2">
                     <div id="liveDateTime" class="hidden md:block text-sm font-medium text-slate-500 dark:text-slate-400"></div>
                     <button onclick="toggleDarkMode()" class="text-slate-600 dark:text-slate-300 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                         <i id="themeIcon" class="fas fa-moon text-xl"></i>
@@ -156,7 +156,7 @@
                         <p class="text-slate-500 dark:text-slate-400 mt-1 text-sm sm:text-base">Setiap alat yang Anda butuhkan untuk menggunakan PDF, ada di ujung jari Anda. Semuanya 100% GRATIS dan diproses secara aman.</p>
                     </div>
 
-                    <div id="dashboardGrid" class="space-y-8 sm:space-y-10"></div>
+                    <div id="dashboardGrid"></div>
                 </div>
 
                 <div id="uploadSection" class="hidden max-w-3xl mx-auto mt-2 sm:mt-4">
