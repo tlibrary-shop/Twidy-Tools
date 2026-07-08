@@ -5,7 +5,7 @@ let selectedFiles = [];
 
 const toolConfig = {
     // ORGANIZE PDF
-    'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop).', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
+    'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop) atau gunakan fitur sortir otomatis.', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
     'pdf-split': { 
         title: 'Split PDF', desc: 'Pisahkan satu halaman atau ekstrak rentang halaman PDF.', icon: 'fa-scissors', color: 'text-orange-500', accept: '.pdf', multi: false,
         settings: [{ id: 'split-range', label: 'Rentang Halaman (Contoh: 1-3, 5)', type: 'text', placeholder: 'Kosongkan jika ingin memisah semua' }]
@@ -57,7 +57,6 @@ const toolConfig = {
         color: 'text-purple-600', 
         accept: '.pdf', 
         multi: false
-        // REVISI: Dihapus pengaturan API Key untuk keamanan
     },
     'translate-pdf': { title: 'Translate PDF', desc: 'Terjemahkan seluruh isi PDF ke bahasa yang Anda inginkan.', icon: 'fa-language', color: 'text-sky-600', accept: '.pdf', multi: false },
     'pdf-to-markdown': { title: 'PDF to Markdown', desc: 'Ubah teks PDF menjadi Markdown yang bersih.', icon: 'fa-markdown', color: 'fab', color: 'text-slate-600', accept: '.pdf', multi: false }
@@ -82,7 +81,6 @@ document.addEventListener('DOMContentLoaded', function() {
     updateDateTime();
 });
 
-// REVISI: Jam dan Tanggal Live
 function updateDateTime() {
     const now = new Date();
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
@@ -196,10 +194,25 @@ function setupFileInput() {
 
 function handleFiles(files) {
     selectedFiles = Array.from(files).slice(0, toolConfig[currentTool].multi ? 100 : 1);
+    
+    // Auto-sort files naturally when they are first uploaded
+    if (selectedFiles.length > 1) {
+        selectedFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+    }
+    
     renderFileList();
 }
 
-// REVISI: Tampilan File List dengan Drag & Drop
+// REVISI TERBARU: Menggunakan Natural Sort (numeric: true) agar Page_2 muncul sebelum Page_10
+function sortFiles(order) {
+    selectedFiles.sort((a, b) => {
+        return order === 'asc' 
+            ? a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }) 
+            : b.name.localeCompare(a.name, undefined, { numeric: true, sensitivity: 'base' });
+    });
+    renderFileList(); 
+}
+
 function renderFileList() {
     const flist = document.getElementById('fileList');
     const actBtn = document.getElementById('actionButtons');
@@ -211,7 +224,18 @@ function renderFileList() {
     }
     
     actBtn.classList.remove('hidden');
-    flist.innerHTML = `<ul id="sortable-list" class="space-y-2"></ul>`;
+
+    let sortHTML = '';
+    if (selectedFiles.length > 1 && toolConfig[currentTool].multi) {
+        sortHTML = `
+            <div class="flex justify-end gap-2 mb-3">
+                <button onclick="sortFiles('asc')" class="px-3 py-1.5 text-xs font-bold bg-slate-200 text-slate-700 hover:bg-indigo-100 hover:text-indigo-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-indigo-900/50 dark:hover:text-indigo-400 rounded-lg transition-colors"><i class="fas fa-sort-alpha-down mr-1"></i> A - Z</button>
+                <button onclick="sortFiles('desc')" class="px-3 py-1.5 text-xs font-bold bg-slate-200 text-slate-700 hover:bg-indigo-100 hover:text-indigo-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-indigo-900/50 dark:hover:text-indigo-400 rounded-lg transition-colors"><i class="fas fa-sort-alpha-up mr-1"></i> Z - A</button>
+            </div>
+        `;
+    }
+
+    flist.innerHTML = sortHTML + `<ul id="sortable-list" class="space-y-2"></ul>`;
     const listEl = document.getElementById('sortable-list');
 
     selectedFiles.forEach((f, i) => {
@@ -316,7 +340,6 @@ async function executeMerge() {
     triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'Twidy_Merged.pdf');
 }
 
-// REVISI: Split Halaman Spesifik
 async function executeSplit() {
     updateProgress(30, 'Membaca dokumen...');
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
@@ -453,7 +476,6 @@ async function executeOcrPdf() {
     triggerDownload(blob, 'Twidy_OCR_Result.txt');
 }
 
-// REVISI: AI Summarizer Tanpa API Key Client-Side (Request ke server sendiri)
 async function executeAiSummarizer() {
     updateProgress(30, 'Mengekstrak teks PDF...');
     const pdf = await pdfjsLib.getDocument({data: await selectedFiles[0].arrayBuffer()}).promise;
@@ -469,7 +491,6 @@ async function executeAiSummarizer() {
 
     updateProgress(70, 'Memproses ringkasan...');
     
-    // Pastikan Anda membuat file backend route/API ini (misal di Vercel atau Google Apps Script)
     const response = await fetch('/api/gemini', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
