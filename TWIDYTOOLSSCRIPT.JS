@@ -4,6 +4,16 @@ let currentTool = null;
 let selectedFiles = [];
 
 const toolConfig = {
+    // KATEGORI BARU: TWIDY ECOSYSTEM (Aplikasi Embed)
+    'twidy-bill': { 
+        title: 'TwidyBill (Invoice Maker)', 
+        desc: 'Buat tagihan, invoice, dan kwitansi profesional dengan mudah dalam bentuk gambar.', 
+        icon: 'fa-file-invoice-dollar', 
+        color: 'text-emerald-500', 
+        isIframe: true, 
+        iframeUrl: 'https://twidybill.netlify.app/' // URL Aplikasi Anda
+    },
+
     // ORGANIZE PDF
     'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop) atau gunakan fitur sortir otomatis.', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
     'pdf-split': { 
@@ -63,6 +73,7 @@ const toolConfig = {
 };
 
 const categories = {
+    'TWIDY ECOSYSTEM': ['twidy-bill'], // Dimasukkan di kategori pertama
     'ORGANIZE PDF': ['pdf-merge', 'pdf-split', 'remove-pages', 'extract-pages', 'organize-pdf', 'scan-to-pdf'],
     'OPTIMIZE PDF': ['pdf-compress', 'repair-pdf', 'ocr-pdf'],
     'CONVERT TO PDF': ['image-to-pdf', 'word-to-pdf', 'ppt-to-pdf', 'excel-to-pdf', 'html-to-pdf'],
@@ -95,7 +106,6 @@ function renderDashboard() {
     grid.innerHTML = '';
 
     for (const [catName, tools] of Object.entries(categories)) {
-        // REVISI GRID: grid-cols-2 sebagai grid dasar paling kecil (Mobile)
         let catHTML = `
             <div class="mb-8 sm:mb-10">
                 <h3 class="text-base sm:text-xl font-bold text-slate-700 dark:text-slate-200 mb-3 sm:mb-5 border-b pb-2 border-slate-200 dark:border-slate-700">
@@ -106,7 +116,6 @@ function renderDashboard() {
         
         tools.forEach(toolId => {
             const t = toolConfig[toolId];
-            // REVISI PADDING & TEKS: Dibuat lebih proporsional untuk 2 kolom di HP
             catHTML += `
                 <div onclick="selectTool('${toolId}')" class="group bg-white dark:bg-darkCard p-3 sm:p-6 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col justify-start">
                     <div class="${t.color} text-2xl sm:text-4xl mb-2 sm:mb-4 transition-transform group-hover:scale-110"><i class="fas ${t.icon}"></i></div>
@@ -158,32 +167,58 @@ function initTheme() {
 function selectTool(toolId) {
     currentTool = toolId;
     const config = toolConfig[toolId];
+    
     document.getElementById('toolsSection').classList.add('hidden');
     document.getElementById('uploadSection').classList.remove('hidden');
     
     document.getElementById('toolTitle').textContent = config.title;
     document.getElementById('toolDescription').textContent = config.desc;
-    
-    const fInput = document.getElementById('fileInput');
-    fInput.accept = config.accept;
-    fInput.multiple = config.multi;
 
-    const sPanel = document.getElementById('settingsPanel');
-    const sContent = document.getElementById('settingsContent');
-    sContent.innerHTML = '';
+    // Element Selector
+    const dropZone = document.getElementById('dropZone');
+    const iframeContainer = document.getElementById('iframeContainer');
+    const appIframe = document.getElementById('appIframe');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const fileListArea = document.getElementById('fileList');
+    const actionBtnArea = document.getElementById('actionButtons');
 
-    if (config.settings) {
-        config.settings.forEach(set => {
-            sContent.innerHTML += `
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">${set.label}</label>
-                    <input type="${set.type}" id="${set.id}" placeholder="${set.placeholder}" class="w-full text-sm px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
-                </div>
-            `;
-        });
-        sPanel.classList.remove('hidden');
+    // REVISI LOGIKA: Cek apakah tool berupa Embed Iframe atau tool PDF biasa
+    if (config.isIframe) {
+        // Mode IFRAME (TwidyBill, dll)
+        dropZone.classList.add('hidden');
+        settingsPanel.classList.add('hidden');
+        fileListArea.classList.add('hidden');
+        actionBtnArea.classList.add('hidden');
+        
+        iframeContainer.classList.remove('hidden');
+        appIframe.src = config.iframeUrl; // Memuat web eksternal
     } else {
-        sPanel.classList.add('hidden');
+        // Mode PDF NORMAL
+        iframeContainer.classList.add('hidden');
+        appIframe.src = ''; // Bersihkan iframe biar nggak memakan memori
+        
+        dropZone.classList.remove('hidden');
+        fileListArea.classList.remove('hidden');
+        
+        const fInput = document.getElementById('fileInput');
+        fInput.accept = config.accept;
+        fInput.multiple = config.multi;
+
+        const sContent = document.getElementById('settingsContent');
+        sContent.innerHTML = '';
+        if (config.settings) {
+            config.settings.forEach(set => {
+                sContent.innerHTML += `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">${set.label}</label>
+                        <input type="${set.type}" id="${set.id}" placeholder="${set.placeholder}" class="w-full text-sm px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                `;
+            });
+            settingsPanel.classList.remove('hidden');
+        } else {
+            settingsPanel.classList.add('hidden');
+        }
     }
     
     clearFiles();
@@ -199,6 +234,11 @@ function selectTool(toolId) {
 function goBack() {
     document.getElementById('uploadSection').classList.add('hidden');
     document.getElementById('toolsSection').classList.remove('hidden');
+    
+    // Pastikan iframe dibersihkan saat kembali ke home
+    document.getElementById('iframeContainer').classList.add('hidden');
+    document.getElementById('appIframe').src = '';
+    
     clearFiles();
     
     if (window.innerWidth < 768) {
@@ -223,11 +263,9 @@ function setupFileInput() {
 
 function handleFiles(files) {
     selectedFiles = Array.from(files).slice(0, toolConfig[currentTool].multi ? 100 : 1);
-    
     if (selectedFiles.length > 1) {
         selectedFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
     }
-    
     renderFileList();
 }
 
@@ -245,7 +283,8 @@ function renderFileList() {
     const actBtn = document.getElementById('actionButtons');
     flist.innerHTML = '';
     
-    if (selectedFiles.length === 0) {
+    // Jika tidak ada file atau tool-nya iframe, jangan render list file
+    if (selectedFiles.length === 0 || (toolConfig[currentTool] && toolConfig[currentTool].isIframe)) {
         actBtn.classList.add('hidden');
         return;
     }
