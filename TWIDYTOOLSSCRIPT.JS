@@ -63,14 +63,14 @@ const toolConfig = {
     // PDF INTELLIGENCE
     'ai-summarizer': { 
         title: 'AI Summarizer', 
-        desc: 'Dapatkan ringkasan dari dokumen PDF panjang menggunakan kecerdasan buatan (Backend/Gemini).', 
+        desc: 'Dapatkan ringkasan dari dokumen PDF panjang menggunakan kecerdasan buatan.', 
         icon: 'fa-brain', 
         color: 'text-purple-600', 
         accept: '.pdf', 
         multi: false
     },
     'translate-pdf': { title: 'Translate PDF', desc: 'Terjemahkan seluruh isi PDF ke bahasa yang Anda inginkan.', icon: 'fa-language', color: 'text-sky-600', accept: '.pdf', multi: false },
-    'pdf-to-markdown': { title: 'PDF to Markdown', desc: 'Ubah teks PDF menjadi Markdown yang bersih.', icon: 'fa-markdown', color: 'fab', color: 'text-slate-600', accept: '.pdf', multi: false }
+    'pdf-to-markdown': { title: 'PDF to Markdown', desc: 'Ubah teks PDF menjadi Markdown yang bersih.', icon: 'fa-markdown', color: 'text-slate-600', accept: '.pdf', multi: false }
 };
 
 const categories = {
@@ -92,6 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(updateDateTime, 1000);
     updateDateTime();
 
+    // SEO FRIENDLY URL
     const hash = window.location.hash.substring(1);
     if (hash && toolConfig[hash]) {
         selectTool(hash);
@@ -174,6 +175,7 @@ function selectTool(toolId) {
     currentTool = toolId;
     const config = toolConfig[toolId];
     
+    // UPDATE URL & TITLE BROWSER
     window.location.hash = toolId;
     document.title = config.title + " - TwidyTools";
     
@@ -579,7 +581,7 @@ async function executeAiSummarizer() {
     triggerDownload(blob, 'Twidy_AI_Summary.txt');
 }
 
-// LOGIKA BARU: FUNGSI PADATKAN PDF VERTIKAL (Atas-Bawah)
+// LOGIKA FIX: FUNGSI PADATKAN PDF (2-IN-1 VERTIKAL)
 async function executePadatkanPdf() {
     updateProgress(30, 'Memuat dokumen...');
     const existingPdfBytes = await selectedFiles[0].arrayBuffer();
@@ -633,4 +635,3 @@ async function executePadatkanPdf() {
     const pdfBytes = await newPdfDoc.save();
     triggerDownload(new Blob([pdfBytes], {type: 'application/pdf'}), 'Twidy_Padat_Vertikal.pdf');
 }
-
