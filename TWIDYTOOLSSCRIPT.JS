@@ -4,7 +4,7 @@ let currentTool = null;
 let selectedFiles = [];
 
 const toolConfig = {
-    // KATEGORI BARU: TWIDY ECOSYSTEM (Aplikasi Embed)
+    // TWIDY ECOSYSTEM (Aplikasi Embed)
     'twidy-bill': { 
         title: 'TwidyBill', 
         desc: 'Generate tagihan siap kirim dalam hitungan detik.', 
@@ -51,6 +51,7 @@ const toolConfig = {
     'crop-pdf': { title: 'Crop PDF', desc: 'Pangkas margin atau potong halaman PDF.', icon: 'fa-crop', color: 'text-teal-500', accept: '.pdf', multi: false },
     'edit-pdf': { title: 'Edit PDF', desc: 'Tambahkan teks, gambar, bentuk atau anotasi tangan.', icon: 'fa-edit', color: 'text-amber-600', accept: '.pdf', multi: false },
     'pdf-forms': { title: 'PDF Forms', desc: 'Buat formulir interaktif atau isi formulir PDF.', icon: 'fa-list-alt', color: 'text-cyan-600', accept: '.pdf', multi: false },
+    'pdf-nup': { title: 'Padatkan (2-in-1)', desc: 'Gabungkan dua halaman PDF menjadi satu lembar untuk menghemat kertas.', icon: 'fa-columns', color: 'text-teal-600', accept: '.pdf', multi: false }, // FITUR BARU
 
     // PDF SECURITY
     'pdf-unlock': { title: 'Unlock PDF', desc: 'Hapus kata sandi keamanan PDF.', icon: 'fa-unlock', color: 'text-teal-500', accept: '.pdf', multi: false },
@@ -73,12 +74,12 @@ const toolConfig = {
 };
 
 const categories = {
-    'TWIDY ECOSYSTEM': ['twidy-bill'], // Dimasukkan di kategori pertama
+    'TWIDY ECOSYSTEM': ['twidy-bill'],
     'ORGANIZE PDF': ['pdf-merge', 'pdf-split', 'remove-pages', 'extract-pages', 'organize-pdf', 'scan-to-pdf'],
     'OPTIMIZE PDF': ['pdf-compress', 'repair-pdf', 'ocr-pdf'],
     'CONVERT TO PDF': ['image-to-pdf', 'word-to-pdf', 'ppt-to-pdf', 'excel-to-pdf', 'html-to-pdf'],
     'CONVERT FROM PDF': ['pdf-to-image', 'pdf-to-word', 'pdf-to-ppt', 'pdf-to-excel', 'pdf-to-pdfa'],
-    'EDIT PDF': ['pdf-rotate', 'page-numbers', 'pdf-watermark', 'crop-pdf', 'edit-pdf', 'pdf-forms'],
+    'EDIT PDF': ['pdf-rotate', 'page-numbers', 'pdf-watermark', 'crop-pdf', 'edit-pdf', 'pdf-forms', 'pdf-nup'],
     'PDF SECURITY': ['pdf-unlock', 'pdf-protect', 'sign-pdf', 'redact-pdf', 'compare-pdf'],
     'PDF INTELLIGENCE': ['ai-summarizer', 'translate-pdf', 'pdf-to-markdown']
 };
@@ -90,6 +91,12 @@ document.addEventListener('DOMContentLoaded', function() {
     initTheme();
     setInterval(updateDateTime, 1000);
     updateDateTime();
+
+    // SEO FRIENDLY URL: Memeriksa Hash URL saat load pertama kali
+    const hash = window.location.hash.substring(1);
+    if (hash && toolConfig[hash]) {
+        selectTool(hash);
+    }
 });
 
 function updateDateTime() {
@@ -168,13 +175,16 @@ function selectTool(toolId) {
     currentTool = toolId;
     const config = toolConfig[toolId];
     
+    // UPDATE URL & TITLE BROWSER
+    window.location.hash = toolId;
+    document.title = config.title + " - TwidyTools";
+    
     document.getElementById('toolsSection').classList.add('hidden');
     document.getElementById('uploadSection').classList.remove('hidden');
     
     document.getElementById('toolTitle').textContent = config.title;
     document.getElementById('toolDescription').textContent = config.desc;
 
-    // Element Selector
     const dropZone = document.getElementById('dropZone');
     const iframeContainer = document.getElementById('iframeContainer');
     const appIframe = document.getElementById('appIframe');
@@ -182,20 +192,17 @@ function selectTool(toolId) {
     const fileListArea = document.getElementById('fileList');
     const actionBtnArea = document.getElementById('actionButtons');
 
-    // REVISI LOGIKA: Cek apakah tool berupa Embed Iframe atau tool PDF biasa
     if (config.isIframe) {
-        // Mode IFRAME (TwidyBill, dll)
         dropZone.classList.add('hidden');
         settingsPanel.classList.add('hidden');
         fileListArea.classList.add('hidden');
         actionBtnArea.classList.add('hidden');
         
         iframeContainer.classList.remove('hidden');
-        appIframe.src = config.iframeUrl; // Memuat web eksternal
+        appIframe.src = config.iframeUrl; 
     } else {
-        // Mode PDF NORMAL
         iframeContainer.classList.add('hidden');
-        appIframe.src = ''; // Bersihkan iframe biar nggak memakan memori
+        appIframe.src = ''; 
         
         dropZone.classList.remove('hidden');
         fileListArea.classList.remove('hidden');
@@ -232,10 +239,13 @@ function selectTool(toolId) {
 }
 
 function goBack() {
+    // KEMBALIKAN URL KE NORMAL & TITLE KE DEFAULT
+    history.pushState("", document.title, window.location.pathname);
+    document.title = "TwidyTools - Solusi PDF & Dokumen Lengkap Online";
+    
     document.getElementById('uploadSection').classList.add('hidden');
     document.getElementById('toolsSection').classList.remove('hidden');
     
-    // Pastikan iframe dibersihkan saat kembali ke home
     document.getElementById('iframeContainer').classList.add('hidden');
     document.getElementById('appIframe').src = '';
     
@@ -283,7 +293,6 @@ function renderFileList() {
     const actBtn = document.getElementById('actionButtons');
     flist.innerHTML = '';
     
-    // Jika tidak ada file atau tool-nya iframe, jangan render list file
     if (selectedFiles.length === 0 || (toolConfig[currentTool] && toolConfig[currentTool].isIframe)) {
         actBtn.classList.add('hidden');
         return;
@@ -377,6 +386,7 @@ async function processFiles() {
             case 'pdf-unlock': await executeUnlock(); break;
             case 'ocr-pdf': await executeOcrPdf(); break;
             case 'ai-summarizer': await executeAiSummarizer(); break;
+            case 'pdf-nup': await executePadatkanPdf(); break; // FITUR BARU DIPANGGIL DI SINI
             
             default: await executeAdvancedPlaceholder();
         }
@@ -570,4 +580,38 @@ async function executeAiSummarizer() {
 
     const blob = new Blob([aiSummary], {type: 'text/plain;charset=utf-8'});
     triggerDownload(blob, 'Twidy_AI_Summary.txt');
+}
+
+// LOGIKA BARU: FUNGSI PADATKAN PDF (2-IN-1)
+async function executePadatkanPdf() {
+    updateProgress(30, 'Memuat dokumen...');
+    const existingPdfBytes = await selectedFiles[0].arrayBuffer();
+    const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
+    const newPdfDoc = await PDFLib.PDFDocument.create();
+    
+    const pages = pdfDoc.getPages();
+    // A4 Landscape: (Lebar = 841.89, Tinggi = 595.27) -> Cocok untuk 2 halaman A4 Portrait berdampingan
+    const pageWidth = 595.27; 
+    const pageHeight = 841.89; 
+    
+    for (let i = 0; i < pages.length; i += 2) {
+        updateProgress(30 + ((i / pages.length) * 50), `Memproses halaman ${i + 1}...`);
+        
+        // Buat halaman landscape baru 
+        const newPage = newPdfDoc.addPage([pageWidth * 2, pageHeight]);
+        
+        // Hal 1 ditaruh di sisi kiri
+        const [page1] = await newPdfDoc.embedPages(pdfDoc, [i]);
+        newPage.drawPage(page1, { x: 0, y: 0, xScale: 1, yScale: 1 });
+        
+        // Hal 2 (jika ada) ditaruh di sisi kanan
+        if (i + 1 < pages.length) {
+            const [page2] = await newPdfDoc.embedPages(pdfDoc, [i + 1]);
+            newPage.drawPage(page2, { x: pageWidth, y: 0, xScale: 1, yScale: 1 });
+        }
+    }
+    
+    updateProgress(90, 'Menyelesaikan...');
+    const pdfBytes = await newPdfDoc.save();
+    triggerDownload(new Blob([pdfBytes], {type: 'application/pdf'}), 'Twidy_Padat_2in1.pdf');
 }
