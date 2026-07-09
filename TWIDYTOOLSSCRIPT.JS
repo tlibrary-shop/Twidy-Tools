@@ -6,8 +6,8 @@ let selectedFiles = [];
 const toolConfig = {
     // KATEGORI BARU: TWIDY ECOSYSTEM (Aplikasi Embed)
     'twidy-bill': { 
-        title: 'TwidyBill (Invoice Maker)', 
-        desc: 'Buat tagihan, invoice, dan kwitansi profesional dengan mudah dalam bentuk gambar.', 
+        title: 'TwidyBill', 
+        desc: 'Generate tagihan siap kirim dalam hitungan detik.', 
         icon: 'fa-file-invoice-dollar', 
         color: 'text-emerald-500', 
         isIframe: true, 
