@@ -6,12 +6,12 @@ let selectedFiles = [];
 const toolConfig = {
     // TWIDY ECOSYSTEM (Aplikasi Embed)
     'twidy-bill': { 
-        title: 'TwidyBill', 
-        desc: 'Generate tagihan siap kirim dalam hitungan detik.', 
+        title: 'TwidyBill (Invoice Maker)', 
+        desc: 'Buat tagihan, invoice, dan kwitansi profesional dengan mudah dalam bentuk gambar.', 
         icon: 'fa-file-invoice-dollar', 
         color: 'text-emerald-500', 
         isIframe: true, 
-        iframeUrl: 'https://twidybill.netlify.app/' // URL Aplikasi Anda
+        iframeUrl: 'https://twidybill.netlify.app/' 
     },
 
     // ORGANIZE PDF
@@ -51,7 +51,7 @@ const toolConfig = {
     'crop-pdf': { title: 'Crop PDF', desc: 'Pangkas margin atau potong halaman PDF.', icon: 'fa-crop', color: 'text-teal-500', accept: '.pdf', multi: false },
     'edit-pdf': { title: 'Edit PDF', desc: 'Tambahkan teks, gambar, bentuk atau anotasi tangan.', icon: 'fa-edit', color: 'text-amber-600', accept: '.pdf', multi: false },
     'pdf-forms': { title: 'PDF Forms', desc: 'Buat formulir interaktif atau isi formulir PDF.', icon: 'fa-list-alt', color: 'text-cyan-600', accept: '.pdf', multi: false },
-    'pdf-nup': { title: 'Padatkan (2-in-1)', desc: 'Gabungkan dua halaman PDF menjadi satu lembar untuk menghemat kertas.', icon: 'fa-columns', color: 'text-teal-600', accept: '.pdf', multi: false }, // FITUR BARU
+    'pdf-nup': { title: 'Padatkan (2-in-1)', desc: 'Gabungkan dua halaman PDF menjadi satu lembar untuk menghemat kertas.', icon: 'fa-columns', color: 'text-teal-600', accept: '.pdf', multi: false },
 
     // PDF SECURITY
     'pdf-unlock': { title: 'Unlock PDF', desc: 'Hapus kata sandi keamanan PDF.', icon: 'fa-unlock', color: 'text-teal-500', accept: '.pdf', multi: false },
@@ -92,7 +92,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(updateDateTime, 1000);
     updateDateTime();
 
-    // SEO FRIENDLY URL: Memeriksa Hash URL saat load pertama kali
     const hash = window.location.hash.substring(1);
     if (hash && toolConfig[hash]) {
         selectTool(hash);
@@ -175,7 +174,6 @@ function selectTool(toolId) {
     currentTool = toolId;
     const config = toolConfig[toolId];
     
-    // UPDATE URL & TITLE BROWSER
     window.location.hash = toolId;
     document.title = config.title + " - TwidyTools";
     
@@ -239,7 +237,6 @@ function selectTool(toolId) {
 }
 
 function goBack() {
-    // KEMBALIKAN URL KE NORMAL & TITLE KE DEFAULT
     history.pushState("", document.title, window.location.pathname);
     document.title = "TwidyTools - Solusi PDF & Dokumen Lengkap Online";
     
@@ -386,7 +383,7 @@ async function processFiles() {
             case 'pdf-unlock': await executeUnlock(); break;
             case 'ocr-pdf': await executeOcrPdf(); break;
             case 'ai-summarizer': await executeAiSummarizer(); break;
-            case 'pdf-nup': await executePadatkanPdf(); break; // FITUR BARU DIPANGGIL DI SINI
+            case 'pdf-nup': await executePadatkanPdf(); break; 
             
             default: await executeAdvancedPlaceholder();
         }
@@ -582,7 +579,7 @@ async function executeAiSummarizer() {
     triggerDownload(blob, 'Twidy_AI_Summary.txt');
 }
 
-// LOGIKA BARU: FUNGSI PADATKAN PDF (2-IN-1)
+// LOGIKA BARU: FUNGSI PADATKAN PDF (2-IN-1) FIX
 async function executePadatkanPdf() {
     updateProgress(30, 'Memuat dokumen...');
     const existingPdfBytes = await selectedFiles[0].arrayBuffer();
@@ -590,24 +587,38 @@ async function executePadatkanPdf() {
     const newPdfDoc = await PDFLib.PDFDocument.create();
     
     const pages = pdfDoc.getPages();
-    // A4 Landscape: (Lebar = 841.89, Tinggi = 595.27) -> Cocok untuk 2 halaman A4 Portrait berdampingan
-    const pageWidth = 595.27; 
-    const pageHeight = 841.89; 
+    
+    // Kertas A4 Landscape (Tinggi x Lebar A4 dibalik)
+    const a4Width = 841.89; 
+    const a4Height = 595.28; 
     
     for (let i = 0; i < pages.length; i += 2) {
         updateProgress(30 + ((i / pages.length) * 50), `Memproses halaman ${i + 1}...`);
         
-        // Buat halaman landscape baru 
-        const newPage = newPdfDoc.addPage([pageWidth * 2, pageHeight]);
+        const newPage = newPdfDoc.addPage([a4Width, a4Height]);
         
-        // Hal 1 ditaruh di sisi kiri
-        const [page1] = await newPdfDoc.embedPages(pdfDoc, [i]);
-        newPage.drawPage(page1, { x: 0, y: 0, xScale: 1, yScale: 1 });
+        // Halaman Kiri
+        const page1 = await newPdfDoc.embedPage(pages[i]);
+        const dims1 = page1.scale(1);
         
-        // Hal 2 (jika ada) ditaruh di sisi kanan
+        const scale1 = Math.min((a4Width / 2) / dims1.width, a4Height / dims1.height);
+        
+        const xPos1 = ((a4Width / 2) - (dims1.width * scale1)) / 2;
+        const yPos1 = (a4Height - (dims1.height * scale1)) / 2;
+        
+        newPage.drawPage(page1, { x: xPos1, y: yPos1, xScale: scale1, yScale: scale1 });
+        
+        // Halaman Kanan
         if (i + 1 < pages.length) {
-            const [page2] = await newPdfDoc.embedPages(pdfDoc, [i + 1]);
-            newPage.drawPage(page2, { x: pageWidth, y: 0, xScale: 1, yScale: 1 });
+            const page2 = await newPdfDoc.embedPage(pages[i + 1]);
+            const dims2 = page2.scale(1);
+            
+            const scale2 = Math.min((a4Width / 2) / dims2.width, a4Height / dims2.height);
+            
+            const xPos2 = (a4Width / 2) + (((a4Width / 2) - (dims2.width * scale2)) / 2);
+            const yPos2 = (a4Height - (dims2.height * scale2)) / 2;
+            
+            newPage.drawPage(page2, { x: xPos2, y: yPos2, xScale: scale2, yScale: scale2 });
         }
     }
     
