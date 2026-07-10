@@ -4,10 +4,8 @@ let currentTool = null;
 let selectedFiles = [];
 
 const toolConfig = {
-    // TWIDY ECOSYSTEM (Aplikasi Embed)
-    'twidy-bill': { 
-        title: 'TwidyBill (Invoice Maker)', desc: 'Buat tagihan, invoice, dan kwitansi profesional dengan mudah dalam bentuk gambar.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.netlify.app/' 
-    },
+    // TWIDY ECOSYSTEM
+    'twidy-bill': { title: 'TwidyBill (Invoice Maker)', desc: 'Buat tagihan, invoice, dan kwitansi profesional dengan mudah dalam bentuk gambar.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.netlify.app/' },
 
     // ORGANIZE PDF
     'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop) atau gunakan fitur sortir otomatis.', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
@@ -337,6 +335,7 @@ async function processFiles() {
         else if (currentTool === 'crop-pdf') { await executeCropPdf(); }
         else if (currentTool === 'pdf-to-markdown') { await executePdfToMarkdown(); }
         else if (currentTool === 'pdf-nup') { await executePdfNup(); }
+        
         // KONDISI UNTUK SEMUA FITUR AI
         else if (currentTool.startsWith('ai-') || currentTool === 'translate-pdf') { await executeAIFeatures(currentTool); }
         else { await executeAdvancedPlaceholder(); }
@@ -510,7 +509,6 @@ async function executePdfNup() {
         
         const newPage = newPdfDoc.addPage([a4Width, a4Height]);
         
-        // Hal 1 ditaruh di Atas
         const page1 = await newPdfDoc.embedPage(pages[i]);
         const dims1 = page1.scale(1);
         
@@ -521,7 +519,6 @@ async function executePdfNup() {
         
         newPage.drawPage(page1, { x: xPos1, y: yPos1, xScale: scale1, yScale: scale1 });
         
-        // Hal 2 (Jika ada) ditaruh di Bawah
         if (i + 1 < pages.length) {
             const page2 = await newPdfDoc.embedPage(pages[i + 1]);
             const dims2 = page2.scale(1);
@@ -546,7 +543,7 @@ async function executeAdvancedPlaceholder() {
 }
 
 // ==========================================
-// CORE AI LOGIC MULTI-FUNCTION 
+// CORE AI LOGIC MULTI-FUNCTION + AUTO OCR
 // ==========================================
 async function executeAIFeatures(toolId) {
     document.getElementById('aiResultContainer').classList.add('hidden');
@@ -557,14 +554,34 @@ async function executeAIFeatures(toolId) {
     
     const maxPages = Math.min(pdf.numPages, 15); 
     for(let i=1; i<=maxPages; i++) {
-        updateProgress(20 + ((i/maxPages)*40), `Memindai teks halaman ${i}...`);
+        updateProgress(20 + ((i/maxPages)*20), `Memindai teks halaman ${i}...`);
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
         extractedText += textContent.items.map(t => t.str).join(" ") + "\n";
     }
 
+    // 🚀 FITUR BARU: Auto-Fallback ke OCR jika tidak ada teks (PDF Scan/Gambar)
     if (!extractedText.trim()) {
-        throw new Error("Tidak ada teks yang dapat dibaca di dokumen ini (mungkin dokumen gambar hasil scan).");
+        updateProgress(45, 'Teks tidak ditemukan. Mengaktifkan Auto-OCR (Pembaca Gambar)...');
+        if(!window.Tesseract) throw new Error("Gagal memuat sistem OCR. Periksa koneksi internet.");
+
+        // Batasi OCR max 3 halaman pertama agar browser tidak ngelag/freeze
+        const ocrPages = Math.min(pdf.numPages, 3);
+        for(let i=1; i<=ocrPages; i++) {
+            updateProgress(45 + ((i/ocrPages)*25), `Mengekstrak gambar ke teks (Halaman ${i})...`);
+            const page = await pdf.getPage(i);
+            const vp = page.getViewport({scale: 1.5});
+            const cvs = document.createElement('canvas');
+            cvs.width = vp.width; cvs.height = vp.height;
+            await page.render({canvasContext: cvs.getContext('2d'), viewport: vp}).promise;
+
+            const result = await Tesseract.recognize(cvs, 'eng+ind');
+            extractedText += result.data.text + "\n";
+        }
+
+        if (!extractedText.trim()) {
+            throw new Error("Dokumen benar-benar kosong atau gambarnya terlalu buram untuk dibaca AI.");
+        }
     }
 
     const textToAnalyze = extractedText.substring(0, 20000); 
@@ -582,7 +599,7 @@ async function executeAIFeatures(toolId) {
     if (toolId === 'ai-chat') {
         actionStr = 'ask_question';
         customPrompt = document.getElementById('ai-prompt')?.value;
-        if(!customPrompt) throw new Error("Anda harus mengetik pertanyaan di kolom Pengaturan Khusus.");
+        if(!customPrompt) throw new Error("Anda harus mengetik pertanyaan di kolom Pengaturan Khusus terlebih dahulu.");
     }
 
     const response = await fetch('/api/gemini', {
