@@ -16,8 +16,8 @@ module.exports = async function handler(req, res) {
             return res.status(500).json({ error: 'API Key belum terpasang di Vercel.' });
         }
         
-        // REVISI: Menggunakan model stabil gemini-1.5-flash yang dijamin tidak 404
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        // REVISI FINAL: Menggunakan model terbaru gemini-3.1-flash-lite yang aktif saat ini
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
 
         const response = await fetch(url, {
             method: 'POST',
