@@ -59,7 +59,7 @@ const categories = {
     'TWIDY ECOSYSTEM': ['twidy-bill'],
     'ORGANIZE PDF': ['pdf-merge', 'pdf-split', 'remove-pages', 'extract-pages', 'organize-pdf', 'scan-to-pdf'],
     'OPTIMIZE PDF': ['pdf-compress', 'repair-pdf', 'ocr-pdf'],
-    'CONVERT TO PDF': ['image-to-pdf', 'word-to-pdf', 'ppt-to-pdf', 'excel-to-pdf', 'html-to-pdf', 'txt-to-pdf', 'rtf-to-pdf'], // Ditambahkan di sini
+    'CONVERT TO PDF': ['image-to-pdf', 'word-to-pdf', 'ppt-to-pdf', 'excel-to-pdf', 'html-to-pdf', 'txt-to-pdf', 'rtf-to-pdf'],
     'CONVERT FROM PDF': ['pdf-to-image', 'pdf-to-word', 'pdf-to-ppt', 'pdf-to-excel', 'pdf-to-pdfa'],
     'EDIT PDF': ['pdf-rotate', 'page-numbers', 'pdf-watermark', 'crop-pdf', 'edit-pdf', 'pdf-forms', 'pdf-nup'],
     'PDF SECURITY': ['pdf-unlock', 'pdf-protect', 'sign-pdf', 'redact-pdf', 'compare-pdf'],
@@ -313,9 +313,6 @@ function downloadAIResult() {
     triggerDownload(blob, `Twidy_AI_Result_${currentTool}.txt`);
 }
 
-// ==========================================
-// MAIN PROCESS HANDLER
-// ==========================================
 async function processFiles() {
     if (selectedFiles.length === 0) return;
     try {
@@ -333,8 +330,8 @@ async function processFiles() {
         else if (currentTool === 'ppt-to-pdf') { await executePptToPdf(); }
         else if (currentTool === 'excel-to-pdf') { await executeExcelToPdf(); }
         else if (currentTool === 'html-to-pdf') { await executeHtmlToPdf(); }
-        else if (currentTool === 'txt-to-pdf') { await executeTxtToPdf(); } // Baru
-        else if (currentTool === 'rtf-to-pdf') { await executeRtfToPdf(); } // Baru
+        else if (currentTool === 'txt-to-pdf') { await executeTxtToPdf(); } 
+        else if (currentTool === 'rtf-to-pdf') { await executeRtfToPdf(); } 
         else if (currentTool === 'pdf-to-image') { await executePdfToImage(); }
         else if (currentTool === 'pdf-to-word') { await executePdfToWord(); }
         else if (currentTool === 'pdf-to-ppt') { await executePdfToPpt(); }
@@ -353,48 +350,31 @@ async function processFiles() {
         else if (currentTool === 'redact-pdf') { await executeRedactPdf(); }
         else if (currentTool === 'compare-pdf') { await executeComparePdf(); }
         else if (currentTool === 'pdf-to-markdown') { await executePdfToMarkdown(); }
-        
         else if (currentTool.startsWith('ai-') || currentTool === 'translate-pdf') { await executeAIFeatures(currentTool); }
         else { await executeAdvancedPlaceholder(); }
-        
     } catch (e) {
         alertUser(`Error: ${e.message}`, 'error');
         hideProgress();
     }
 }
 
-// ==========================================
-// FUNGSI NON-AI YANG DIPERBAIKI / DIPERKAYA
-// ==========================================
-
-// Fitur Baru TXT to PDF
 async function executeTxtToPdf() {
     updateProgress(40, 'Membaca file teks...');
     const text = await selectedFiles[0].text();
     updateProgress(70, 'Mengonversi teks ke halaman PDF...');
-    
-    // Membungkus teks mentah ke dalam tag div yang rapi sebelum diserahkan ke html2pdf
     const safeText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const htmlContent = `<div style="font-family: Arial, sans-serif; padding: 30px; font-size: 12pt; line-height: 1.6; white-space: pre-wrap;">${safeText}</div>`;
-    
     await html2pdf().from(htmlContent).save(selectedFiles[0].name.replace('.txt', '.pdf'));
     updateProgress(100, 'Selesai!'); hideProgress();
 }
 
-// Fitur Baru RTF to PDF
 async function executeRtfToPdf() {
     updateProgress(40, 'Membaca format file RTF...');
     const text = await selectedFiles[0].text();
-    
-    // Pembersih otomatis (Stripper) untuk kode tag bawaan RTF agar tidak ikut tercetak
-    const cleanRtfText = text.replace(/\\par[d]?/g, "\n")
-                             .replace(/\{\*?\\[^{}]+}|[{}]|\\\n?[A-Za-z]+\n?(?:-?\d+)?[ ]?/g, "")
-                             .trim();
-                             
+    const cleanRtfText = text.replace(/\\par[d]?/g, "\n").replace(/\{\*?\\[^{}]+}|[{}]|\\\n?[A-Za-z]+\n?(?:-?\d+)?[ ]?/g, "").trim();
     updateProgress(70, 'Memproses teks menjadi dokumen PDF...');
     const safeText = cleanRtfText.replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const htmlContent = `<div style="font-family: Arial, sans-serif; padding: 30px; font-size: 12pt; line-height: 1.6; white-space: pre-wrap;">${safeText}</div>`;
-    
     await html2pdf().from(htmlContent).save(selectedFiles[0].name.replace('.rtf', '.pdf'));
     updateProgress(100, 'Selesai!'); hideProgress();
 }
@@ -449,7 +429,7 @@ async function executePdfProtect() {
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
     const passVal = document.getElementById('pt-pass')?.value;
     if(!passVal) throw new Error("Silakan masukkan kata kunci (password) di menu Pengaturan Khusus terlebih dahulu.");
-    updateProgress(100, 'Selesai!'); alertUser(`Dokumen berhasil diproteksi dengan password!`, 'success'); setTimeout(() => hideProgress(), 2000);
+    updateProgress(100, 'Selesai!'); alertUser(`Dokumen berhasil diproteksi!`, 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Protected.pdf');
 }
 
@@ -492,8 +472,8 @@ async function executeWordToPdf() {
     updateProgress(100, 'Selesai!'); hideProgress();
 }
 async function executePptToPdf() { await executeWordToPdf(); }
-async function executeExcelToPdf() { await executeWordToPdf(); }
 async function executeHtmlToPdf() { await executeWordToPdf(); }
+
 async function executePdfRotate() {
     updateProgress(50, 'Memutar halaman...');
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
@@ -619,7 +599,9 @@ async function executePdfToExcel() {
     }
     const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "Data");
     updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
-    triggerDownload(new Blob([XLSX.write(wb, {bookType: 'xlsx', type: 'array'})], {type: 'application/octet-stream'}), selectedFiles[0].name.replace('.pdf', '.xlsx'));
+    
+    const excelBuffer = XLSX.write(wb, {bookType: 'xlsx', type: 'array'});
+    triggerDownload(new Blob([excelBuffer], {type: 'application/octet-stream'}), selectedFiles[0].name.replace('.pdf', '.xlsx'));
 }
 
 async function executePdfToImage() {
