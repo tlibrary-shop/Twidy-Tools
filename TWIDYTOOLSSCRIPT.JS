@@ -10,8 +10,8 @@ const toolConfig = {
     },
 
     // ORGANIZE PDF
-    'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file.', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
-    'pdf-split': { title: 'Split PDF', desc: 'Pisahkan satu halaman atau ekstrak rentang halaman.', icon: 'fa-scissors', color: 'text-orange-500', accept: '.pdf', multi: false, settings: [{ id: 'split-range', label: 'Rentang Halaman (Contoh: 1-3, 5)', type: 'text', placeholder: 'Kosongkan jika ingin memisah semua' }] },
+    'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop) atau gunakan fitur sortir otomatis.', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
+    'pdf-split': { title: 'Split PDF', desc: 'Pisahkan satu halaman atau ekstrak rentang halaman PDF.', icon: 'fa-scissors', color: 'text-orange-500', accept: '.pdf', multi: false, settings: [{ id: 'split-range', label: 'Rentang Halaman (Contoh: 1-3, 5)', type: 'text', placeholder: 'Kosongkan jika ingin memisah semua' }] },
     'remove-pages': { title: 'Remove pages', desc: 'Hapus halaman tertentu dari dokumen PDF.', icon: 'fa-minus-circle', color: 'text-rose-500', accept: '.pdf', multi: false, settings: [{ id: 'remove-range', label: 'Halaman yang dihapus (Contoh: 1, 3, 5-7)', type: 'text', placeholder: 'Ketik halaman di sini' }] },
     'extract-pages': { title: 'Extract pages', desc: 'Dapatkan dokumen baru berisi halaman yang Anda ekstrak.', icon: 'fa-share-square', color: 'text-blue-500', accept: '.pdf', multi: false, settings: [{ id: 'extract-range', label: 'Halaman yang diambil (Contoh: 2, 4-6)', type: 'text', placeholder: 'Ketik halaman di sini' }] },
     'organize-pdf': { title: 'Organize PDF', desc: 'Susun ulang urutan halaman PDF.', icon: 'fa-sort-alpha-down', color: 'text-indigo-500', accept: '.pdf', multi: false, settings: [{ id: 'organize-order', label: 'Urutan Halaman Baru (Contoh: 3, 1, 2)', type: 'text', placeholder: 'Ketik urutan baru' }] },
@@ -20,7 +20,7 @@ const toolConfig = {
     // OPTIMIZE PDF
     'pdf-compress': { title: 'Compress PDF', desc: 'Kurangi ukuran file sambil mengoptimalkan kualitas maksimal.', icon: 'fa-compress-arrows-alt', color: 'text-green-500', accept: '.pdf', multi: false },
     'repair-pdf': { title: 'Repair PDF', desc: 'Perbaiki file PDF yang rusak dan pulihkan data.', icon: 'fa-wrench', color: 'text-amber-500', accept: '.pdf', multi: false },
-    'ocr-pdf': { title: 'OCR PDF', desc: 'Ubah PDF hasil scan menjadi dokumen teks mentah yang dapat dicari.', icon: 'fa-search-plus', color: 'text-sky-500', accept: '.pdf', multi: false },
+    'ocr-pdf': { title: 'OCR PDF', desc: 'Ubah PDF hasil scan menjadi dokumen teks mentah yang dapat dicari dan di-copy.', icon: 'fa-search-plus', color: 'text-sky-500', accept: '.pdf', multi: false },
 
     // CONVERT TO PDF
     'image-to-pdf': { title: 'JPG to PDF', desc: 'Konversi gambar JPG ke PDF dalam hitungan detik.', icon: 'fa-image', color: 'text-yellow-500', accept: '.jpg,.jpeg,.png', multi: true },
@@ -39,7 +39,7 @@ const toolConfig = {
     // EDIT PDF
     'pdf-rotate': { title: 'Rotate PDF', desc: 'Putar PDF sesuka Anda.', icon: 'fa-redo', color: 'text-purple-500', accept: '.pdf', multi: false },
     'page-numbers': { title: 'Add page numbers', desc: 'Tambahkan nomor halaman ke bagian bawah PDF.', icon: 'fa-sort-numeric-down', color: 'text-pink-500', accept: '.pdf', multi: false },
-    'pdf-watermark': { title: 'Add watermark', desc: 'Stempel gambar atau teks ke PDF.', icon: 'fa-stamp', color: 'text-indigo-400', accept: '.pdf', multi: false, settings: [{ id: 'wm-text', label: 'Teks Watermark', type: 'text', placeholder: 'Ketik Teks' }] },
+    'pdf-watermark': { title: 'Add watermark', desc: 'Stempel gambar atau teks ke PDF dalam hitungan detik.', icon: 'fa-stamp', color: 'text-indigo-400', accept: '.pdf', multi: false, settings: [{ id: 'wm-text', label: 'Teks Watermark', type: 'text', placeholder: 'Ketik Teks' }] },
     'crop-pdf': { title: 'Crop PDF', desc: 'Pangkas margin atau potong halaman PDF.', icon: 'fa-crop', color: 'text-teal-500', accept: '.pdf', multi: false, settings: [{ id: 'crop-margin', label: 'Besar potongan margin (Angka 10-100 poin)', type: 'number', placeholder: '20' }] },
     'edit-pdf': { title: 'Edit PDF', desc: 'Tambahkan teks, gambar, bentuk atau anotasi tangan.', icon: 'fa-edit', color: 'text-amber-600', accept: '.pdf', multi: false },
     'pdf-forms': { title: 'PDF Forms', desc: 'Buat formulir interaktif atau isi formulir PDF.', icon: 'fa-list-alt', color: 'text-cyan-600', accept: '.pdf', multi: false },
@@ -52,7 +52,7 @@ const toolConfig = {
     'redact-pdf': { title: 'Redact PDF', desc: 'Sensor info sensitif di dokumen PDF Anda.', icon: 'fa-eraser', color: 'text-slate-800', accept: '.pdf', multi: false },
     'compare-pdf': { title: 'Compare PDF', desc: 'Bandingkan dua dokumen untuk melihat perubahannya.', icon: 'fa-not-equal', color: 'text-orange-400', accept: '.pdf', multi: true },
 
-    // PDF INTELLIGENCE (AI FEATURES)
+    // PDF INTELLIGENCE
     'ai-summarizer': { title: 'AI Summarizer', desc: 'Dapatkan ringkasan otomatis dari dokumen.', icon: 'fa-brain', color: 'text-purple-600', accept: '.pdf', multi: false },
     'translate-pdf': { title: 'AI Translate PDF', desc: 'Terjemahkan seluruh isi PDF ke bahasa Indonesia menggunakan AI.', icon: 'fa-language', color: 'text-sky-600', accept: '.pdf', multi: false },
     'ai-proofread': { title: 'AI Proofreader', desc: 'Perbaiki tata bahasa, ejaan (typo), dan struktur kalimat dokumen.', icon: 'fa-spell-check', color: 'text-green-600', accept: '.pdf', multi: false },
@@ -95,13 +95,10 @@ function updateDateTime() {
 function renderDashboard() {
     const grid = document.getElementById('dashboardGrid');
     grid.innerHTML = '';
-
     for (const [catName, tools] of Object.entries(categories)) {
         let catHTML = `
             <div class="mb-8 sm:mb-10">
-                <h3 class="text-base sm:text-xl font-bold text-slate-700 dark:text-slate-200 mb-3 sm:mb-5 border-b pb-2 border-slate-200 dark:border-slate-700">
-                    ${catName}
-                </h3>
+                <h3 class="text-base sm:text-xl font-bold text-slate-700 dark:text-slate-200 mb-3 sm:mb-5 border-b pb-2 border-slate-200 dark:border-slate-700">${catName}</h3>
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
         `;
         tools.forEach(toolId => {
@@ -156,7 +153,7 @@ function selectTool(toolId) {
     
     document.getElementById('toolsSection').classList.add('hidden');
     document.getElementById('uploadSection').classList.remove('hidden');
-    document.getElementById('aiResultContainer').classList.add('hidden'); // Sembunyikan hasil AI sebelumnya
+    document.getElementById('aiResultContainer').classList.add('hidden');
     
     document.getElementById('toolTitle').textContent = config.title;
     document.getElementById('toolDescription').textContent = config.desc;
@@ -317,6 +314,13 @@ function parseRange(rangeStr, maxPages) {
     return Array.from(pages).filter(p => p >= 0 && p < maxPages).sort((a,b) => a-b);
 }
 
+function downloadAIResult() {
+    const text = document.getElementById('aiResultText').value;
+    if(!text) return;
+    const blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
+    triggerDownload(blob, `Twidy_AI_Result_${currentTool}.txt`);
+}
+
 // MAIN PROCESS HANDLER
 async function processFiles() {
     if (selectedFiles.length === 0) return;
@@ -332,6 +336,7 @@ async function processFiles() {
         else if (currentTool === 'organize-pdf') { await executeOrganizePdf(); }
         else if (currentTool === 'crop-pdf') { await executeCropPdf(); }
         else if (currentTool === 'pdf-to-markdown') { await executePdfToMarkdown(); }
+        else if (currentTool === 'pdf-nup') { await executePdfNup(); }
         // KONDISI UNTUK SEMUA FITUR AI
         else if (currentTool.startsWith('ai-') || currentTool === 'translate-pdf') { await executeAIFeatures(currentTool); }
         else { await executeAdvancedPlaceholder(); }
@@ -343,92 +348,9 @@ async function processFiles() {
 }
 
 // ==========================================
-// CORE AI LOGIC MULTI-FUNCTION
+// KUMPULAN FITUR BAWAAN ASLI YANG DIKEMBALIKAN (TIDAK ADA YANG DIHAPUS)
 // ==========================================
-async function executeAIFeatures(toolId) {
-    document.getElementById('aiResultContainer').classList.add('hidden'); // Reset UI
-    updateProgress(20, 'Membaca dan mengekstrak teks dari PDF...');
-    
-    const pdf = await pdfjsLib.getDocument({data: await selectedFiles[0].arrayBuffer()}).promise;
-    let extractedText = "";
-    
-    // Batasi jumlah halaman yang dibaca agar tidak memberatkan Limit Token AI (Maks 15 halaman pertama)
-    const maxPages = Math.min(pdf.numPages, 15); 
-    for(let i=1; i<=maxPages; i++) {
-        updateProgress(20 + ((i/maxPages)*40), `Memindai teks halaman ${i}...`);
-        const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
-        extractedText += textContent.items.map(t => t.str).join(" ") + "\n";
-    }
 
-    if (!extractedText.trim()) {
-        throw new Error("Tidak ada teks yang dapat dibaca di dokumen ini (mungkin ini dokumen hasil scan berupa gambar murni tanpa OCR).");
-    }
-
-    // Pemotongan aman max 20,000 karakter agar tidak melanggar limit free API
-    const textToAnalyze = extractedText.substring(0, 20000); 
-    updateProgress(75, 'Menghubungkan & memproses dengan Gemini AI...');
-
-    // Menentukan jenis Action untuk Backend Serverless
-    let actionStr = 'summarize';
-    let customPrompt = '';
-    
-    if (toolId === 'ai-summarizer') actionStr = 'summarize';
-    if (toolId === 'translate-pdf') actionStr = 'translate';
-    if (toolId === 'ai-proofread') actionStr = 'proofread';
-    if (toolId === 'ai-extract') actionStr = 'extract_entities';
-    if (toolId === 'ai-quiz') actionStr = 'generate_quiz';
-    if (toolId === 'ai-sentiment') actionStr = 'analyze_sentiment';
-    if (toolId === 'ai-chat') {
-        actionStr = 'ask_question';
-        customPrompt = document.getElementById('ai-prompt')?.value;
-        if(!customPrompt) throw new Error("Anda harus mengetik pertanyaan di kolom Pengaturan Khusus terlebih dahulu.");
-    }
-
-    // Call ke Backend (apigemini.js / api handler)
-    const response = await fetch('/api/gemini', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            text: textToAnalyze, 
-            action: actionStr, 
-            customPrompt: customPrompt 
-        })
-    });
-
-    if(!response.ok) {
-        throw new Error("Gagal terhubung ke layanan AI. Pastikan Vercel/API backend aktif dan Key terpasang.");
-    }
-    
-    const data = await response.json();
-    const aiSummary = data.result || "Hasil AI berhasil dibuat namun kosong.";
-    
-    updateProgress(100, 'AI Selesai Memproses!');
-    
-    // Tampilkan Textarea UI
-    const resultContainer = document.getElementById('aiResultContainer');
-    const resultTextarea = document.getElementById('aiResultText');
-    
-    resultContainer.classList.remove('hidden');
-    resultTextarea.value = aiSummary;
-    
-    // Scroll mulus ke bagian jawaban
-    resultContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    
-    alertUser('AI berhasil memproses dokumen!', 'success');
-    setTimeout(() => hideProgress(), 2000);
-}
-
-function downloadAIResult() {
-    const text = document.getElementById('aiResultText').value;
-    if(!text) return;
-    const blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
-    triggerDownload(blob, `Twidy_AI_Result_${currentTool}.txt`);
-}
-
-// ==========================================
-// KUMPULAN FITUR BAWAAN SEBELUMNYA (UTUH)
-// ==========================================
 async function executeMerge() {
     const outPdf = await PDFLib.PDFDocument.create();
     for(let i=0; i<selectedFiles.length; i++){
@@ -455,6 +377,50 @@ async function executeSplit() {
     }
     updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(await zip.generateAsync({type: 'blob'}), 'Twidy_Splitted.zip');
+}
+
+async function executeRemovePages() {
+    updateProgress(30, 'Membaca dokumen...');
+    const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
+    const rangeInput = document.getElementById('remove-range')?.value;
+    if(!rangeInput) throw new Error("Mohon ketik halaman yang ingin dihapus.");
+    const toRemove = parseRange(rangeInput, doc.getPageCount());
+    const indicesToKeep = [];
+    for(let i=0; i<doc.getPageCount(); i++) { if(!toRemove.includes(i)) indicesToKeep.push(i); }
+    if(indicesToKeep.length === 0) throw new Error("Anda tidak bisa menghapus semua halaman.");
+    updateProgress(60, 'Memotong halaman...');
+    const newPdf = await PDFLib.PDFDocument.create();
+    const copiedPages = await newPdf.copyPages(doc, indicesToKeep); copiedPages.forEach(p => newPdf.addPage(p));
+    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
+    triggerDownload(new Blob([await newPdf.save()], {type: 'application/pdf'}), 'Twidy_Removed.pdf');
+}
+
+async function executeExtractPages() {
+    updateProgress(30, 'Membaca dokumen...');
+    const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
+    const rangeInput = document.getElementById('extract-range')?.value;
+    if(!rangeInput) throw new Error("Mohon ketik halaman yang ingin diekstrak.");
+    const toExtract = parseRange(rangeInput, doc.getPageCount());
+    if(toExtract.length === 0) throw new Error("Halaman yang Anda masukkan tidak valid.");
+    updateProgress(60, 'Mengekstrak halaman...');
+    const newPdf = await PDFLib.PDFDocument.create();
+    const copiedPages = await newPdf.copyPages(doc, toExtract); copiedPages.forEach(p => newPdf.addPage(p));
+    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
+    triggerDownload(new Blob([await newPdf.save()], {type: 'application/pdf'}), 'Twidy_Extracted.pdf');
+}
+
+async function executeOrganizePdf() {
+    updateProgress(30, 'Membaca dokumen...');
+    const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
+    const orderInput = document.getElementById('organize-order')?.value;
+    if(!orderInput) throw new Error("Mohon ketik urutan halaman yang baru.");
+    let newOrder = [];
+    orderInput.split(',').forEach(part => { let num = parseInt(part.trim()); if(num && num > 0 && num <= doc.getPageCount()) newOrder.push(num - 1); });
+    updateProgress(60, 'Menyusun ulang...');
+    const newPdf = await PDFLib.PDFDocument.create();
+    const copiedPages = await newPdf.copyPages(doc, newOrder); copiedPages.forEach(p => newPdf.addPage(p));
+    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
+    triggerDownload(new Blob([await newPdf.save()], {type: 'application/pdf'}), 'Twidy_Reorganized.pdf');
 }
 
 async function executeCompress() {
@@ -503,52 +469,6 @@ async function executePdfToImage() {
     triggerDownload(await zip.generateAsync({type: 'blob'}), 'Twidy_Images.zip');
 }
 
-async function executeRemovePages() {
-    updateProgress(30, 'Membaca dokumen...');
-    const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
-    const rangeInput = document.getElementById('remove-range')?.value;
-    if(!rangeInput) throw new Error("Mohon ketik halaman yang ingin dihapus.");
-    const toRemove = parseRange(rangeInput, doc.getPageCount());
-    const indicesToKeep = [];
-    for(let i=0; i<doc.getPageCount(); i++) { if(!toRemove.includes(i)) indicesToKeep.push(i); }
-    if(indicesToKeep.length === 0) throw new Error("Anda tidak bisa menghapus semua halaman.");
-    updateProgress(60, 'Memotong halaman...');
-    const newPdf = await PDFLib.PDFDocument.create();
-    const copiedPages = await newPdf.copyPages(doc, indicesToKeep); copiedPages.forEach(p => newPdf.addPage(p));
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
-    triggerDownload(new Blob([await newPdf.save()], {type: 'application/pdf'}), 'Twidy_Removed.pdf');
-}
-
-async function executeExtractPages() {
-    updateProgress(30, 'Membaca dokumen...');
-    const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
-    const rangeInput = document.getElementById('extract-range')?.value;
-    if(!rangeInput) throw new Error("Mohon ketik halaman yang ingin diekstrak.");
-    const toExtract = parseRange(rangeInput, doc.getPageCount());
-    if(toExtract.length === 0) throw new Error("Halaman yang Anda masukkan tidak valid.");
-    updateProgress(60, 'Mengekstrak halaman...');
-    const newPdf = await PDFLib.PDFDocument.create();
-    const copiedPages = await newPdf.copyPages(doc, toExtract); copiedPages.forEach(p => newPdf.addPage(p));
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
-    triggerDownload(new Blob([await newPdf.save()], {type: 'application/pdf'}), 'Twidy_Extracted.pdf');
-}
-
-async function executeOrganizePdf() {
-    updateProgress(30, 'Membaca dokumen...');
-    const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
-    const orderInput = document.getElementById('organize-order')?.value;
-    if(!orderInput) throw new Error("Mohon ketik urutan halaman yang baru.");
-    
-    let newOrder = [];
-    orderInput.split(',').forEach(part => { let num = parseInt(part.trim()); if(num && num > 0 && num <= doc.getPageCount()) newOrder.push(num - 1); });
-    
-    updateProgress(60, 'Menyusun ulang...');
-    const newPdf = await PDFLib.PDFDocument.create();
-    const copiedPages = await newPdf.copyPages(doc, newOrder); copiedPages.forEach(p => newPdf.addPage(p));
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
-    triggerDownload(new Blob([await newPdf.save()], {type: 'application/pdf'}), 'Twidy_Reorganized.pdf');
-}
-
 async function executeCropPdf() {
     updateProgress(30, 'Membaca batas halaman...');
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
@@ -577,8 +497,116 @@ async function executePdfToMarkdown() {
     triggerDownload(new Blob([mdText], {type: 'text/markdown;charset=utf-8'}), 'Twidy_Extracted.md');
 }
 
+async function executePdfNup() {
+    updateProgress(20, 'Menyiapkan canvas A4...');
+    const pdfDoc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
+    const newPdfDoc = await PDFLib.PDFDocument.create();
+    const pages = pdfDoc.getPages();
+    const a4Width = 595.28;
+    const a4Height = 841.89;
+
+    for (let i = 0; i < pages.length; i += 2) {
+        updateProgress(30 + ((i / pages.length) * 50), `Memproses halaman ${i + 1}...`);
+        
+        const newPage = newPdfDoc.addPage([a4Width, a4Height]);
+        
+        // Hal 1 ditaruh di Atas
+        const page1 = await newPdfDoc.embedPage(pages[i]);
+        const dims1 = page1.scale(1);
+        
+        const scale1 = Math.min(a4Width / dims1.width, (a4Height / 2) / dims1.height);
+        
+        const xPos1 = (a4Width - (dims1.width * scale1)) / 2;
+        const yPos1 = (a4Height / 2) + (((a4Height / 2) - (dims1.height * scale1)) / 2);
+        
+        newPage.drawPage(page1, { x: xPos1, y: yPos1, xScale: scale1, yScale: scale1 });
+        
+        // Hal 2 (Jika ada) ditaruh di Bawah
+        if (i + 1 < pages.length) {
+            const page2 = await newPdfDoc.embedPage(pages[i + 1]);
+            const dims2 = page2.scale(1);
+            
+            const scale2 = Math.min(a4Width / dims2.width, (a4Height / 2) / dims2.height);
+            
+            const xPos2 = (a4Width - (dims2.width * scale2)) / 2;
+            const yPos2 = (((a4Height / 2) - (dims2.height * scale2)) / 2);
+            
+            newPage.drawPage(page2, { x: xPos2, y: yPos2, xScale: scale2, yScale: scale2 });
+        }
+    }
+    
+    updateProgress(100, 'Selesai!'); alertUser('Berhasil memadatkan dokumen!', 'success'); setTimeout(() => hideProgress(), 2000);
+    triggerDownload(new Blob([await newPdfDoc.save()], {type: 'application/pdf'}), 'Twidy_Nup_2in1.pdf');
+}
+
 async function executeAdvancedPlaceholder() {
     updateProgress(50, 'Menghubungkan ke modul server...');
     await new Promise(r => setTimeout(r, 1500));
-    throw new Error(`Fitur "${toolConfig[currentTool].title}" masih dalam tahap pengembangan.`);
+    throw new Error(`Fitur "${toolConfig[currentTool].title}" memerlukan sistem Backend Server (Python/NodeJS) agar bisa digunakan.`);
+}
+
+// ==========================================
+// CORE AI LOGIC MULTI-FUNCTION 
+// ==========================================
+async function executeAIFeatures(toolId) {
+    document.getElementById('aiResultContainer').classList.add('hidden');
+    updateProgress(20, 'Membaca dan mengekstrak teks dari PDF...');
+    
+    const pdf = await pdfjsLib.getDocument({data: await selectedFiles[0].arrayBuffer()}).promise;
+    let extractedText = "";
+    
+    const maxPages = Math.min(pdf.numPages, 15); 
+    for(let i=1; i<=maxPages; i++) {
+        updateProgress(20 + ((i/maxPages)*40), `Memindai teks halaman ${i}...`);
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        extractedText += textContent.items.map(t => t.str).join(" ") + "\n";
+    }
+
+    if (!extractedText.trim()) {
+        throw new Error("Tidak ada teks yang dapat dibaca di dokumen ini (mungkin dokumen gambar hasil scan).");
+    }
+
+    const textToAnalyze = extractedText.substring(0, 20000); 
+    updateProgress(75, 'Menghubungkan & memproses dengan AI...');
+
+    let actionStr = 'summarize';
+    let customPrompt = '';
+    
+    if (toolId === 'ai-summarizer') actionStr = 'summarize';
+    if (toolId === 'translate-pdf') actionStr = 'translate';
+    if (toolId === 'ai-proofread') actionStr = 'proofread';
+    if (toolId === 'ai-extract') actionStr = 'extract_entities';
+    if (toolId === 'ai-quiz') actionStr = 'generate_quiz';
+    if (toolId === 'ai-sentiment') actionStr = 'analyze_sentiment';
+    if (toolId === 'ai-chat') {
+        actionStr = 'ask_question';
+        customPrompt = document.getElementById('ai-prompt')?.value;
+        if(!customPrompt) throw new Error("Anda harus mengetik pertanyaan di kolom Pengaturan Khusus.");
+    }
+
+    const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: textToAnalyze, action: actionStr, customPrompt: customPrompt })
+    });
+
+    if(!response.ok) {
+        throw new Error("Gagal terhubung ke layanan AI. Pastikan Vercel API aktif.");
+    }
+    
+    const data = await response.json();
+    const aiSummary = data.result || "Hasil AI kosong.";
+    
+    updateProgress(100, 'AI Selesai Memproses!');
+    
+    const resultContainer = document.getElementById('aiResultContainer');
+    const resultTextarea = document.getElementById('aiResultText');
+    
+    resultContainer.classList.remove('hidden');
+    resultTextarea.value = aiSummary;
+    resultContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    
+    alertUser('AI berhasil memproses dokumen!', 'success');
+    setTimeout(() => hideProgress(), 2000);
 }
