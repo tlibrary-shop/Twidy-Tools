@@ -6,24 +6,11 @@
     <title>TwidyTools - Solusi PDF & Dokumen Lengkap Online</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#4f46e5',
-                        secondary: '#ec4899',
-                        darkBg: '#0f172a',
-                        darkCard: '#1e293b'
-                    }
-                }
-            }
-        }
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#4f46e5', secondary: '#ec4899', darkBg: '#0f172a', darkCard: '#1e293b' } } } }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .sidebar-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        [x-cloak] { display: none !important; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -32,195 +19,91 @@
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-darkBg text-slate-800 dark:text-slate-100 font-sans">
-
     <div class="flex h-screen overflow-hidden relative">
+        <div id="mobile-overlay" class="fixed inset-0 bg-slate-900/50 z-20 hidden md:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
         
-        <div id="mobile-overlay" class="fixed inset-0 bg-slate-900/50 dark:bg-slate-900/80 z-20 hidden md:hidden backdrop-blur-sm transition-opacity" onclick="toggleSidebar()"></div>
-
         <aside id="sidebar" class="sidebar-transition w-64 bg-white dark:bg-darkCard border-r border-slate-200 dark:border-slate-700 flex flex-col z-30 fixed inset-y-0 left-0 md:relative transform -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none">
-            
-            <div class="flex-1 overflow-y-auto p-4 space-y-6 mt-2">
-                <div class="flex items-center justify-between gap-2">
-                    <button onclick="goBack()" class="flex-1 flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors font-bold text-left">
-                        <i class="fas fa-home text-indigo-500 text-lg"></i> Dashboard Utama
-                    </button>
-                    <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-slate-700 dark:hover:text-white p-2 rounded-lg transition-colors shrink-0">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
-                </div>
-                
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Twidy Ecosystem</h4>
-                    <div class="space-y-1">
-                        <button onclick="selectTool('twidy-bill')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 font-medium text-left transition-colors"><i class="fas fa-file-invoice-dollar text-emerald-500 w-5"></i> TwidyBill</button>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Organize PDF</h4>
-                    <div class="space-y-1">
-                        <button onclick="selectTool('pdf-merge')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-object-group text-red-500 w-5"></i> Merge PDF</button>
-                        <button onclick="selectTool('pdf-split')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-scissors text-orange-500 w-5"></i> Split PDF</button>
-                        <button onclick="selectTool('remove-pages')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-minus-circle text-rose-500 w-5"></i> Remove pages</button>
-                        <button onclick="selectTool('extract-pages')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-share-square text-blue-500 w-5"></i> Extract pages</button>
-                        <button onclick="selectTool('organize-pdf')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-sort-alpha-down text-indigo-500 w-5"></i> Organize PDF</button>
-                        <button onclick="selectTool('scan-to-pdf')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-qrcode text-slate-500 w-5"></i> Scan to PDF</button>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Optimize PDF</h4>
-                    <div class="space-y-1">
-                        <button onclick="selectTool('pdf-compress')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-compress-arrows-alt text-green-500 w-5"></i> Compress PDF</button>
-                        <button onclick="selectTool('repair-pdf')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-wrench text-amber-500 w-5"></i> Repair PDF</button>
-                        <button onclick="selectTool('ocr-pdf')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-search-plus text-sky-500 w-5"></i> OCR PDF</button>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Convert to PDF</h4>
-                    <div class="space-y-1">
-                        <button onclick="selectTool('image-to-pdf')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-image text-yellow-500 w-5"></i> JPG to PDF</button>
-                        <button onclick="selectTool('word-to-pdf')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-file-word text-blue-600 w-5"></i> WORD to PDF</button>
-                        <button onclick="selectTool('ppt-to-pdf')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-file-powerpoint text-orange-600 w-5"></i> POWERPOINT to PDF</button>
-                        <button onclick="selectTool('excel-to-pdf')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-file-excel text-green-600 w-5"></i> EXCEL to PDF</button>
-                        <button onclick="selectTool('html-to-pdf')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fab fa-html5 text-orange-500 w-5"></i> HTML to PDF</button>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Convert from PDF</h4>
-                    <div class="space-y-1">
-                        <button onclick="selectTool('pdf-to-image')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-images text-yellow-500 w-5"></i> PDF to JPG</button>
-                        <button onclick="selectTool('pdf-to-word')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-file-word text-blue-500 w-5"></i> PDF to WORD</button>
-                        <button onclick="selectTool('pdf-to-ppt')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-file-powerpoint text-orange-500 w-5"></i> PDF to POWERPOINT</button>
-                        <button onclick="selectTool('pdf-to-excel')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-file-excel text-green-500 w-5"></i> PDF to EXCEL</button>
-                        <button onclick="selectTool('pdf-to-pdfa')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-file-pdf text-red-500 w-5"></i> PDF to PDF/A</button>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Edit PDF</h4>
-                    <div class="space-y-1">
-                        <button onclick="selectTool('pdf-rotate')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-redo text-purple-500 w-5"></i> Rotate PDF</button>
-                        <button onclick="selectTool('page-numbers')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-sort-numeric-down text-pink-500 w-5"></i> Add page numbers</button>
-                        <button onclick="selectTool('pdf-watermark')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-stamp text-indigo-400 w-5"></i> Add watermark</button>
-                        <button onclick="selectTool('crop-pdf')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-crop text-teal-500 w-5"></i> Crop PDF</button>
-                        <button onclick="selectTool('edit-pdf')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-edit text-amber-600 w-5"></i> Edit PDF</button>
-                        <button onclick="selectTool('pdf-forms')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-list-alt text-cyan-600 w-5"></i> PDF Forms</button>
-                        <button onclick="selectTool('pdf-nup')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-columns text-teal-600 w-5"></i> Padatkan (2-in-1)</button>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">PDF Security</h4>
-                    <div class="space-y-1">
-                        <button onclick="selectTool('pdf-unlock')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-unlock text-teal-500 w-5"></i> Unlock PDF</button>
-                        <button onclick="selectTool('pdf-protect')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-lock text-red-600 w-5"></i> Protect PDF</button>
-                        <button onclick="selectTool('sign-pdf')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-signature text-blue-700 w-5"></i> Sign PDF</button>
-                        <button onclick="selectTool('redact-pdf')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-eraser text-slate-800 dark:text-slate-300 w-5"></i> Redact PDF</button>
-                        <button onclick="selectTool('compare-pdf')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-not-equal text-orange-400 w-5"></i> Compare PDF</button>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">PDF Intelligence</h4>
-                    <div class="space-y-1">
-                        <button onclick="selectTool('ai-summarizer')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-brain text-purple-600 w-5"></i> AI Summarizer</button>
-                        <button onclick="selectTool('translate-pdf')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-language text-sky-600 w-5"></i> Translate PDF</button>
-                        <button onclick="selectTool('pdf-to-markdown')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fab fa-markdown text-slate-600 dark:text-slate-200 w-5"></i> PDF to Markdown</button>
-                    </div>
-                </div>
+            <div class="p-4 flex items-center justify-between border-b dark:border-slate-700">
+                <button onclick="goBack()" class="flex-1 flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 font-bold text-left text-indigo-600 dark:text-indigo-400">
+                    <i class="fas fa-home text-lg"></i> Menu Utama
+                </button>
+                <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-slate-700"><i class="fas fa-times text-xl"></i></button>
             </div>
+            <div id="sidebarMenu" class="flex-1 overflow-y-auto p-4 space-y-6"></div>
         </aside>
 
         <div class="flex-1 flex flex-col h-full overflow-hidden w-full relative z-10">
-            
-            <header class="h-16 bg-white dark:bg-darkCard border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 sm:px-6 z-20 flex-shrink-0">
-                <div class="flex items-center gap-3 sm:gap-4 flex-1 pr-2">
-                    <button onclick="toggleSidebar()" class="shrink-0 text-slate-600 dark:text-slate-300 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-                    
-                    <button onclick="goBack()" class="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-indigo-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <header class="h-16 bg-white dark:bg-darkCard border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-6 z-20">
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleSidebar()" class="text-slate-600 dark:text-slate-300 p-2"><i class="fas fa-bars text-xl"></i></button>
+                    <button onclick="goBack()" class="text-2xl font-extrabold bg-gradient-to-r from-indigo-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-2">
                         <i class="fas fa-toolbox text-indigo-600"></i> TwidyTools
                     </button>
                 </div>
-                
-                <div class="flex items-center gap-2 sm:gap-4 shrink-0 pl-1">
+                <div class="flex items-center gap-4">
                     <div id="liveDateTime" class="hidden md:block text-sm font-medium text-slate-500 dark:text-slate-400"></div>
-                    <button onclick="toggleDarkMode()" class="text-slate-600 dark:text-slate-300 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                        <i id="themeIcon" class="fas fa-moon text-xl"></i>
-                    </button>
+                    <button onclick="toggleDarkMode()" class="text-slate-600 dark:text-slate-300 p-2"><i id="themeIcon" class="fas fa-moon text-xl"></i></button>
                 </div>
             </header>
 
-            <main class="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-50 dark:bg-darkBg w-full">
-                
+            <main class="flex-1 overflow-y-auto p-6 bg-slate-50 dark:bg-darkBg">
                 <div id="toolsSection">
-                    <div class="mb-6 sm:mb-8">
-                        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Your All-in-One Digital Toolkit</h1>
-                        <p class="text-slate-500 dark:text-slate-400 mt-1 text-sm sm:text-base">Semua alat bantu yang Anda perlukan untuk mengelola dokumen dan file digital ada di sini. Cepat, aman, dan gratis.</p>
+                    <div class="mb-8">
+                        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">Twidy Digital Workspace</h1>
+                        <p class="text-slate-500 dark:text-slate-400">Pusat kendali dokumen cerdas Anda. Didukung penuh oleh Gemini AI.</p>
                     </div>
-
                     <div id="dashboardGrid"></div>
                 </div>
 
-                <div id="uploadSection" class="hidden max-w-4xl mx-auto mt-2 sm:mt-4">
-                    <button onclick="goBack()" class="mb-4 sm:mb-5 text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-2 font-medium">
+                <div id="uploadSection" class="hidden max-w-4xl mx-auto">
+                    <button onclick="goBack()" class="mb-5 text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-2 font-medium">
                         <i class="fas fa-arrow-left"></i> Kembali ke Alat
                     </button>
                     
-                    <div class="bg-white dark:bg-darkCard rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl p-5 sm:p-8">
-                        <div class="text-center mb-5 sm:mb-6">
-                            <h2 id="toolTitle" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Tool Title</h2>
-                            <p id="toolDescription" class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-2 font-medium px-2">Deskripsi tool pilihan.</p>
+                    <div class="bg-white dark:bg-darkCard rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl p-8">
+                        <div class="text-center mb-6">
+                            <h2 id="toolTitle" class="text-3xl font-extrabold text-slate-900 dark:text-white">Tool Title</h2>
+                            <p id="toolDescription" class="text-slate-500 dark:text-slate-400 text-sm mt-2 font-medium"></p>
                         </div>
 
-                        <div id="iframeContainer" class="hidden w-full h-[70vh] rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-inner bg-slate-100 dark:bg-slate-800 relative">
-                            <div class="absolute inset-0 flex flex-col items-center justify-center -z-10">
-                                <i class="fas fa-circle-notch fa-spin text-4xl text-indigo-300 mb-2"></i>
-                                <p class="text-sm text-slate-400 font-medium">Memuat Aplikasi...</p>
-                            </div>
-                            <iframe id="appIframe" class="w-full h-full border-0 relative z-10" allow="clipboard-write"></iframe>
+                        <div id="iframeContainer" class="hidden w-full h-[70vh] rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800">
+                            <iframe id="appIframe" class="w-full h-full border-0"></iframe>
                         </div>
 
-                        <div id="dropZone" class="border-2 border-dashed border-indigo-300 dark:border-indigo-500/50 bg-indigo-50/30 dark:bg-indigo-900/10 rounded-2xl p-8 sm:p-12 text-center transition-all cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/30" onclick="document.getElementById('fileInput').click()">
-                            <i class="fas fa-file-upload text-5xl sm:text-6xl text-indigo-400 mb-3 sm:mb-4 drop-shadow-sm"></i>
-                            <h3 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-200">Pilih Berkas</h3>
-                            <p class="text-slate-400 text-xs sm:text-sm mt-1">atau jatuhkan berkas di sini</p>
-                            <p id="fileTypeInfo" class="hidden"></p>
+                        <div id="dropZone" class="border-2 border-dashed border-indigo-300 dark:border-indigo-500/50 bg-indigo-50/30 dark:bg-indigo-900/10 rounded-2xl p-12 text-center transition-all cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/30" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-file-upload text-6xl text-indigo-400 mb-4"></i>
+                            <h3 class="text-xl font-bold text-slate-800 dark:text-slate-200">Pilih Berkas</h3>
+                            <p class="text-slate-400 text-sm mt-1">Klik atau jatuhkan berkas di sini</p>
                             <input type="file" id="fileInput" class="hidden" multiple>
                         </div>
 
-                        <div id="settingsPanel" class="mt-5 sm:mt-6 hidden bg-slate-50 dark:bg-slate-800/50 p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-700">
-                            <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-3 flex items-center gap-2"><i class="fas fa-sliders-h text-indigo-500"></i> Pengaturan Khusus</h3>
+                        <div id="settingsPanel" class="mt-6 hidden bg-slate-50 dark:bg-slate-800/50 p-5 rounded-xl border border-slate-200 dark:border-slate-700">
+                            <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-3 flex items-center gap-2"><i class="fas fa-sliders-h text-indigo-500"></i> Pengaturan Fitur</h3>
                             <div id="settingsContent" class="grid grid-cols-1 gap-4"></div>
                         </div>
 
-                        <div id="fileList" class="mt-5 sm:mt-6"></div>
+                        <div id="fileList" class="mt-6"></div>
 
-                        <div id="actionButtons" class="mt-6 sm:mt-8 hidden flex gap-3 justify-center w-full">
-                            <button onclick="processFiles()" id="processBtn" class="w-full sm:w-auto px-8 sm:px-10 py-3 sm:py-4 bg-red-600 hover:bg-red-700 text-white rounded-xl text-base sm:text-lg font-bold shadow-lg shadow-red-600/30 flex items-center justify-center gap-3 transition-all sm:hover:scale-105">
-                                PROSES SEKARANG <i class="fas fa-arrow-right"></i>
+                        <div id="actionButtons" class="mt-8 hidden flex justify-center">
+                            <button onclick="processFiles()" id="processBtn" class="px-10 py-4 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl text-lg font-bold shadow-lg shadow-red-600/30 flex items-center gap-3 transition-transform hover:scale-105">
+                                PROSES SEKARANG <i class="fas fa-bolt"></i>
                             </button>
                         </div>
                     </div>
 
                     <div id="alertArea" class="mt-4"></div>
-                    <div id="progressArea" class="mt-5 sm:mt-6 hidden bg-white dark:bg-darkCard p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl text-center">
-                        <i class="fas fa-cog fa-spin text-3xl sm:text-4xl text-indigo-500 mb-3"></i>
-                        <h3 class="text-base sm:text-lg font-bold text-slate-800 dark:text-white mb-1">Sedang Memproses...</h3>
-                        <div class="flex justify-between text-[10px] sm:text-xs font-bold text-slate-500 mb-2 mt-4">
-                            <span id="progressText">Menyusun struktur...</span>
+                    <div id="progressArea" class="mt-6 hidden bg-white dark:bg-darkCard p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl text-center">
+                        <i class="fas fa-circle-notch fa-spin text-4xl text-indigo-500 mb-3"></i>
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-1">Sedang Memproses...</h3>
+                        <div class="flex justify-between text-xs font-bold text-slate-500 mb-2 mt-4">
+                            <span id="progressText">Menyiapkan...</span>
                             <span id="progressPercent" class="text-indigo-600 dark:text-indigo-400">0%</span>
                         </div>
-                        <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 sm:h-3">
-                            <div id="progressFill" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2.5 sm:h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3">
+                            <div id="progressFill" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
-
             </main>
         </div>
     </div>
@@ -228,13 +111,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-
     <script src="TWIDYTOOLSSCRIPT.JS"></script>
 </body>
 </html>
