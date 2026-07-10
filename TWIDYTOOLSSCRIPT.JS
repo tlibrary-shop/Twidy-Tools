@@ -22,6 +22,8 @@ const toolConfig = {
     'ppt-to-pdf': { title: 'POWERPOINT to PDF', desc: 'Jadikan presentasi PPT dan PPTX mudah dilihat dengan PDF.', icon: 'fa-file-powerpoint', color: 'text-orange-600', accept: '.pptx,.ppt', multi: false },
     'excel-to-pdf': { title: 'EXCEL to PDF', desc: 'Buat spreadsheet EXCEL mudah dibaca mengkonversi ke PDF.', icon: 'fa-file-excel', color: 'text-green-600', accept: '.xlsx', multi: false },
     'html-to-pdf': { title: 'HTML to PDF', desc: 'Konversi halaman web dalam HTML ke PDF.', icon: 'fa-html5', color: 'text-orange-500', accept: '.html', multi: false },
+    'txt-to-pdf': { title: 'TXT to PDF', desc: 'Konversi file teks biasa (.txt) menjadi dokumen PDF.', icon: 'fa-file-lines', color: 'text-slate-600', accept: '.txt', multi: false },
+    'rtf-to-pdf': { title: 'RTF to PDF', desc: 'Konversi file Rich Text Format (.rtf) menjadi PDF.', icon: 'fa-file-alt', color: 'text-purple-600', accept: '.rtf', multi: false },
 
     'pdf-to-image': { title: 'PDF to JPG', desc: 'Konversi setiap halaman PDF ke JPG atau ekstrak gambar.', icon: 'fa-images', color: 'text-yellow-500', accept: '.pdf', multi: false },
     'pdf-to-word': { title: 'PDF to WORD', desc: 'Mudah mengkonversi PDF ke DOC dan DOCX.', icon: 'fa-file-word', color: 'text-blue-500', accept: '.pdf', multi: false },
@@ -57,7 +59,7 @@ const categories = {
     'TWIDY ECOSYSTEM': ['twidy-bill'],
     'ORGANIZE PDF': ['pdf-merge', 'pdf-split', 'remove-pages', 'extract-pages', 'organize-pdf', 'scan-to-pdf'],
     'OPTIMIZE PDF': ['pdf-compress', 'repair-pdf', 'ocr-pdf'],
-    'CONVERT TO PDF': ['image-to-pdf', 'word-to-pdf', 'ppt-to-pdf', 'excel-to-pdf', 'html-to-pdf'],
+    'CONVERT TO PDF': ['image-to-pdf', 'word-to-pdf', 'ppt-to-pdf', 'excel-to-pdf', 'html-to-pdf', 'txt-to-pdf', 'rtf-to-pdf'], // Ditambahkan di sini
     'CONVERT FROM PDF': ['pdf-to-image', 'pdf-to-word', 'pdf-to-ppt', 'pdf-to-excel', 'pdf-to-pdfa'],
     'EDIT PDF': ['pdf-rotate', 'page-numbers', 'pdf-watermark', 'crop-pdf', 'edit-pdf', 'pdf-forms', 'pdf-nup'],
     'PDF SECURITY': ['pdf-unlock', 'pdf-protect', 'sign-pdf', 'redact-pdf', 'compare-pdf'],
@@ -331,6 +333,8 @@ async function processFiles() {
         else if (currentTool === 'ppt-to-pdf') { await executePptToPdf(); }
         else if (currentTool === 'excel-to-pdf') { await executeExcelToPdf(); }
         else if (currentTool === 'html-to-pdf') { await executeHtmlToPdf(); }
+        else if (currentTool === 'txt-to-pdf') { await executeTxtToPdf(); } // Baru
+        else if (currentTool === 'rtf-to-pdf') { await executeRtfToPdf(); } // Baru
         else if (currentTool === 'pdf-to-image') { await executePdfToImage(); }
         else if (currentTool === 'pdf-to-word') { await executePdfToWord(); }
         else if (currentTool === 'pdf-to-ppt') { await executePdfToPpt(); }
@@ -362,6 +366,39 @@ async function processFiles() {
 // ==========================================
 // FUNGSI NON-AI YANG DIPERBAIKI / DIPERKAYA
 // ==========================================
+
+// Fitur Baru TXT to PDF
+async function executeTxtToPdf() {
+    updateProgress(40, 'Membaca file teks...');
+    const text = await selectedFiles[0].text();
+    updateProgress(70, 'Mengonversi teks ke halaman PDF...');
+    
+    // Membungkus teks mentah ke dalam tag div yang rapi sebelum diserahkan ke html2pdf
+    const safeText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const htmlContent = `<div style="font-family: Arial, sans-serif; padding: 30px; font-size: 12pt; line-height: 1.6; white-space: pre-wrap;">${safeText}</div>`;
+    
+    await html2pdf().from(htmlContent).save(selectedFiles[0].name.replace('.txt', '.pdf'));
+    updateProgress(100, 'Selesai!'); hideProgress();
+}
+
+// Fitur Baru RTF to PDF
+async function executeRtfToPdf() {
+    updateProgress(40, 'Membaca format file RTF...');
+    const text = await selectedFiles[0].text();
+    
+    // Pembersih otomatis (Stripper) untuk kode tag bawaan RTF agar tidak ikut tercetak
+    const cleanRtfText = text.replace(/\\par[d]?/g, "\n")
+                             .replace(/\{\*?\\[^{}]+}|[{}]|\\\n?[A-Za-z]+\n?(?:-?\d+)?[ ]?/g, "")
+                             .trim();
+                             
+    updateProgress(70, 'Memproses teks menjadi dokumen PDF...');
+    const safeText = cleanRtfText.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const htmlContent = `<div style="font-family: Arial, sans-serif; padding: 30px; font-size: 12pt; line-height: 1.6; white-space: pre-wrap;">${safeText}</div>`;
+    
+    await html2pdf().from(htmlContent).save(selectedFiles[0].name.replace('.rtf', '.pdf'));
+    updateProgress(100, 'Selesai!'); hideProgress();
+}
+
 async function executeScanToPdf() {
     updateProgress(30, 'Mengonversi gambar ke PDF...');
     const outPdf = await PDFLib.PDFDocument.create();
@@ -411,8 +448,7 @@ async function executePdfProtect() {
     updateProgress(50, 'Mengonfigurasi pengamanan dokumen...');
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
     const passVal = document.getElementById('pt-pass')?.value;
-    if(!passVal) throw new Error("Silakan masukkan kata kunci (password) terlebih dahulu.");
-    // Catatan: PDF-lib mengenkripsi dasar via metadata/penerapan password sisi klien jika didukung
+    if(!passVal) throw new Error("Silakan masukkan kata kunci (password) di menu Pengaturan Khusus terlebih dahulu.");
     updateProgress(100, 'Selesai!'); alertUser(`Dokumen berhasil diproteksi dengan password!`, 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Protected.pdf');
 }
