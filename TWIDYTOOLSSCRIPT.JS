@@ -4,63 +4,43 @@ let currentTool = null;
 let selectedFiles = [];
 
 const toolConfig = {
-    // ECOSYSTEM
     'twidy-bill': { title: 'TwidyBill Maker', desc: 'Aplikasi pembuat invoice & tagihan otomatis.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.netlify.app/' },
-
-    // AI INTELLIGENCE
     'ai-summarizer': { title: 'AI Summarizer', desc: 'Ringkas otomatis dokumen PDF Anda yang panjang.', icon: 'fa-brain', color: 'text-purple-600', accept: '.pdf', multi: false },
-    'translate-pdf': { 
-        title: 'Translate PDF', desc: 'Terjemahkan teks PDF ke bahasa yang Anda inginkan.', icon: 'fa-language', color: 'text-sky-500', accept: '.pdf', multi: false,
-        settings: [{ id: 'target-lang', label: 'Bahasa Tujuan (Contoh: Inggris, Jawa, Jepang)', type: 'text', placeholder: 'Masukkan bahasa tujuan' }] 
-    },
-    'smart-extract': { 
-        title: 'Smart Data Extract', desc: 'Tarik data spesifik (nama, nilai, dll) dari PDF acak.', icon: 'fa-filter', color: 'text-teal-500', accept: '.pdf', multi: false,
-        settings: [{ id: 'extract-query', label: 'Data apa yang ingin diekstrak?', type: 'text', placeholder: 'Contoh: Ambil Nama dan NISN' }] 
-    },
-    'chat-pdf': { 
-        title: 'Chat with PDF', desc: 'Tanya jawab seputar isi dokumen PDF Anda.', icon: 'fa-comments', color: 'text-indigo-400', accept: '.pdf', multi: false,
-        settings: [{ id: 'chat-query', label: 'Pertanyaan Anda', type: 'text', placeholder: 'Contoh: Apa syarat utama dokumen ini?' }] 
-    },
-
-    // ORGANIZE PDF
+    'translate-pdf': { title: 'Translate PDF', desc: 'Terjemahkan teks PDF ke bahasa yang Anda inginkan.', icon: 'fa-language', color: 'text-sky-500', accept: '.pdf', multi: false, settings: [{ id: 'target-lang', label: 'Bahasa Tujuan', type: 'text', placeholder: 'Contoh: Inggris, Jawa' }] },
+    'smart-extract': { title: 'Smart Data Extract', desc: 'Tarik data spesifik dari PDF acak.', icon: 'fa-filter', color: 'text-teal-500', accept: '.pdf', multi: false, settings: [{ id: 'extract-query', label: 'Data apa yang ingin diekstrak?', type: 'text', placeholder: 'Contoh: Nama dan NISN' }] },
+    'chat-pdf': { title: 'Chat with PDF', desc: 'Tanya jawab seputar isi dokumen PDF Anda.', icon: 'fa-comments', color: 'text-indigo-400', accept: '.pdf', multi: false, settings: [{ id: 'chat-query', label: 'Pertanyaan Anda', type: 'text', placeholder: 'Apa isi dokumen ini?' }] },
     'pdf-merge': { title: 'Merge PDF', desc: 'Gabung & urutkan banyak file PDF.', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
-    'pdf-split': { title: 'Split PDF', desc: 'Pisah halaman PDF.', icon: 'fa-scissors', color: 'text-orange-500', accept: '.pdf', multi: false, settings: [{ id: 'split-range', label: 'Rentang Halaman (Contoh: 1-3, 5)', type: 'text', placeholder: 'Kosongkan jika semua' }] },
-    'remove-pages': { title: 'Remove pages', desc: 'Hapus halaman.', icon: 'fa-minus-circle', color: 'text-rose-500', accept: '.pdf', multi: false, settings: [{ id: 'remove-range', label: 'Halaman Dihapus (Contoh: 1, 3)', type: 'text', placeholder: 'Ketik halaman' }] },
-    'extract-pages': { title: 'Extract pages', desc: 'Ambil halaman tertentu jadi PDF baru.', icon: 'fa-share-square', color: 'text-blue-500', accept: '.pdf', multi: false, settings: [{ id: 'extract-range', label: 'Halaman Diambil (Contoh: 2, 4)', type: 'text', placeholder: 'Ketik halaman' }] },
-    'organize-pdf': { title: 'Organize PDF', desc: 'Susun ulang posisi halaman PDF.', icon: 'fa-sort-alpha-down', color: 'text-indigo-500', accept: '.pdf', multi: false, settings: [{ id: 'organize-order', label: 'Urutan Baru (Contoh: 3, 1, 2)', type: 'text', placeholder: 'Ketik urutan baru' }] },
-    'scan-to-pdf': { title: 'Scan to PDF', desc: 'Gabungkan gambar pindaian dari galeri/kamera ke PDF.', icon: 'fa-qrcode', color: 'text-slate-500', accept: '.jpg,.jpeg,.png', multi: true },
-
-    // OPTIMIZE & CONVERT
-    'pdf-compress': { title: 'Compress PDF', desc: 'Optimalkan ukuran dokumen tanpa mengurangi kualitas.', icon: 'fa-compress-arrows-alt', color: 'text-green-500', accept: '.pdf', multi: false },
-    'ocr-pdf': { title: 'OCR PDF', desc: 'Ekstrak susunan teks tersembunyi dari PDF hasil scan.', icon: 'fa-search-plus', color: 'text-sky-500', accept: '.pdf', multi: false },
-    'pdf-to-markdown': { title: 'PDF to Markdown', desc: 'Ubah teks dokumen PDF ke format teks Markdown (.md).', icon: 'fa-markdown', color: 'text-slate-600', accept: '.pdf', multi: false },
-    'image-to-pdf': { title: 'JPG to PDF', desc: 'Ubah rangkaian berkas gambar jadi file PDF ringkas.', icon: 'fa-image', color: 'text-yellow-500', accept: '.jpg,.jpeg,.png', multi: true },
-    'word-to-pdf': { title: 'WORD to PDF', desc: 'Konversi file Microsoft Word (.docx) langsung ke PDF.', icon: 'fa-file-word', color: 'text-blue-600', accept: '.docx', multi: false },
-    'excel-to-pdf': { title: 'EXCEL to PDF', desc: 'Ubah spreadsheet tabel Excel (.xlsx) langsung ke PDF.', icon: 'fa-file-excel', color: 'text-green-600', accept: '.xlsx', multi: false },
-
-    // EDITING
-    'pdf-nup': { title: 'Padatkan (2-in-1)', desc: 'Susun 2 halaman PDF vertikal dalam satu lembar cetak A4.', icon: 'fa-columns', color: 'text-teal-600', accept: '.pdf', multi: false },
-    'pdf-rotate': { title: 'Rotate PDF', desc: 'Putar orientasi sudut halaman dokumen PDF.', icon: 'fa-redo', color: 'text-purple-500', accept: '.pdf', multi: false },
-    'page-numbers': { title: 'Add page numbers', desc: 'Beri penomoran halaman otomatis di bagian bawah tengah.', icon: 'fa-sort-numeric-down', color: 'text-pink-500', accept: '.pdf', multi: false },
-    'crop-pdf': { title: 'Crop PDF', desc: 'Pangkas margin luar halaman PDF secara rata.', icon: 'fa-crop', color: 'text-teal-500', accept: '.pdf', multi: false, settings: [{ id: 'crop-margin', label: 'Potong Margin (Angka)', type: 'number', placeholder: '20' }] },
-    'pdf-watermark': { title: 'Add watermark', desc: 'Beri stempel teks transparan di atas halaman PDF.', icon: 'fa-stamp', color: 'text-indigo-400', accept: '.pdf', multi: false, settings: [{ id: 'wm-text', label: 'Teks Watermark', type: 'text', placeholder: 'TWIDYTOOLS' }] },
-
-    // BACKEND PLACEHOLDERS
-    'repair-pdf': { title: 'Repair PDF', desc: 'Perbaiki indeks dokumen PDF yang korup/rusak.', icon: 'fa-wrench', color: 'text-amber-500', accept: '.pdf', multi: false },
-    'ppt-to-pdf': { title: 'POWERPOINT to PDF', desc: 'Ubah file presentasi PPTX langsung menjadi PDF.', icon: 'fa-file-powerpoint', color: 'text-orange-600', accept: '.pptx,.ppt', multi: false },
-    'html-to-pdf': { title: 'HTML to PDF', desc: 'Ubah kode halaman website HTML menjadi dokumen PDF.', icon: 'fa-html5', color: 'text-orange-500', accept: '.html', multi: false },
-    'pdf-to-image': { title: 'PDF to JPG', desc: 'Ubah lembaran halaman PDF menjadi deretan gambar JPG.', icon: 'fa-images', color: 'text-yellow-500', accept: '.pdf', multi: false },
-    'pdf-to-word': { title: 'PDF to WORD', desc: 'Konversi susunan teks PDF ke file dokumen Word.', icon: 'fa-file-word', color: 'text-blue-500', accept: '.pdf', multi: false },
-    'pdf-to-ppt': { title: 'PDF to POWERPOINT', desc: 'Ubah halaman PDF menjadi slide presentasi PPTX.', icon: 'fa-file-powerpoint', color: 'text-orange-500', accept: '.pdf', multi: false },
-    'pdf-to-excel': { title: 'PDF to EXCEL', desc: 'Ekstrak struktur data tabel PDF ke spreadsheet Excel.', icon: 'fa-file-excel', color: 'text-green-500', accept: '.pdf', multi: false },
-    'pdf-to-pdfa': { title: 'PDF to PDF/A', desc: 'Ubah dokumen PDF ke standar kearsipan jangka panjang PDF/A.', icon: 'fa-file-pdf', color: 'text-red-500', accept: '.pdf', multi: false },
-    'edit-pdf': { title: 'Edit PDF', desc: 'Tambahkan teks, bentuk gambar atau anotasi khusus.', icon: 'fa-edit', color: 'text-amber-600', accept: '.pdf', multi: false },
-    'pdf-forms': { title: 'PDF Forms', desc: 'Isi atau manipulasi field formulir digital interaktif.', icon: 'fa-list-alt', color: 'text-cyan-600', accept: '.pdf', multi: false },
-    'pdf-unlock': { title: 'Unlock PDF', desc: 'Buka pembatasan enkripsi kata sandi dokumen PDF.', icon: 'fa-unlock', color: 'text-teal-500', accept: '.pdf', multi: false },
-    'pdf-protect': { title: 'Protect PDF', desc: 'Kunci berkas dokumen PDF menggunakan enkripsi password.', icon: 'fa-lock', color: 'text-red-600', accept: '.pdf', multi: false, settings: [{ id: 'pt-pass', label: 'Set Password', type: 'text', placeholder: '***' }] },
-    'sign-pdf': { title: 'Sign PDF', desc: 'Bubuhkan tanda tangan elektronik di atas halaman PDF.', icon: 'fa-signature', color: 'text-blue-700', accept: '.pdf', multi: false },
-    'redact-pdf': { title: 'Redact PDF', desc: 'Sensor/blok hitam permanen teks informasi sensitif.', icon: 'fa-eraser', color: 'text-slate-800', accept: '.pdf', multi: false },
-    'compare-pdf': { title: 'Compare PDF', desc: 'Analisis perbedaan konten visual antara dua file PDF.', icon: 'fa-not-equal', color: 'text-orange-400', accept: '.pdf', multi: true }
+    'pdf-split': { title: 'Split PDF', desc: 'Pisah halaman PDF.', icon: 'fa-scissors', color: 'text-orange-500', accept: '.pdf', multi: false, settings: [{ id: 'split-range', label: 'Rentang Halaman', type: 'text', placeholder: '1-3, 5' }] },
+    'remove-pages': { title: 'Remove pages', desc: 'Hapus halaman.', icon: 'fa-minus-circle', color: 'text-rose-500', accept: '.pdf', multi: false, settings: [{ id: 'remove-range', label: 'Halaman Dihapus', type: 'text', placeholder: '1, 3' }] },
+    'extract-pages': { title: 'Extract pages', desc: 'Ambil halaman tertentu jadi PDF baru.', icon: 'fa-share-square', color: 'text-blue-500', accept: '.pdf', multi: false, settings: [{ id: 'extract-range', label: 'Halaman Diambil', type: 'text', placeholder: '2, 4' }] },
+    'organize-pdf': { title: 'Organize PDF', desc: 'Susun ulang posisi halaman PDF.', icon: 'fa-sort-alpha-down', color: 'text-indigo-500', accept: '.pdf', multi: false, settings: [{ id: 'organize-order', label: 'Urutan Baru', type: 'text', placeholder: '3, 1, 2' }] },
+    'scan-to-pdf': { title: 'Scan to PDF', desc: 'Gabungkan gambar pindaian ke PDF.', icon: 'fa-qrcode', color: 'text-slate-500', accept: '.jpg,.jpeg,.png', multi: true },
+    'pdf-compress': { title: 'Compress PDF', desc: 'Optimalkan ukuran dokumen.', icon: 'fa-compress-arrows-alt', color: 'text-green-500', accept: '.pdf', multi: false },
+    'ocr-pdf': { title: 'OCR PDF', desc: 'Ekstrak teks dari PDF hasil scan.', icon: 'fa-search-plus', color: 'text-sky-500', accept: '.pdf', multi: false },
+    'pdf-to-markdown': { title: 'PDF to Markdown', desc: 'Ubah teks PDF ke format .md', icon: 'fa-markdown', color: 'text-slate-600', accept: '.pdf', multi: false },
+    'image-to-pdf': { title: 'JPG to PDF', desc: 'Ubah gambar jadi file PDF.', icon: 'fa-image', color: 'text-yellow-500', accept: '.jpg,.jpeg,.png', multi: true },
+    'word-to-pdf': { title: 'WORD to PDF', desc: 'Konversi file Word ke PDF.', icon: 'fa-file-word', color: 'text-blue-600', accept: '.docx', multi: false },
+    'excel-to-pdf': { title: 'EXCEL to PDF', desc: 'Ubah Excel ke PDF.', icon: 'fa-file-excel', color: 'text-green-600', accept: '.xlsx', multi: false },
+    'pdf-nup': { title: 'Padatkan (2-in-1)', desc: '2 halaman PDF dalam satu lembar A4.', icon: 'fa-columns', color: 'text-teal-600', accept: '.pdf', multi: false },
+    'pdf-rotate': { title: 'Rotate PDF', desc: 'Putar orientasi halaman PDF.', icon: 'fa-redo', color: 'text-purple-500', accept: '.pdf', multi: false },
+    'page-numbers': { title: 'Add page numbers', desc: 'Beri nomor halaman otomatis.', icon: 'fa-sort-numeric-down', color: 'text-pink-500', accept: '.pdf', multi: false },
+    'crop-pdf': { title: 'Crop PDF', desc: 'Pangkas margin luar PDF.', icon: 'fa-crop', color: 'text-teal-500', accept: '.pdf', multi: false, settings: [{ id: 'crop-margin', label: 'Potong Margin', type: 'number', placeholder: '20' }] },
+    'pdf-watermark': { title: 'Add watermark', desc: 'Beri stempel teks transparan.', icon: 'fa-stamp', color: 'text-indigo-400', accept: '.pdf', multi: false, settings: [{ id: 'wm-text', label: 'Teks Watermark', type: 'text', placeholder: 'TWIDYTOOLS' }] },
+    'repair-pdf': { title: 'Repair PDF', desc: 'Perlu integrasi server.', icon: 'fa-wrench', color: 'text-amber-500', accept: '.pdf', multi: false },
+    'ppt-to-pdf': { title: 'POWERPOINT to PDF', desc: 'Perlu integrasi server.', icon: 'fa-file-powerpoint', color: 'text-orange-600', accept: '.pptx,.ppt', multi: false },
+    'html-to-pdf': { title: 'HTML to PDF', desc: 'Perlu integrasi server.', icon: 'fa-html5', color: 'text-orange-500', accept: '.html', multi: false },
+    'pdf-to-image': { title: 'PDF to JPG', desc: 'Perlu integrasi server.', icon: 'fa-images', color: 'text-yellow-500', accept: '.pdf', multi: false },
+    'pdf-to-word': { title: 'PDF to WORD', desc: 'Perlu integrasi server.', icon: 'fa-file-word', color: 'text-blue-500', accept: '.pdf', multi: false },
+    'pdf-to-ppt': { title: 'PDF to POWERPOINT', desc: 'Perlu integrasi server.', icon: 'fa-file-powerpoint', color: 'text-orange-500', accept: '.pdf', multi: false },
+    'pdf-to-excel': { title: 'PDF to EXCEL', desc: 'Perlu integrasi server.', icon: 'fa-file-excel', color: 'text-green-500', accept: '.pdf', multi: false },
+    'pdf-to-pdfa': { title: 'PDF to PDF/A', desc: 'Perlu integrasi server.', icon: 'fa-file-pdf', color: 'text-red-500', accept: '.pdf', multi: false },
+    'edit-pdf': { title: 'Edit PDF', desc: 'Perlu integrasi server.', icon: 'fa-edit', color: 'text-amber-600', accept: '.pdf', multi: false },
+    'pdf-forms': { title: 'PDF Forms', desc: 'Perlu integrasi server.', icon: 'fa-list-alt', color: 'text-cyan-600', accept: '.pdf', multi: false },
+    'pdf-unlock': { title: 'Unlock PDF', desc: 'Perlu integrasi server.', icon: 'fa-unlock', color: 'text-teal-500', accept: '.pdf', multi: false },
+    'pdf-protect': { title: 'Protect PDF', desc: 'Perlu integrasi server.', icon: 'fa-lock', color: 'text-red-600', accept: '.pdf', multi: false, settings: [{ id: 'pt-pass', label: 'Set Password', type: 'text', placeholder: '***' }] },
+    'sign-pdf': { title: 'Sign PDF', desc: 'Perlu integrasi server.', icon: 'fa-signature', color: 'text-blue-700', accept: '.pdf', multi: false },
+    'redact-pdf': { title: 'Redact PDF', desc: 'Perlu integrasi server.', icon: 'fa-eraser', color: 'text-slate-800', accept: '.pdf', multi: false },
+    'compare-pdf': { title: 'Compare PDF', desc: 'Perlu integrasi server.', icon: 'fa-not-equal', color: 'text-orange-400', accept: '.pdf', multi: true }
 };
 
 const categories = {
@@ -78,44 +58,26 @@ document.addEventListener('DOMContentLoaded', function() {
     initTheme();
     setInterval(updateDateTime, 1000);
     updateDateTime();
-    
     const hash = window.location.hash.substring(1);
     if (hash && toolConfig[hash]) selectTool(hash);
 });
 
 function updateDateTime() {
     const now = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
     const dtElement = document.getElementById('liveDateTime');
-    if (dtElement) {
-        dtElement.textContent = now.toLocaleDateString('id-ID', options).replace(/\./g, ':');
-    }
+    if (dtElement) dtElement.textContent = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\./g, ':');
 }
 
 function renderDashboard() {
     const grid = document.getElementById('dashboardGrid');
     grid.innerHTML = '';
-
     for (const [catName, tools] of Object.entries(categories)) {
-        let catHTML = `
-            <div class="mb-10">
-                <h3 class="text-xl font-bold text-slate-700 dark:text-slate-200 mb-5 border-b pb-2 border-slate-200 dark:border-slate-700">${catName}</h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        `;
-        
+        let catHTML = `<div class="mb-10"><h3 class="text-xl font-bold text-slate-700 dark:text-slate-200 mb-5 border-b pb-2 border-slate-200 dark:border-slate-700">${catName}</h3><div class="grid grid-cols-2 md:grid-cols-4 gap-4">`;
         tools.forEach(toolId => {
             const t = toolConfig[toolId];
-            catHTML += `
-                <div onclick="selectTool('${toolId}')" class="group bg-white dark:bg-darkCard p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg cursor-pointer transition-all hover:-translate-y-1">
-                    <div class="${t.color} text-4xl mb-4 transition-transform group-hover:scale-110"><i class="fas ${t.icon}"></i></div>
-                    <h4 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-indigo-500 mb-1 leading-tight">${t.title}</h4>
-                    <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug line-clamp-3">${t.desc}</p>
-                </div>
-            `;
+            catHTML += `<div onclick="selectTool('${toolId}')" class="group bg-white dark:bg-darkCard p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg cursor-pointer transition-all hover:-translate-y-1"><div class="${t.color} text-4xl mb-4 transition-transform group-hover:scale-110"><i class="fas ${t.icon}"></i></div><h4 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-indigo-500 mb-1 leading-tight">${t.title}</h4><p class="text-slate-500 dark:text-slate-400 text-xs leading-snug line-clamp-3">${t.desc}</p></div>`;
         });
-        
-        catHTML += `</div></div>`;
-        grid.innerHTML += catHTML;
+        grid.innerHTML += catHTML + `</div></div>`;
     }
 }
 
@@ -141,9 +103,8 @@ function toggleDarkMode() {
 }
 
 function initTheme() {
-    const isDark = localStorage.getItem('theme') === 'dark';
-    if (isDark) document.documentElement.classList.add('dark');
-    document.getElementById('themeIcon').className = isDark ? 'fas fa-sun text-xl' : 'fas fa-moon text-xl';
+    if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+    document.getElementById('themeIcon').className = localStorage.getItem('theme') === 'dark' ? 'fas fa-sun text-xl' : 'fas fa-moon text-xl';
 }
 
 function selectTool(toolId) {
@@ -151,51 +112,35 @@ function selectTool(toolId) {
     const config = toolConfig[toolId];
     window.location.hash = toolId;
     document.title = config.title + " - TwidyTools";
-    
     document.getElementById('toolsSection').classList.add('hidden');
     document.getElementById('uploadSection').classList.remove('hidden');
     document.getElementById('toolTitle').textContent = config.title;
     document.getElementById('toolDescription').textContent = config.desc;
 
-    const dropZone = document.getElementById('dropZone');
-    const iframeContainer = document.getElementById('iframeContainer');
+    const els = ['dropZone', 'iframeContainer', 'settingsPanel', 'fileList', 'actionButtons'].reduce((acc, id) => ({ ...acc, [id]: document.getElementById(id) }), {});
     const appIframe = document.getElementById('appIframe');
-    const settingsPanel = document.getElementById('settingsPanel');
-    const fileListArea = document.getElementById('fileList');
-    const actionBtnArea = document.getElementById('actionButtons');
 
     if (config.isIframe) {
-        dropZone.classList.add('hidden');
-        settingsPanel.classList.add('hidden');
-        fileListArea.classList.add('hidden');
-        actionBtnArea.classList.add('hidden');
-        iframeContainer.classList.remove('hidden');
-        appIframe.src = config.iframeUrl; 
+        ['dropZone', 'settingsPanel', 'fileList', 'actionButtons'].forEach(id => els[id].classList.add('hidden'));
+        els.iframeContainer.classList.remove('hidden');
+        appIframe.src = config.iframeUrl;
     } else {
-        iframeContainer.classList.add('hidden');
-        appIframe.src = ''; 
-        dropZone.classList.remove('hidden');
-        fileListArea.classList.remove('hidden');
+        els.iframeContainer.classList.add('hidden');
+        appIframe.src = '';
+        els.dropZone.classList.remove('hidden');
+        els.fileList.classList.remove('hidden');
         
         const fInput = document.getElementById('fileInput');
-        fInput.accept = config.accept;
-        fInput.multiple = config.multi;
+        fInput.accept = config.accept; fInput.multiple = config.multi;
 
         const sContent = document.getElementById('settingsContent');
         sContent.innerHTML = '';
         if (config.settings) {
             config.settings.forEach(set => {
-                sContent.innerHTML += `
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">${set.label}</label>
-                        <input type="${set.type}" id="${set.id}" placeholder="${set.placeholder}" class="w-full text-sm px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white outline-none">
-                    </div>
-                `;
+                sContent.innerHTML += `<div><label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">${set.label}</label><input type="${set.type}" id="${set.id}" placeholder="${set.placeholder}" class="w-full text-sm px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white outline-none"></div>`;
             });
-            settingsPanel.classList.remove('hidden');
-        } else {
-            settingsPanel.classList.add('hidden');
-        }
+            els.settingsPanel.classList.remove('hidden');
+        } else els.settingsPanel.classList.add('hidden');
     }
     clearFiles();
 }
@@ -218,9 +163,7 @@ function setupDropZone() {
     dz.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
 }
 
-function setupFileInput() {
-    document.getElementById('fileInput').addEventListener('change', e => handleFiles(e.target.files));
-}
+function setupFileInput() { document.getElementById('fileInput').addEventListener('change', e => handleFiles(e.target.files)); }
 
 function handleFiles(files) {
     selectedFiles = Array.from(files).slice(0, toolConfig[currentTool].multi ? 100 : 1);
@@ -231,10 +174,7 @@ function renderFileList() {
     const flist = document.getElementById('fileList');
     const actBtn = document.getElementById('actionButtons');
     flist.innerHTML = '';
-    
-    if (selectedFiles.length === 0 || (toolConfig[currentTool] && toolConfig[currentTool].isIframe)) {
-        actBtn.classList.add('hidden'); return;
-    }
+    if (selectedFiles.length === 0 || (toolConfig[currentTool] && toolConfig[currentTool].isIframe)) { actBtn.classList.add('hidden'); return; }
     
     actBtn.classList.remove('hidden');
     flist.innerHTML = `<ul id="sortable-list" class="space-y-2"></ul>`;
@@ -243,20 +183,11 @@ function renderFileList() {
     selectedFiles.forEach((f, i) => {
         const li = document.createElement('li');
         li.className = "flex items-center justify-between p-3 bg-white dark:bg-slate-800 border rounded-lg shadow-sm cursor-move";
-        li.innerHTML = `
-            <div class="flex items-center gap-3 truncate">
-                <i class="fas fa-grip-vertical text-slate-400"></i>
-                <i class="fas fa-file-pdf text-red-500 text-2xl"></i>
-                <div class="truncate"><p class="text-sm font-bold truncate">${f.name}</p><p class="text-xs text-slate-400">${(f.size/1024/1024).toFixed(2)} MB</p></div>
-            </div>
-            <button onclick="removeFile(${i})" class="text-slate-400 hover:text-red-500"><i class="fas fa-times text-lg"></i></button>
-        `;
+        li.innerHTML = `<div class="flex items-center gap-3 truncate"><i class="fas fa-grip-vertical text-slate-400"></i><i class="fas fa-file-pdf text-red-500 text-2xl"></i><div class="truncate"><p class="text-sm font-bold truncate">${f.name}</p><p class="text-xs text-slate-400">${(f.size/1024/1024).toFixed(2)} MB</p></div></div><button onclick="removeFile(${i})" class="text-slate-400 hover:text-red-500"><i class="fas fa-times text-lg"></i></button>`;
         listEl.appendChild(li);
     });
 
-    if (toolConfig[currentTool].multi) {
-        new Sortable(listEl, { animation: 150, onEnd: evt => { const item = selectedFiles.splice(evt.oldIndex, 1)[0]; selectedFiles.splice(evt.newIndex, 0, item); } });
-    }
+    if (toolConfig[currentTool].multi) new Sortable(listEl, { animation: 150, onEnd: evt => { const item = selectedFiles.splice(evt.oldIndex, 1)[0]; selectedFiles.splice(evt.newIndex, 0, item); } });
 }
 
 function removeFile(i) { selectedFiles.splice(i, 1); renderFileList(); }
@@ -271,8 +202,7 @@ function updateProgress(pct, txt) {
 function hideProgress() { document.getElementById('progressArea').classList.add('hidden'); }
 function alertUser(msg, type) {
     const area = document.getElementById('alertArea');
-    const cl = type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-    area.innerHTML = `<div class="p-3 font-bold rounded-lg text-sm ${cl}">${msg}</div>`;
+    area.innerHTML = `<div class="p-3 font-bold rounded-lg text-sm ${type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${msg}</div>`;
     setTimeout(() => area.innerHTML = '', 5000);
 }
 function triggerDownload(blob, fname) {
@@ -292,19 +222,10 @@ async function processFiles() {
     updateProgress(5, 'Menyiapkan berkas...');
     try {
         switch(currentTool) {
-            // AI Features
             case 'ai-summarizer': await executeAI("Tolong buatkan ringkasan yang terstruktur, profesional, dan mudah dipahami dalam bahasa Indonesia dari teks berikut:", 'Twidy_Summary.txt'); break;
-            case 'translate-pdf': 
-                const lang = document.getElementById('target-lang').value || 'Inggris';
-                await executeAI(`Terjemahkan dengan akurat teks dokumen berikut ini ke dalam bahasa ${lang}:`, `Twidy_Translate_${lang}.txt`); break;
-            case 'smart-extract': 
-                const extractQuery = document.getElementById('extract-query').value || 'Nama, Alamat, Tanggal';
-                await executeAI(`Ekstrak dan carikan informasi spesifik berikut: [${extractQuery}] dari teks di bawah ini. Sajikan dalam format list yang rapi:`, 'Twidy_Extracted_Data.txt'); break;
-            case 'chat-pdf': 
-                const chatQuery = document.getElementById('chat-query').value || 'Apa isi utama dokumen ini?';
-                await executeAI(`Berdasarkan teks dokumen di bawah ini, tolong jawab pertanyaan berikut dengan jelas: "${chatQuery}"`, 'Twidy_Chat_Answer.txt'); break;
-            
-            // Organize & Edit
+            case 'translate-pdf': await executeAI(`Terjemahkan dengan akurat teks dokumen berikut ini ke dalam bahasa ${document.getElementById('target-lang').value || 'Inggris'}:`, `Twidy_Translate.txt`); break;
+            case 'smart-extract': await executeAI(`Ekstrak dan carikan informasi spesifik berikut: [${document.getElementById('extract-query').value || 'Data'}] dari teks di bawah ini. Sajikan dalam format list yang rapi:`, 'Twidy_Extracted_Data.txt'); break;
+            case 'chat-pdf': await executeAI(`Berdasarkan teks dokumen di bawah ini, tolong jawab pertanyaan berikut dengan jelas: "${document.getElementById('chat-query').value || 'Apa isi utamanya?'}"`, 'Twidy_Chat_Answer.txt'); break;
             case 'pdf-merge': await executeMerge(); break;
             case 'pdf-split': await executeSplit(); break;
             case 'remove-pages': await executeRemovePages(); break;
@@ -322,25 +243,7 @@ async function processFiles() {
             case 'word-to-pdf': await executeWordToPdf(); break;
             case 'excel-to-pdf': await executeExcelToPdf(); break;
             case 'ocr-pdf': await executeOcrPdf(); break;
-            
-            // Backend-reliant feature placeholders
-            case 'repair-pdf':
-            case 'ppt-to-pdf':
-            case 'html-to-pdf':
-            case 'pdf-to-image':
-            case 'pdf-to-word':
-            case 'pdf-to-ppt':
-            case 'pdf-to-excel':
-            case 'pdf-to-pdfa':
-            case 'edit-pdf':
-            case 'pdf-forms':
-            case 'pdf-unlock':
-            case 'pdf-protect':
-            case 'sign-pdf':
-            case 'redact-pdf':
-            case 'compare-pdf':
-                await executeAdvancedPlaceholder();
-                break;
+            default: await executeAdvancedPlaceholder(); break;
         }
         updateProgress(100, 'Selesai!');
         alertUser('Dokumen berhasil diproses!', 'success');
@@ -354,22 +257,15 @@ async function processFiles() {
 async function extractTextFromPDF(fileBuffer) {
     const pdf = await pdfjsLib.getDocument({data: fileBuffer}).promise;
     let txt = "";
-    for(let i=1; i<=Math.min(pdf.numPages, 10); i++) {
-        txt += (await (await pdf.getPage(i)).getTextContent()).items.map(t=>t.str).join(" ") + "\n";
-    }
+    for(let i=1; i<=Math.min(pdf.numPages, 10); i++) txt += (await (await pdf.getPage(i)).getTextContent()).items.map(t=>t.str).join(" ") + "\n";
     return txt.substring(0, 20000);
 }
 
 async function executeAI(instruction, filename) {
     updateProgress(30, 'Mengekstrak teks PDF...');
     const text = await extractTextFromPDF(await selectedFiles[0].arrayBuffer());
-    
     updateProgress(70, 'Menganalisis dengan Gemini AI...');
-    const response = await fetch('/api/gemini', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ instruction: instruction, text: text })
-    });
+    const response = await fetch('/api/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ instruction: instruction, text: text }) });
     const data = await response.json();
     if(!response.ok) throw new Error(data.error || "Gagal dari API");
     triggerDownload(new Blob([data.result], {type: 'text/plain;charset=utf-8'}), filename);
@@ -402,9 +298,9 @@ async function executeSplit() {
 async function executeRemovePages() {
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
     const toRemove = parseRange(document.getElementById('remove-range')?.value, doc.getPageCount());
-    const newPdf = await PDFLib.PDFDocument.create();
     const keep = Array.from({length: doc.getPageCount()}, (_, i) => i).filter(i => !toRemove.includes(i));
     if(keep.length===0) throw new Error("Tidak boleh menghapus semua halaman.");
+    const newPdf = await PDFLib.PDFDocument.create();
     const copied = await newPdf.copyPages(doc, keep);
     copied.forEach(p => newPdf.addPage(p));
     triggerDownload(new Blob([await newPdf.save()], {type: 'application/pdf'}), 'Twidy_Removed.pdf');
@@ -435,8 +331,7 @@ async function executeScanToPdf() {
     const outPdf = await PDFLib.PDFDocument.create();
     for(let i=0; i<selectedFiles.length; i++){
         const file = selectedFiles[i];
-        const bytes = await file.arrayBuffer();
-        const img = file.type.includes('png') ? await outPdf.embedPng(bytes) : await outPdf.embedJpg(bytes);
+        const img = file.type.includes('png') ? await outPdf.embedPng(await file.arrayBuffer()) : await outPdf.embedJpg(await file.arrayBuffer());
         outPdf.addPage([img.width, img.height]).drawImage(img, {x:0, y:0, width:img.width, height:img.height});
     }
     triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'Twidy_Scan.pdf');
@@ -539,5 +434,6 @@ async function executeOcrPdf() {
 async function executeAdvancedPlaceholder() {
     updateProgress(50, 'Mengecek modul server...');
     await new Promise(r => setTimeout(r, 1200));
-    throw new Error(`Fitur "${toolConfig[currentTool].title}" memerlukan integrasi server backend tingkat lanjut (seperti Python/Node OS engine) untuk memproses struktur internal file.`);
+    throw new Error(`Fitur "${toolConfig[currentTool].title}" memerlukan integrasi server backend tingkat lanjut.`);
 }
+// --- AKHIR DARI KODE TWIDYTOOLSSCRIPT.JS ---
