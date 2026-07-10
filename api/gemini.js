@@ -1,70 +1,44 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TwidyTools - Solusi PDF & Dokumen Lengkap Online</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#4f46e5', secondary: '#ec4899', darkBg: '#0f172a', darkCard: '#1e293b' } } } }</script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>.sidebar-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); } ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; } .dark ::-webkit-scrollbar-thumb { background: #475569; } .sortable-ghost { opacity: 0.4; background-color: #f8fafc; }</style>
-</head>
-<body class="bg-slate-50 dark:bg-darkBg text-slate-800 dark:text-slate-100 font-sans">
-    <div class="flex h-screen overflow-hidden relative">
-        <div id="mobile-overlay" class="fixed inset-0 bg-slate-900/50 z-20 hidden md:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
-        <aside id="sidebar" class="sidebar-transition w-64 bg-white dark:bg-darkCard border-r border-slate-200 dark:border-slate-700 flex flex-col z-30 fixed inset-y-0 left-0 md:relative transform -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none">
-            <div class="p-4 flex items-center justify-between border-b dark:border-slate-700">
-                <button onclick="goBack()" class="flex-1 flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 font-bold text-left text-indigo-600 dark:text-indigo-400"><i class="fas fa-home text-lg"></i> Menu Utama</button>
-                <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-slate-700"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <div id="sidebarMenu" class="flex-1 overflow-y-auto p-4 space-y-6"></div>
-        </aside>
-        <div class="flex-1 flex flex-col h-full overflow-hidden w-full relative z-10">
-            <header class="h-16 bg-white dark:bg-darkCard border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-6 z-20">
-                <div class="flex items-center gap-4">
-                    <button onclick="toggleSidebar()" class="text-slate-600 dark:text-slate-300 p-2"><i class="fas fa-bars text-xl"></i></button>
-                    <button onclick="goBack()" class="text-2xl font-extrabold bg-gradient-to-r from-indigo-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-2"><i class="fas fa-toolbox text-indigo-600"></i> TwidyTools</button>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div id="liveDateTime" class="hidden md:block text-sm font-medium text-slate-500 dark:text-slate-400"></div>
-                    <button onclick="toggleDarkMode()" class="text-slate-600 dark:text-slate-300 p-2"><i id="themeIcon" class="fas fa-moon text-xl"></i></button>
-                </div>
-            </header>
-            <main class="flex-1 overflow-y-auto p-6 bg-slate-50 dark:bg-darkBg">
-                <div id="toolsSection">
-                    <div class="mb-8"><h1 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">Twidy Digital Workspace</h1><p class="text-slate-500 dark:text-slate-400">Pusat kendali dokumen cerdas Anda. Didukung penuh oleh Gemini AI.</p></div>
-                    <div id="dashboardGrid"></div>
-                </div>
-                <div id="uploadSection" class="hidden max-w-4xl mx-auto">
-                    <button onclick="goBack()" class="mb-5 text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-2 font-medium"><i class="fas fa-arrow-left"></i> Kembali ke Alat</button>
-                    <div class="bg-white dark:bg-darkCard rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl p-8">
-                        <div class="text-center mb-6"><h2 id="toolTitle" class="text-3xl font-extrabold text-slate-900 dark:text-white">Tool Title</h2><p id="toolDescription" class="text-slate-500 dark:text-slate-400 text-sm mt-2 font-medium"></p></div>
-                        <div id="iframeContainer" class="hidden w-full h-[70vh] rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800"><iframe id="appIframe" class="w-full h-full border-0"></iframe></div>
-                        <div id="dropZone" class="border-2 border-dashed border-indigo-300 dark:border-indigo-500/50 bg-indigo-50/30 dark:bg-indigo-900/10 rounded-2xl p-12 text-center transition-all cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/30" onclick="document.getElementById('fileInput').click()">
-                            <i class="fas fa-file-upload text-6xl text-indigo-400 mb-4"></i><h3 class="text-xl font-bold text-slate-800 dark:text-slate-200">Pilih Berkas</h3><p class="text-slate-400 text-sm mt-1">Klik atau jatuhkan berkas di sini</p><input type="file" id="fileInput" class="hidden" multiple>
-                        </div>
-                        <div id="settingsPanel" class="mt-6 hidden bg-slate-50 dark:bg-slate-800/50 p-5 rounded-xl border border-slate-200 dark:border-slate-700"><h3 class="font-bold text-sm text-slate-900 dark:text-white mb-3 flex items-center gap-2"><i class="fas fa-sliders-h text-indigo-500"></i> Pengaturan Fitur</h3><div id="settingsContent" class="grid grid-cols-1 gap-4"></div></div>
-                        <div id="fileList" class="mt-6"></div>
-                        <div id="actionButtons" class="mt-8 hidden flex justify-center"><button onclick="processFiles()" id="processBtn" class="px-10 py-4 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl text-lg font-bold shadow-lg shadow-red-600/30 flex items-center gap-3 transition-transform hover:scale-105">PROSES SEKARANG <i class="fas fa-bolt"></i></button></div>
-                    </div>
-                    <div id="alertArea" class="mt-4"></div>
-                    <div id="progressArea" class="mt-6 hidden bg-white dark:bg-darkCard p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl text-center">
-                        <i class="fas fa-circle-notch fa-spin text-4xl text-indigo-500 mb-3"></i><h3 class="text-lg font-bold text-slate-800 dark:text-white mb-1">Sedang Memproses...</h3>
-                        <div class="flex justify-between text-xs font-bold text-slate-500 mb-2 mt-4"><span id="progressText">Menyiapkan...</span><span id="progressPercent" class="text-indigo-600 dark:text-indigo-400">0%</span></div>
-                        <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3"><div id="progressFill" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div></div>
-                    </div>
-                </div>
-            </main>
-        </div>
-    </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="TWIDYTOOLSSCRIPT.JS"></script>
-</body>
-</html>
+module.exports = async function handler(req, res) {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Hanya menerima method POST' });
+    }
+
+    try {
+        const { text } = req.body;
+        
+        if (!text) {
+            return res.status(400).json({ error: 'Teks dokumen kosong atau tidak terbaca.' });
+        }
+
+        const apiKey = process.env.GEMINI_API_KEY;
+        
+        if (!apiKey) {
+            return res.status(500).json({ error: 'API Key belum terpasang di Vercel.' });
+        }
+        
+        // REVISI FINAL: Menggunakan model terbaru gemini-3.1-flash-lite yang aktif saat ini
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: `Tolong buatkan ringkasan yang terstruktur, profesional, dan mudah dipahami dalam bahasa Indonesia dari teks dokumen berikut:\n\n${text}` }] }]
+            })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            console.error("Error Response API:", data);
+            return res.status(500).json({ error: 'Gagal mendapat respon dari Google AI.' });
+        }
+
+        const resultText = data.candidates[0].content.parts[0].text;
+        res.status(200).json({ result: resultText });
+
+    } catch (error) {
+        console.error("Error Backend Terjadi:", error);
+        res.status(500).json({ error: 'Terjadi kesalahan pada server backend.' });
+    }
+}
