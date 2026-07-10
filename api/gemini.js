@@ -4,7 +4,8 @@ module.exports = async function handler(req, res) {
     }
 
     try {
-        const { text } = req.body;
+        // Sekarang menerima instruksi dan teks
+        const { instruction, text } = req.body;
         
         if (!text) {
             return res.status(400).json({ error: 'Teks dokumen kosong atau tidak terbaca.' });
@@ -16,14 +17,16 @@ module.exports = async function handler(req, res) {
             return res.status(500).json({ error: 'API Key belum terpasang di Vercel.' });
         }
         
-        // REVISI FINAL: Menggunakan model terbaru gemini-3.1-flash-lite yang aktif saat ini
+        // Menggabungkan instruksi dari frontend dengan teks dokumen
+        const finalPrompt = `${instruction}\n\n--- TEKS DOKUMEN ---\n${text}`;
+        
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
 
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: `Tolong buatkan ringkasan yang terstruktur, profesional, dan mudah dipahami dalam bahasa Indonesia dari teks dokumen berikut:\n\n${text}` }] }]
+                contents: [{ parts: [{ text: finalPrompt }] }]
             })
         });
 
