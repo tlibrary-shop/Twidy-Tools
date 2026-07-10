@@ -38,7 +38,8 @@ module.exports = async function handler(req, res) {
         res.status(200).json({ result: resultText });
 
     } catch (error) {
-        console.error("Error Backend Terjadi:", error);
+        console.error("Error Backend:", error);
         res.status(500).json({ error: 'Terjadi kesalahan pada server backend.' });
     }
 };
+// --- AKHIR DARI KODE API/GEMINI.JS ---
