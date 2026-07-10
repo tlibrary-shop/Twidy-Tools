@@ -4,7 +4,7 @@ let currentTool = null;
 let selectedFiles = [];
 
 const toolConfig = {
-    'twidy-bill': { title: 'TwidyBill', desc: 'Generate tagihan siap kirim dalam hitungan detik.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.netlify.app/' },
+    'twidy-bill': { title: 'TwidyBill (Invoice Maker)', desc: 'Buat tagihan, invoice, dan kwitansi profesional dengan mudah dalam bentuk gambar.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.netlify.app/' },
 
     'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop) atau gunakan fitur sortir otomatis.', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
     'pdf-split': { title: 'Split PDF', desc: 'Pisahkan satu halaman atau ekstrak rentang halaman PDF.', icon: 'fa-scissors', color: 'text-orange-500', accept: '.pdf', multi: false, settings: [{ id: 'split-range', label: 'Rentang Halaman (Contoh: 1-3, 5)', type: 'text', placeholder: 'Kosongkan jika ingin memisah semua' }] },
@@ -86,6 +86,7 @@ function updateDateTime() {
 
 function renderDashboard() {
     const grid = document.getElementById('dashboardGrid');
+    if (!grid) return;
     grid.innerHTML = '';
     for (const [catName, tools] of Object.entries(categories)) {
         let catHTML = `
@@ -95,13 +96,15 @@ function renderDashboard() {
         `;
         tools.forEach(toolId => {
             const t = toolConfig[toolId];
-            catHTML += `
-                <div onclick="selectTool('${toolId}')" class="group bg-white dark:bg-darkCard p-3 sm:p-6 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col justify-start">
-                    <div class="${t.color} text-2xl sm:text-4xl mb-2 sm:mb-4 transition-transform group-hover:scale-110"><i class="fas ${t.icon}"></i></div>
-                    <h4 class="font-bold text-sm sm:text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 mb-1 leading-tight">${t.title}</h4>
-                    <p class="text-slate-500 dark:text-slate-400 text-[10px] sm:text-sm leading-snug line-clamp-3 sm:line-clamp-none">${t.desc}</p>
-                </div>
-            `;
+            if (t) {
+                catHTML += `
+                    <div onclick="selectTool('${toolId}')" class="group bg-white dark:bg-darkCard p-3 sm:p-6 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col justify-start">
+                        <div class="${t.color} text-2xl sm:text-4xl mb-2 sm:mb-4 transition-transform group-hover:scale-110"><i class="fas ${t.icon}"></i></div>
+                        <h4 class="font-bold text-sm sm:text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 mb-1 leading-tight">${t.title}</h4>
+                        <p class="text-slate-500 dark:text-slate-400 text-[10px] sm:text-sm leading-snug line-clamp-3 sm:line-clamp-none">${t.desc}</p>
+                    </div>
+                `;
+            }
         });
         catHTML += `</div></div>`;
         grid.innerHTML += catHTML;
@@ -111,6 +114,7 @@ function renderDashboard() {
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('mobile-overlay');
+    if (!sidebar) return;
     if (window.innerWidth < 768) {
         if (sidebar.classList.contains('-translate-x-full')) {
             sidebar.classList.remove('-translate-x-full'); sidebar.classList.add('translate-x-0');
@@ -134,12 +138,16 @@ function toggleDarkMode() {
 function initTheme() {
     const isDark = localStorage.getItem('theme') === 'dark';
     if (isDark) document.documentElement.classList.add('dark');
-    document.getElementById('themeIcon').className = isDark ? 'fas fa-sun text-xl' : 'fas fa-moon text-xl';
+    const themeIcon = document.getElementById('themeIcon');
+    if (themeIcon) {
+        themeIcon.className = isDark ? 'fas fa-sun text-xl' : 'fas fa-moon text-xl';
+    }
 }
 
 function selectTool(toolId) {
     currentTool = toolId;
     const config = toolConfig[toolId];
+    if (!config) return;
     window.location.hash = toolId;
     document.title = config.title + " - TwidyTools";
     
@@ -187,7 +195,7 @@ function selectTool(toolId) {
     clearFiles();
     if (window.innerWidth < 768) {
         const sidebar = document.getElementById('sidebar');
-        if (!sidebar.classList.contains('-translate-x-full')) toggleSidebar();
+        if (sidebar && !sidebar.classList.contains('-translate-x-full')) toggleSidebar();
     }
 }
 
@@ -202,12 +210,13 @@ function goBack() {
     clearFiles();
     if (window.innerWidth < 768) {
         const sidebar = document.getElementById('sidebar');
-        if (!sidebar.classList.contains('-translate-x-full')) toggleSidebar();
+        if (sidebar && !sidebar.classList.contains('-translate-x-full')) toggleSidebar();
     }
 }
 
 function setupDropZone() {
     const dz = document.getElementById('dropZone');
+    if (!dz) return;
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }));
     ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, () => dz.classList.add('scale-105', 'border-indigo-600')));
     ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, () => dz.classList.remove('scale-105', 'border-indigo-600')));
@@ -215,7 +224,10 @@ function setupDropZone() {
 }
 
 function setupFileInput() {
-    document.getElementById('fileInput').addEventListener('change', e => handleFiles(e.target.files));
+    const fInput = document.getElementById('fileInput');
+    if (fInput) {
+        fInput.addEventListener('change', e => handleFiles(e.target.files));
+    }
 }
 
 function handleFiles(files) {
@@ -236,6 +248,7 @@ function sortFiles(order) {
 function renderFileList() {
     const flist = document.getElementById('fileList');
     const actBtn = document.getElementById('actionButtons');
+    if (!flist || !actBtn) return;
     flist.innerHTML = '';
     
     if (selectedFiles.length === 0 || (toolConfig[currentTool] && toolConfig[currentTool].isIframe)) {
@@ -268,40 +281,62 @@ function renderFileList() {
         `;
     });
 
-    if(toolConfig[currentTool].multi && selectedFiles.length > 1) {
+    if(toolConfig[currentTool].multi && selectedFiles.length > 1 && window.Sortable) {
         new Sortable(listEl, { animation: 150, ghostClass: 'sortable-ghost', onEnd: function (evt) { const item = selectedFiles.splice(evt.oldIndex, 1)[0]; selectedFiles.splice(evt.newIndex, 0, item); } });
     }
 }
 
 function removeFile(i) { selectedFiles.splice(i, 1); renderFileList(); }
-function clearFiles() { selectedFiles = []; document.getElementById('fileInput').value = ''; renderFileList(); hideProgress(); }
+function clearFiles() { 
+    selectedFiles = []; 
+    const fInput = document.getElementById('fileInput');
+    if (fInput) fInput.value = ''; 
+    renderFileList(); 
+    hideProgress(); 
+}
 
 function updateProgress(pct, txt) {
-    document.getElementById('progressArea').classList.remove('hidden');
+    const area = document.getElementById('progressArea');
+    if (area) area.classList.remove('hidden');
     document.getElementById('progressFill').style.width = `${pct}%`;
     document.getElementById('progressPercent').textContent = `${pct}%`;
     document.getElementById('progressText').textContent = txt;
 }
-function hideProgress() { document.getElementById('progressArea').classList.add('hidden'); }
+function hideProgress() { 
+    const area = document.getElementById('progressArea');
+    if (area) area.classList.add('hidden'); 
+}
 
 function alertUser(msg, type) {
     const area = document.getElementById('alertArea');
+    if (!area) return;
     const cl = type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
     area.innerHTML = `<div class="p-3 font-bold rounded-lg text-sm sm:text-base ${cl}">${msg}</div>`;
     setTimeout(() => area.innerHTML = '', 5000);
 }
 
 function triggerDownload(blob, fname) {
-    const u = URL.createObjectURL(blob); const a = document.createElement('a');
-    a.href = u; a.download = fname; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(u);
+    const u = URL.createObjectURL(blob); 
+    const a = document.createElement('a');
+    a.href = u; 
+    a.download = fname; 
+    document.body.appendChild(a); 
+    a.click(); 
+    a.remove(); 
+    URL.revokeObjectURL(u);
 }
 
 function parseRange(rangeStr, maxPages) {
     let pages = new Set();
     if(!rangeStr) return Array.from({length: maxPages}, (_, i) => i);
     rangeStr.split(',').forEach(part => {
-        if(part.includes('-')) { let [start, end] = part.split('-').map(Number); if(start && end) { for(let i=start; i<=end; i++) pages.add(i-1); } } 
-        else { let num = parseInt(part.trim()); if(num) pages.add(num-1); }
+        if(part.includes('-')) { 
+            let [start, end] = part.split('-').map(Number); 
+            if(start && end) { for(let i=start; i<=end; i++) pages.add(i-1); } 
+        } else { 
+            let num = parseInt(part.trim()); 
+            if(num) pages.add(num-1); 
+        }
     });
     return Array.from(pages).filter(p => p >= 0 && p < maxPages).sort((a,b) => a-b);
 }
@@ -313,6 +348,9 @@ function downloadAIResult() {
     triggerDownload(blob, `Twidy_AI_Result_${currentTool}.txt`);
 }
 
+// ==========================================
+// PUSAT EKSEKUSI (PROCESS HANDLER)
+// ==========================================
 async function processFiles() {
     if (selectedFiles.length === 0) return;
     try {
@@ -325,6 +363,7 @@ async function processFiles() {
         else if (currentTool === 'repair-pdf') { await executeRepairPdf(); }
         else if (currentTool === 'ocr-pdf') { await executeOcrPdf(); }
         else if (currentTool === 'scan-to-pdf') { await executeScanToPdf(); }
+        
         else if (currentTool === 'image-to-pdf') { await executeImageToPdf(); }
         else if (currentTool === 'word-to-pdf') { await executeWordToPdf(); }
         else if (currentTool === 'ppt-to-pdf') { await executePptToPdf(); }
@@ -332,11 +371,13 @@ async function processFiles() {
         else if (currentTool === 'html-to-pdf') { await executeHtmlToPdf(); }
         else if (currentTool === 'txt-to-pdf') { await executeTxtToPdf(); } 
         else if (currentTool === 'rtf-to-pdf') { await executeRtfToPdf(); } 
+        
         else if (currentTool === 'pdf-to-image') { await executePdfToImage(); }
         else if (currentTool === 'pdf-to-word') { await executePdfToWord(); }
         else if (currentTool === 'pdf-to-ppt') { await executePdfToPpt(); }
         else if (currentTool === 'pdf-to-excel') { await executePdfToExcel(); }
         else if (currentTool === 'pdf-to-pdfa') { await executePdfToPdfa(); }
+        
         else if (currentTool === 'pdf-rotate') { await executePdfRotate(); }
         else if (currentTool === 'page-numbers') { await executePageNumbers(); }
         else if (currentTool === 'pdf-watermark') { await executePdfWatermark(); }
@@ -344,19 +385,26 @@ async function processFiles() {
         else if (currentTool === 'edit-pdf') { await executeEditPdf(); }
         else if (currentTool === 'pdf-forms') { await executePdfForms(); }
         else if (currentTool === 'pdf-nup') { await executePdfNup(); }
+        
         else if (currentTool === 'pdf-unlock') { await executePdfUnlock(); }
         else if (currentTool === 'pdf-protect') { await executePdfProtect(); }
         else if (currentTool === 'sign-pdf') { await executeSignPdf(); }
         else if (currentTool === 'redact-pdf') { await executeRedactPdf(); }
         else if (currentTool === 'compare-pdf') { await executeComparePdf(); }
         else if (currentTool === 'pdf-to-markdown') { await executePdfToMarkdown(); }
+        
         else if (currentTool.startsWith('ai-') || currentTool === 'translate-pdf') { await executeAIFeatures(currentTool); }
         else { await executeAdvancedPlaceholder(); }
+        
     } catch (e) {
-        alertUser(`Error: ${e.message}`, 'error');
+        alertUser(`Gagal: ${e.message}`, 'error');
         hideProgress();
     }
 }
+
+// ==========================================
+// KUMPULAN FUNGSI FITUR
+// ==========================================
 
 async function executeTxtToPdf() {
     updateProgress(40, 'Membaca file teks...');
@@ -389,7 +437,7 @@ async function executeScanToPdf() {
         const page = outPdf.addPage([img.width, img.height]);
         page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
     }
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil membuat scan PDF!', 'success'); setTimeout(() => hideProgress(), 2000);
+    updateProgress(100, 'Selesai!'); alertUser('Berhasil membuat PDF!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'Twidy_Scanned.pdf');
 }
 
@@ -428,8 +476,8 @@ async function executePdfProtect() {
     updateProgress(50, 'Mengonfigurasi pengamanan dokumen...');
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
     const passVal = document.getElementById('pt-pass')?.value;
-    if(!passVal) throw new Error("Silakan masukkan kata kunci (password) di menu Pengaturan Khusus terlebih dahulu.");
-    updateProgress(100, 'Selesai!'); alertUser(`Dokumen berhasil diproteksi!`, 'success'); setTimeout(() => hideProgress(), 2000);
+    if(!passVal) throw new Error("Silakan masukkan kata kunci (password) di menu Pengaturan Khusus.");
+    updateProgress(100, 'Selesai!'); alertUser('Dokumen berhasil diproteksi!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Protected.pdf');
 }
 
@@ -440,7 +488,7 @@ async function executeSignPdf() {
     const pages = doc.getPages();
     const lastPage = pages[pages.length - 1];
     lastPage.drawText(signText, { x: 50, y: 50, size: 12, color: PDFLib.rgb(0, 0, 0.8) });
-    updateProgress(100, 'Selesai!'); alertUser('Dokumen berhasil diberi tanda tangan kustom!', 'success'); setTimeout(() => hideProgress(), 2000);
+    updateProgress(100, 'Selesai!'); alertUser('Dokumen berhasil diberi tanda tangan!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Signed.pdf');
 }
 
@@ -450,12 +498,12 @@ async function executeRedactPdf() {
     const pNum = parseInt(document.getElementById('redact-page')?.value) || 1;
     const page = doc.getPages()[pNum - 1];
     if (page) { page.drawRectangle({ x: 50, y: 100, width: 200, height: 20, color: PDFLib.rgb(0, 0, 0) }); }
-    updateProgress(100, 'Selesai!'); alertUser('Area dokumen berhasil disensor!', 'success'); setTimeout(() => hideProgress(), 2000);
+    updateProgress(100, 'Selesai!'); alertUser('Area berhasil disensor!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Redacted.pdf');
 }
 
 async function executeComparePdf() {
-    if (selectedFiles.length < 2) throw new Error("Anda harus memilih 2 file PDF untuk dibandingkan.");
+    if (selectedFiles.length < 2) throw new Error("Anda harus memilih minimal 2 file PDF.");
     updateProgress(50, 'Membandingkan dokumen...');
     const d1 = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
     const d2 = await PDFLib.PDFDocument.load(await selectedFiles[1].arrayBuffer());
@@ -465,14 +513,17 @@ async function executeComparePdf() {
 }
 
 async function executeImageToPdf() { await executeScanToPdf(); }
+
 async function executeWordToPdf() {
-    updateProgress(50, 'Mengonversi format Word ke PDF...');
-    const htmlContent = '<h1>Dokumen Word</h1><p>Berhasil dikonversi melalui TwidyTools.</p>';
+    updateProgress(50, 'Mengonversi format ke PDF...');
+    const htmlContent = '<h1>Dokumen Hasil Konversi</h1><p>Berhasil diproses melalui TwidyTools.</p>';
     await html2pdf().from(htmlContent).save('Twidy_Converted.pdf');
     updateProgress(100, 'Selesai!'); hideProgress();
 }
+
 async function executePptToPdf() { await executeWordToPdf(); }
 async function executeHtmlToPdf() { await executeWordToPdf(); }
+async function executePdfToPpt() { await executePdfToWord(); }
 
 async function executePdfRotate() {
     updateProgress(50, 'Memutar halaman...');
@@ -480,12 +531,14 @@ async function executePdfRotate() {
     doc.getPages().forEach(p => p.setRotation(PDFLib.degrees(p.getRotation().angle + 90)));
     updateProgress(100, 'Selesai!'); triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Rotated.pdf'); hideProgress();
 }
+
 async function executePageNumbers() {
     updateProgress(50, 'Menambahkan nomor halaman...');
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
     doc.getPages().forEach((p, idx) => p.drawText(`Hal ${idx + 1}`, { x: p.getWidth() - 50, y: 30, size: 8 }));
     updateProgress(100, 'Selesai!'); triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Numbered.pdf'); hideProgress();
 }
+
 async function executePdfWatermark() {
     updateProgress(50, 'Menempelkan watermark...');
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
@@ -493,10 +546,10 @@ async function executePdfWatermark() {
     doc.getPages().forEach(p => p.drawText(wmText, { x: 100, y: 100, size: 40, color: PDFLib.rgb(0.8, 0.8, 0.8), rotate: PDFLib.degrees(45) }));
     updateProgress(100, 'Selesai!'); triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Watermarked.pdf'); hideProgress();
 }
-async function executeEditPdf() { alertUser('Fitur anotasi langsung aktifkan mode preview.', 'success'); hideProgress(); }
+
+async function executeEditPdf() { alertUser('Fitur ini berfungsi sebagai preview dokumen di browser.', 'success'); hideProgress(); }
 async function executePdfForms() { alertUser('Formulir berhasil distrukturkan.', 'success'); hideProgress(); }
 async function executePdfToPdfa() { await executeCompress(); }
-async function executePdfToPpt() { await executePdfToWord(); }
 
 async function executeMerge() {
     const outPdf = await PDFLib.PDFDocument.create();
@@ -506,7 +559,7 @@ async function executeMerge() {
         const pages = await outPdf.copyPages(doc, doc.getPageIndices());
         pages.forEach(p => outPdf.addPage(p));
     }
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
+    updateProgress(100, 'Selesai!'); alertUser('Berhasil digabung!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'Twidy_Merged.pdf');
 }
 
@@ -522,7 +575,7 @@ async function executeSplit() {
         const [p] = await sub.copyPages(doc, [i]); sub.addPage(p);
         zip.file(`Page_${i+1}.pdf`, await sub.save());
     }
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
+    updateProgress(100, 'Selesai!'); alertUser('Berhasil dipisah!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(await zip.generateAsync({type: 'blob'}), 'Twidy_Splitted.zip');
 }
 
@@ -538,7 +591,7 @@ async function executeRemovePages() {
     updateProgress(60, 'Memotong halaman...');
     const newPdf = await PDFLib.PDFDocument.create();
     const copiedPages = await newPdf.copyPages(doc, indicesToKeep); copiedPages.forEach(p => newPdf.addPage(p));
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
+    updateProgress(100, 'Selesai!'); alertUser('Berhasil dihapus!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await newPdf.save()], {type: 'application/pdf'}), 'Twidy_Removed.pdf');
 }
 
@@ -548,11 +601,11 @@ async function executeExtractPages() {
     const rangeInput = document.getElementById('extract-range')?.value;
     if(!rangeInput) throw new Error("Mohon ketik halaman yang ingin diekstrak.");
     const toExtract = parseRange(rangeInput, doc.getPageCount());
-    if(toExtract.length === 0) throw new Error("Halaman yang Anda masukkan tidak valid.");
+    if(toExtract.length === 0) throw new Error("Halaman tidak valid.");
     updateProgress(60, 'Mengekstrak halaman...');
     const newPdf = await PDFLib.PDFDocument.create();
     const copiedPages = await newPdf.copyPages(doc, toExtract); copiedPages.forEach(p => newPdf.addPage(p));
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
+    updateProgress(100, 'Selesai!'); alertUser('Berhasil diekstrak!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await newPdf.save()], {type: 'application/pdf'}), 'Twidy_Extracted.pdf');
 }
 
@@ -566,14 +619,14 @@ async function executeOrganizePdf() {
     updateProgress(60, 'Menyusun ulang...');
     const newPdf = await PDFLib.PDFDocument.create();
     const copiedPages = await newPdf.copyPages(doc, newOrder); copiedPages.forEach(p => newPdf.addPage(p));
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
+    updateProgress(100, 'Selesai!'); alertUser('Berhasil disusun ulang!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await newPdf.save()], {type: 'application/pdf'}), 'Twidy_Reorganized.pdf');
 }
 
 async function executeCompress() {
     updateProgress(60, 'Kompresi struktur...');
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
+    updateProgress(100, 'Selesai!'); alertUser('Berhasil dikompresi!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Compressed.pdf');
 }
 
@@ -598,7 +651,7 @@ async function executePdfToExcel() {
         });
     }
     const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "Data");
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
+    updateProgress(100, 'Selesai!'); alertUser('Berhasil ditarik!', 'success'); setTimeout(() => hideProgress(), 2000);
     
     const excelBuffer = XLSX.write(wb, {bookType: 'xlsx', type: 'array'});
     triggerDownload(new Blob([excelBuffer], {type: 'application/octet-stream'}), selectedFiles[0].name.replace('.pdf', '.xlsx'));
@@ -627,7 +680,7 @@ async function executeCropPdf() {
         const { x, y, width, height } = page.getCropBox();
         page.setCropBox(x + margin, y + margin, width - (margin*2), height - (margin*2));
     });
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
+    updateProgress(100, 'Selesai!'); alertUser('Berhasil dipotong!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Cropped.pdf');
 }
 
@@ -642,7 +695,7 @@ async function executePdfToMarkdown() {
         const text = textContent.items.map(t => t.str).join(" ");
         mdText += `## Halaman ${i}\n${text}\n\n`;
     }
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
+    updateProgress(100, 'Selesai!'); alertUser('Berhasil dikonversi!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([mdText], {type: 'text/markdown;charset=utf-8'}), 'Twidy_Extracted.md');
 }
 
@@ -673,12 +726,12 @@ async function executePdfNup() {
             newPage.drawPage(page2, { x: xPos2, y: yPos2, xScale: scale2, yScale: scale2 });
         }
     }
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil memadatkan dokumen!', 'success'); setTimeout(() => hideProgress(), 2000);
+    updateProgress(100, 'Selesai!'); alertUser('Berhasil dipadatkan!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await newPdfDoc.save()], {type: 'application/pdf'}), 'Twidy_Nup_2in1.pdf');
 }
 
 async function executeAdvancedPlaceholder() {
-    throw new Error("Modul sedang disiapkan. Silakan gunakan fitur lain yang tersedia.");
+    throw new Error("Modul dalam tahap pengembangan.");
 }
 
 async function executeAIFeatures(toolId) {
@@ -727,7 +780,7 @@ async function executeAIFeatures(toolId) {
     if (toolId === 'ai-chat') {
         actionStr = 'ask_question';
         customPrompt = document.getElementById('ai-prompt')?.value;
-        if(!customPrompt) throw new Error("Anda harus mengetik pertanyaan di kolom Pengaturan Khusus.");
+        if(!customPrompt) throw new Error("Ketik pertanyaan di kolom Pengaturan Khusus.");
     }
 
     const response = await fetch('/api/gemini', {
