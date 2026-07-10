@@ -16,6 +16,7 @@ module.exports = async function handler(req, res) {
             return res.status(500).json({ error: 'API Key belum terpasang di Vercel.' });
         }
         
+        // Setup dinamis System Prompt
         let systemPrompt = "";
         
         switch(action) {
@@ -46,8 +47,8 @@ module.exports = async function handler(req, res) {
 
         const finalPrompt = systemPrompt + text;
         
-        // MENGGUNAKAN GEMINI 3.1 FLASH LITE SESUAI PERMINTAAN
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
+        // PERBAIKAN: Menggunakan model API publik terbaru (Gemini 2.0 Flash) yang sangat cepat & stabil
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
         const response = await fetch(url, {
             method: 'POST',
@@ -60,7 +61,7 @@ module.exports = async function handler(req, res) {
         const data = await response.json();
         
         if (!response.ok) {
-            console.error("Error Response API:", data);
+            console.error("Error Response API Google:", data);
             return res.status(500).json({ error: 'Gagal mendapat respon dari Google AI.' });
         }
 
