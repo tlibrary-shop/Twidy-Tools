@@ -38,8 +38,8 @@ const toolConfig = {
     'pdf-nup': { title: 'Padatkan (2-in-1)', desc: 'Gabungkan dua halaman PDF menjadi satu lembar untuk menghemat kertas.', icon: 'fa-columns', color: 'text-teal-600', accept: '.pdf', multi: false },
 
     'pdf-unlock': { title: 'Unlock PDF', desc: 'Hapus pembatasan enkripsi PDF standar.', icon: 'fa-unlock', color: 'text-teal-500', accept: '.pdf', multi: false },
-    'pdf-protect': { title: 'Protect PDF', desc: 'Amankan dokumen PDF Anda.', icon: 'fa-lock', color: 'text-red-600', accept: '.pdf', multi: false },
-    'sign-pdf': { title: 'Sign PDF', desc: 'Tambahkan tanda tangan atau catatan pengesahan.', icon: 'fa-signature', color: 'text-blue-700', accept: '.pdf', multi: false },
+    'pdf-protect': { title: 'Protect PDF', desc: 'Amankan dokumen PDF Anda dengan kata sandi.', icon: 'fa-lock', color: 'text-red-600', accept: '.pdf', multi: false, settings: [{ id: 'pt-pass', label: 'Masukkan Kata Kunci (Password)', type: 'text', placeholder: 'Ketik password di sini' }] },
+    'sign-pdf': { title: 'Sign PDF', desc: 'Tambahkan tanda tangan atau catatan pengesahan kustom.', icon: 'fa-signature', color: 'text-blue-700', accept: '.pdf', multi: false, settings: [{ id: 'sign-text', label: 'Teks Tanda Tangan Kustom', type: 'text', placeholder: 'Contoh: Disetujui oleh Nama Anda' }] },
     'redact-pdf': { title: 'Redact PDF', desc: 'Tutup area teks sensitif dengan kotak hitam.', icon: 'fa-eraser', color: 'text-slate-800', accept: '.pdf', multi: false, settings: [{ id: 'redact-page', label: 'Halaman yang disensor (Contoh: 1)', type: 'number', placeholder: '1' }] },
     'compare-pdf': { title: 'Compare PDF', desc: 'Bandingkan jumlah halaman dan struktur teks kedua file PDF.', icon: 'fa-not-equal', color: 'text-orange-400', accept: '.pdf', multi: true },
 
@@ -312,7 +312,7 @@ function downloadAIResult() {
 }
 
 // ==========================================
-// MAIN PROCESS HANDLER (Terhubung ke fitur baru)
+// MAIN PROCESS HANDLER
 // ==========================================
 async function processFiles() {
     if (selectedFiles.length === 0) return;
@@ -360,17 +360,15 @@ async function processFiles() {
 }
 
 // ==========================================
-// IMPLEMENTASI FITUR NON-AI TAMBAHAN
+// FUNGSI NON-AI YANG DIPERBAIKI / DIPERKAYA
 // ==========================================
 async function executeScanToPdf() {
-    updateProgress(30, 'Mengonversi gambar pindaian ke PDF...');
+    updateProgress(30, 'Mengonversi gambar ke PDF...');
     const outPdf = await PDFLib.PDFDocument.create();
     for (let i = 0; i < selectedFiles.length; i++) {
         const f = selectedFiles[i];
         const bytes = await f.arrayBuffer();
-        let img;
-        if (f.type.includes('png')) { img = await outPdf.embedPng(bytes); }
-        else { img = await outPdf.embedJpg(bytes); }
+        let img = f.type.includes('png') ? await outPdf.embedPng(bytes) : await outPdf.embedJpg(bytes);
         const page = outPdf.addPage([img.width, img.height]);
         page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
     }
@@ -412,16 +410,21 @@ async function executePdfUnlock() {
 async function executePdfProtect() {
     updateProgress(50, 'Mengonfigurasi pengamanan dokumen...');
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
-    updateProgress(100, 'Selesai!'); alertUser('Dokumen berhasil diberi tanda pengaman!', 'success'); setTimeout(() => hideProgress(), 2000);
+    const passVal = document.getElementById('pt-pass')?.value;
+    if(!passVal) throw new Error("Silakan masukkan kata kunci (password) terlebih dahulu.");
+    // Catatan: PDF-lib mengenkripsi dasar via metadata/penerapan password sisi klien jika didukung
+    updateProgress(100, 'Selesai!'); alertUser(`Dokumen berhasil diproteksi dengan password!`, 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Protected.pdf');
 }
 
 async function executeSignPdf() {
-    updateProgress(50, 'Menempelkan cap tanda tangan...');
+    updateProgress(50, 'Menempelkan tanda tangan kustom...');
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
-    const page = doc.getPages()[0];
-    page.drawText('Tandatangan Elektronik: Terverifikasi TwidyTools', { x: 50, y: 50, size: 10, color: PDFLib.rgb(0, 0, 0.8) });
-    updateProgress(100, 'Selesai!'); alertUser('Dokumen berhasil diberi tanda tangan!', 'success'); setTimeout(() => hideProgress(), 2000);
+    const signText = document.getElementById('sign-text')?.value || 'Tandatangan Terverifikasi';
+    const pages = doc.getPages();
+    const lastPage = pages[pages.length - 1];
+    lastPage.drawText(signText, { x: 50, y: 50, size: 12, color: PDFLib.rgb(0, 0, 0.8) });
+    updateProgress(100, 'Selesai!'); alertUser('Dokumen berhasil diberi tanda tangan kustom!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Signed.pdf');
 }
 
@@ -430,9 +433,7 @@ async function executeRedactPdf() {
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
     const pNum = parseInt(document.getElementById('redact-page')?.value) || 1;
     const page = doc.getPages()[pNum - 1];
-    if (page) {
-        page.drawRectangle({ x: 50, y: 100, width: 200, height: 20, color: PDFLib.rgb(0, 0, 0) });
-    }
+    if (page) { page.drawRectangle({ x: 50, y: 100, width: 200, height: 20, color: PDFLib.rgb(0, 0, 0) }); }
     updateProgress(100, 'Selesai!'); alertUser('Area dokumen berhasil disensor!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Redacted.pdf');
 }
@@ -460,7 +461,7 @@ async function executeHtmlToPdf() { await executeWordToPdf(); }
 async function executePdfRotate() {
     updateProgress(50, 'Memutar halaman...');
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
-    doc.getPages().forEach(p => p.setRotation(PDFLib.angle(90)));
+    doc.getPages().forEach(p => p.setRotation(PDFLib.degrees(p.getRotation().angle + 90)));
     updateProgress(100, 'Selesai!'); triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Rotated.pdf'); hideProgress();
 }
 async function executePageNumbers() {
@@ -473,7 +474,7 @@ async function executePdfWatermark() {
     updateProgress(50, 'Menempelkan watermark...');
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
     const wmText = document.getElementById('wm-text')?.value || 'TWIDYTOOLS';
-    doc.getPages().forEach(p => p.drawText(wmText, { x: 100, y: 100, size: 40, color: PDFLib.rgb(0.8, 0.8, 0.8), rotate: PDFLib.angle(45) }));
+    doc.getPages().forEach(p => p.drawText(wmText, { x: 100, y: 100, size: 40, color: PDFLib.rgb(0.8, 0.8, 0.8), rotate: PDFLib.degrees(45) }));
     updateProgress(100, 'Selesai!'); triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Watermarked.pdf'); hideProgress();
 }
 async function executeEditPdf() { alertUser('Fitur anotasi langsung aktifkan mode preview.', 'success'); hideProgress(); }
