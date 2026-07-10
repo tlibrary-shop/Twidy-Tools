@@ -4,7 +4,6 @@ module.exports = async function handler(req, res) {
     }
 
     try {
-        // Sekarang menerima instruksi dan teks
         const { instruction, text } = req.body;
         
         if (!text) {
@@ -17,9 +16,7 @@ module.exports = async function handler(req, res) {
             return res.status(500).json({ error: 'API Key belum terpasang di Vercel.' });
         }
         
-        // Menggabungkan instruksi dari frontend dengan teks dokumen
         const finalPrompt = `${instruction}\n\n--- TEKS DOKUMEN ---\n${text}`;
-        
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
 
         const response = await fetch(url, {
@@ -44,4 +41,4 @@ module.exports = async function handler(req, res) {
         console.error("Error Backend Terjadi:", error);
         res.status(500).json({ error: 'Terjadi kesalahan pada server backend.' });
     }
-}
+};
