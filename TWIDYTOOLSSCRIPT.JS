@@ -5,6 +5,7 @@ let selectedFiles = [];
 
 const toolConfig = {
     'twidy-bill': { title: 'TwidyBill', desc: 'Generate tagihan siap kirim dalam hitungan detik.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.netlify.app/' },
+    'twidy-ai': { title: 'TwidyAI', desc: 'Tersedia 50 alat kecerdasan buatan untuk mempercepat pekerjaan, belajar, coding, hingga gaya hidup.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidyai.netlify.app/' },
 
     'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop) atau gunakan fitur sortir otomatis.', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
     'pdf-split': { title: 'Split PDF', desc: 'Pisahkan satu halaman atau ekstrak rentang halaman PDF.', icon: 'fa-scissors', color: 'text-orange-500', accept: '.pdf', multi: false, settings: [{ id: 'split-range', label: 'Rentang Halaman (Contoh: 1-3, 5)', type: 'text', placeholder: 'Kosongkan jika ingin memisah semua' }] },
