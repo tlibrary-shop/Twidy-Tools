@@ -57,7 +57,7 @@ const toolConfig = {
 };
 
 const categories = {
-    'TWIDY ECOSYSTEM': ['twidy-bill'],
+    'TWIDY ECOSYSTEM': ['twidy-bill', 'twidy-ai'],
     'ORGANIZE PDF': ['pdf-merge', 'pdf-split', 'remove-pages', 'extract-pages', 'organize-pdf', 'scan-to-pdf'],
     'OPTIMIZE PDF': ['pdf-compress', 'repair-pdf', 'ocr-pdf'],
     'CONVERT TO PDF': ['image-to-pdf', 'word-to-pdf', 'ppt-to-pdf', 'excel-to-pdf', 'html-to-pdf', 'txt-to-pdf', 'rtf-to-pdf'],
