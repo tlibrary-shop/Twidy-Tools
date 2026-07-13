@@ -275,7 +275,7 @@ function renderFileList() {
         listEl.innerHTML += `
             <li class="flex items-center justify-between bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
                 <div class="flex items-center gap-3 overflow-hidden">
-                    <i class="fas fa-file-pdf text-red-500 text-lg"></i>
+                    <i class="fas fa-file text-indigo-500 text-lg"></i>
                     <span class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate w-40 sm:w-64">${f.name}</span>
                 </div>
                 <button onclick="removeFile(${i})" class="text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-lg transition-colors"><i class="fas fa-trash"></i></button>
@@ -412,7 +412,6 @@ async function processFiles() {
 async function executeConvertAPI(conversionType, targetExtension, loadingMessage) {
     updateProgress(20, loadingMessage);
     
-    // Menyiapkan FormData untuk dikirim ke backend /api/convert
     const formData = new FormData();
     formData.append('file', selectedFiles[0]);
     formData.append('conversionType', conversionType); 
@@ -431,12 +430,20 @@ async function executeConvertAPI(conversionType, targetExtension, loadingMessage
 
     updateProgress(80, 'Mengunduh hasil konversi...');
     
-    // Asumsi backend mengembalikan file dalam bentuk Blob
-    const blob = await response.blob();
-    const originalName = selectedFiles[0].name;
-    const baseName = originalName.substring(0, originalName.lastIndexOf('.'));
-    const newFileName = `${baseName}.${targetExtension}`;
+    // Membaca nama file asli yang diberikan oleh backend ConvertAPI
+    let newFileName = 'Hasil_Konversi.' + targetExtension;
+    const disposition = response.headers.get('Content-Disposition');
+    if (disposition && disposition.includes('filename=')) {
+        const match = disposition.match(/filename="?([^"]+)"?/);
+        if (match && match[1]) {
+            newFileName = match[1];
+        }
+    } else {
+        const baseName = selectedFiles[0].name.substring(0, selectedFiles[0].name.lastIndexOf('.'));
+        newFileName = `${baseName}.${targetExtension}`;
+    }
 
+    const blob = await response.blob();
     updateProgress(100, 'Selesai!');
     alertUser('Berhasil dikonversi!', 'success');
     setTimeout(() => hideProgress(), 2000);
@@ -444,45 +451,21 @@ async function executeConvertAPI(conversionType, targetExtension, loadingMessage
     triggerDownload(blob, newFileName);
 }
 
-// --- OFFICE & PDF CONVERSION VIA BACKEND ---
+// --- OFFICE & TEXT CONVERSION VIA BACKEND ---
 async function executeWordToPdf() { await executeConvertAPI('word-to-pdf', 'pdf', 'Menyiapkan file Word...'); }
 async function executePptToPdf() { await executeConvertAPI('ppt-to-pdf', 'pdf', 'Menyiapkan file PowerPoint...'); }
 async function executeExcelToPdf() { await executeConvertAPI('excel-to-pdf', 'pdf', 'Menyiapkan file Excel...'); }
+async function executeHtmlToPdf() { await executeConvertAPI('html-to-pdf', 'pdf', 'Membaca struktur HTML...'); }
+async function executeTxtToPdf() { await executeConvertAPI('txt-to-pdf', 'pdf', 'Menyiapkan file Teks...'); }
+async function executeRtfToPdf() { await executeConvertAPI('rtf-to-pdf', 'pdf', 'Membaca format file RTF...'); }
 
 async function executePdfToWord() { await executeConvertAPI('pdf-to-word', 'docx', 'Menyiapkan file PDF...'); }
 async function executePdfToExcel() { await executeConvertAPI('pdf-to-excel', 'xlsx', 'Menyiapkan file PDF...'); }
 async function executePdfToPpt() { await executeConvertAPI('pdf-to-ppt', 'pptx', 'Menyiapkan file PDF...'); }
+async function executePdfToPdfa() { await executeConvertAPI('pdf-to-pdfa', 'pdf', 'Memproses metadata PDF/A...'); }
 
 
-// --- FUNGSI LOCAL / BROWSER ---
-async function executeHtmlToPdf() {
-    updateProgress(50, 'Mengonversi format ke PDF...');
-    const htmlContent = '<h1>Dokumen Hasil Konversi</h1><p>Berhasil diproses melalui TwidyTools.</p>';
-    await html2pdf().from(htmlContent).save('Twidy_Converted.pdf');
-    updateProgress(100, 'Selesai!'); hideProgress();
-}
-
-async function executeTxtToPdf() {
-    updateProgress(40, 'Membaca file teks...');
-    const text = await selectedFiles[0].text();
-    updateProgress(70, 'Mengonversi teks ke halaman PDF...');
-    const safeText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    const htmlContent = `<div style="font-family: Arial, sans-serif; padding: 30px; font-size: 12pt; line-height: 1.6; white-space: pre-wrap;">${safeText}</div>`;
-    await html2pdf().from(htmlContent).save(selectedFiles[0].name.replace('.txt', '.pdf'));
-    updateProgress(100, 'Selesai!'); hideProgress();
-}
-
-async function executeRtfToPdf() {
-    updateProgress(40, 'Membaca format file RTF...');
-    const text = await selectedFiles[0].text();
-    const cleanRtfText = text.replace(/\\par[d]?/g, "\n").replace(/\{\*?\\[^{}]+}|[{}]|\\\n?[A-Za-z]+\n?(?:-?\d+)?[ ]?/g, "").trim();
-    updateProgress(70, 'Memproses teks menjadi dokumen PDF...');
-    const safeText = cleanRtfText.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    const htmlContent = `<div style="font-family: Arial, sans-serif; padding: 30px; font-size: 12pt; line-height: 1.6; white-space: pre-wrap;">${safeText}</div>`;
-    await html2pdf().from(htmlContent).save(selectedFiles[0].name.replace('.rtf', '.pdf'));
-    updateProgress(100, 'Selesai!'); hideProgress();
-}
-
+// --- FUNGSI LOCAL / BROWSER (IMAGE, PDF MANIPULATION, DLL) ---
 async function executeScanToPdf() {
     updateProgress(30, 'Mengonversi gambar ke PDF...');
     const outPdf = await PDFLib.PDFDocument.create();
@@ -495,6 +478,22 @@ async function executeScanToPdf() {
     }
     updateProgress(100, 'Selesai!'); alertUser('Berhasil membuat PDF!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'Twidy_Scanned.pdf');
+}
+
+async function executeImageToPdf() { await executeScanToPdf(); }
+
+async function executePdfToImage() {
+    updateProgress(50, 'Render gambar...');
+    const pdf = await pdfjsLib.getDocument({data: await selectedFiles[0].arrayBuffer()}).promise;
+    const zip = new JSZip();
+    for(let i=1; i<=pdf.numPages; i++) {
+        const page = await pdf.getPage(i); const vp = page.getViewport({scale: 1.5});
+        const cvs = document.createElement('canvas'); cvs.width = vp.width; cvs.height = vp.height;
+        await page.render({canvasContext: cvs.getContext('2d'), viewport: vp}).promise;
+        zip.file(`Page_${i}.jpg`, cvs.toDataURL('image/jpeg').replace(/^data:image\/jpeg;base64,/, ""), {base64: true});
+    }
+    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
+    triggerDownload(await zip.generateAsync({type: 'blob'}), 'Twidy_Images.zip');
 }
 
 async function executeRepairPdf() {
@@ -568,8 +567,6 @@ async function executeComparePdf() {
     triggerDownload(new Blob([report], {type: 'text/plain'}), 'Twidy_Comparison_Report.txt');
 }
 
-async function executeImageToPdf() { await executeScanToPdf(); }
-
 async function executePdfRotate() {
     updateProgress(50, 'Memutar halaman...');
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
@@ -594,7 +591,6 @@ async function executePdfWatermark() {
 
 async function executeEditPdf() { alertUser('Fitur ini berfungsi sebagai preview dokumen di browser.', 'success'); hideProgress(); }
 async function executePdfForms() { alertUser('Formulir berhasil distrukturkan.', 'success'); hideProgress(); }
-async function executePdfToPdfa() { await executeCompress(); }
 
 async function executeMerge() {
     const outPdf = await PDFLib.PDFDocument.create();
@@ -608,7 +604,6 @@ async function executeMerge() {
     triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'Twidy_Merged.pdf');
 }
 
-// LOGIKA SPLIT PDF TERBARU SESUAI GRUP
 async function executeSplit() {
     updateProgress(30, 'Membaca dokumen...');
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
@@ -707,20 +702,6 @@ async function executeCompress() {
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
     updateProgress(100, 'Selesai!'); alertUser('Berhasil dikompresi!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Compressed.pdf');
-}
-
-async function executePdfToImage() {
-    updateProgress(50, 'Render gambar...');
-    const pdf = await pdfjsLib.getDocument({data: await selectedFiles[0].arrayBuffer()}).promise;
-    const zip = new JSZip();
-    for(let i=1; i<=pdf.numPages; i++) {
-        const page = await pdf.getPage(i); const vp = page.getViewport({scale: 1.5});
-        const cvs = document.createElement('canvas'); cvs.width = vp.width; cvs.height = vp.height;
-        await page.render({canvasContext: cvs.getContext('2d'), viewport: vp}).promise;
-        zip.file(`Page_${i}.jpg`, cvs.toDataURL('image/jpeg').replace(/^data:image\/jpeg;base64,/, ""), {base64: true});
-    }
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
-    triggerDownload(await zip.generateAsync({type: 'blob'}), 'Twidy_Images.zip');
 }
 
 async function executeCropPdf() {
