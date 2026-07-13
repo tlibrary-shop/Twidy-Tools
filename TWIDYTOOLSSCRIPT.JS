@@ -13,7 +13,7 @@ const toolConfig = {
     'remove-pages': { title: 'Remove pages', desc: 'Hapus halaman tertentu dari dokumen PDF.', icon: 'fa-minus-circle', color: 'text-rose-500', accept: '.pdf', multi: false, settings: [{ id: 'remove-range', label: 'Halaman yang dihapus (Contoh: 1, 3, 5-7)', type: 'text', placeholder: 'Ketik halaman di sini' }] },
     'extract-pages': { title: 'Extract pages', desc: 'Dapatkan dokumen baru berisi halaman yang Anda ekstrak.', icon: 'fa-share-square', color: 'text-blue-500', accept: '.pdf', multi: false, settings: [{ id: 'extract-range', label: 'Halaman yang diambil (Contoh: 2, 4-6)', type: 'text', placeholder: 'Ketik halaman di sini' }] },
     'organize-pdf': { title: 'Organize PDF', desc: 'Susun ulang urutan halaman PDF.', icon: 'fa-sort-alpha-down', color: 'text-indigo-500', accept: '.pdf', multi: false, settings: [{ id: 'organize-order', label: 'Urutan Halaman Baru (Contoh: 3, 1, 2)', type: 'text', placeholder: 'Ketik urutan baru' }] },
-    'scan-to-pdf': { title: 'Scan to PDF', desc: 'Gabungkan gambar pindaian dokumen menjadi satu file PDF.', icon: 'fa-qrcode', color: 'text-slate-500', accept: '.jpg,.jpeg,.png', multi: true },
+    'scan-to-pdf': { title: 'Scan to PDF', desc: 'Gabungkan gambar pindaian dokumen menjadi satu file PDF profesional (High Contrast).', icon: 'fa-qrcode', color: 'text-slate-500', accept: '.jpg,.jpeg,.png', multi: true },
     
     'pdf-compress': { title: 'Compress PDF', desc: 'Kurangi ukuran file sambil mengoptimalkan kualitas maksimal.', icon: 'fa-compress-arrows-alt', color: 'text-green-500', accept: '.pdf', multi: false },
     'repair-pdf': { title: 'Repair PDF', desc: 'Pulihkan struktur file PDF yang rusak ringan secara otomatis.', icon: 'fa-wrench', color: 'text-amber-500', accept: '.pdf', multi: false },
@@ -476,7 +476,53 @@ async function executePdfToPdfa() { await executeConvertAPI('pdf-to-pdfa', 'pdf'
 
 
 // --- FUNGSI LOCAL / BROWSER (IMAGE, PDF MANIPULATION, DLL) ---
+
+// --- FITUR SCANNER DENGAN MAGIC COLOR (HIGH CONTRAST) ---
 async function executeScanToPdf() {
+    updateProgress(30, 'Mengoptimalkan kualitas gambar (Magic Color)...');
+    const outPdf = await PDFLib.PDFDocument.create();
+    
+    for (let i = 0; i < selectedFiles.length; i++) {
+        const f = selectedFiles[i];
+        
+        // Load gambar ke Image Object
+        const imgBitmap = await createImageBitmap(f);
+        const canvas = document.createElement('canvas');
+        canvas.width = imgBitmap.width;
+        canvas.height = imgBitmap.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(imgBitmap, 0, 0);
+
+        // Terapkan Magic Color Filter (Kontras Tinggi)
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        for (let j = 0; j < data.length; j += 4) {
+            // Rumus Luminance sederhana untuk mengubah ke hitam-putih kontras tinggi
+            let avg = (data[j] * 0.299 + data[j + 1] * 0.587 + data[j + 2] * 0.114);
+            // Threshold: Nilai di atas 140 jadi putih, di bawah jadi hitam
+            let val = avg > 140 ? 255 : 0;
+            data[j] = data[j + 1] = data[j + 2] = val;
+        }
+        ctx.putImageData(imageData, 0, 0);
+
+        // Masukkan ke PDF
+        const optimizedImageBytes = await new Promise(resolve => canvas.toBlob(b => b.arrayBuffer().then(resolve), 'image/jpeg', 0.8));
+        const img = await outPdf.embedJpg(optimizedImageBytes);
+        
+        const page = outPdf.addPage([img.width, img.height]);
+        page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+        
+        updateProgress(30 + ((i / selectedFiles.length) * 60), `Memproses gambar ${i + 1}...`);
+    }
+
+    updateProgress(100, 'Selesai!'); 
+    alertUser('Berhasil membuat PDF profesional!', 'success'); 
+    setTimeout(() => hideProgress(), 2000);
+    
+    triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'Twidy_Scanner_Pro.pdf');
+}
+
+async function executeImageToPdf() {
     updateProgress(30, 'Mengonversi gambar ke PDF...');
     const outPdf = await PDFLib.PDFDocument.create();
     for (let i = 0; i < selectedFiles.length; i++) {
@@ -487,10 +533,8 @@ async function executeScanToPdf() {
         page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
     }
     updateProgress(100, 'Selesai!'); alertUser('Berhasil membuat PDF!', 'success'); setTimeout(() => hideProgress(), 2000);
-    triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'Twidy_Scanned.pdf');
+    triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'Twidy_Images.pdf');
 }
-
-async function executeImageToPdf() { await executeScanToPdf(); }
 
 async function executePdfToImage() {
     updateProgress(50, 'Render gambar...');
