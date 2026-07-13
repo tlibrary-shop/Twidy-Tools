@@ -5,8 +5,8 @@ let selectedFiles = [];
 
 const toolConfig = {
     // === TWIDY ECOSYSTEM ===
-    'twidy-bill': { title: 'TwidyBill', desc: 'Generate tagihan siap kirim dalam hitungan detik.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.netlify.app/' },
-    'twidy-ai': { title: 'Twidy AI', desc: 'Asisten pintar dengan 50+ tools AI untuk produktivitas & kreativitas.', icon: 'fa-robot', color: 'text-purple-500', isIframe: true, iframeUrl: 'https://twidyai.vercel.app/' },
+    'twidy-bill': { title: 'TwidyBill (Invoice Maker)', desc: 'Buat tagihan, invoice, dan kwitansi profesional dengan mudah dalam bentuk gambar.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.netlify.app/' },
+    'twidy-ai': { title: 'Twidy AI (Assistant)', desc: 'Asisten AI pintar untuk membantu berbagai tugas digital Anda secara langsung.', icon: 'fa-robot', color: 'text-purple-500', isIframe: true, iframeUrl: 'https://twidyai.vercel.app/' },
 
     'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop) atau gunakan fitur sortir otomatis.', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
     'pdf-split': { title: 'Split PDF', desc: 'Pisahkan dokumen PDF menjadi beberapa bagian.', icon: 'fa-scissors', color: 'text-orange-500', accept: '.pdf', multi: false, settings: [{ id: 'split-range', label: 'Rentang Halaman (Gunakan koma untuk memisah file. Contoh: 1, 2-50)', type: 'text', placeholder: 'Kosongkan jika ingin memisah tiap halaman' }] },
@@ -20,9 +20,9 @@ const toolConfig = {
     'ocr-pdf': { title: 'OCR PDF', desc: 'Ubah teks gambar pada halaman PDF menjadi teks digital yang bisa disalin.', icon: 'fa-search-plus', color: 'text-sky-500', accept: '.pdf', multi: false },
 
     'image-to-pdf': { title: 'JPG to PDF', desc: 'Konversi gambar JPG ke PDF dalam hitungan detik.', icon: 'fa-image', color: 'text-yellow-500', accept: '.jpg,.jpeg,.png', multi: true },
-    'word-to-pdf': { title: 'WORD to PDF', desc: 'Buat file DOC dan DOCX Anda mudah dibaca dengan PDF.', icon: 'fa-file-word', color: 'text-blue-600', accept: '.docx', multi: false },
+    'word-to-pdf': { title: 'WORD to PDF', desc: 'Buat file DOC dan DOCX Anda mudah dibaca dengan PDF.', icon: 'fa-file-word', color: 'text-blue-600', accept: '.docx,.doc', multi: false },
     'ppt-to-pdf': { title: 'POWERPOINT to PDF', desc: 'Jadikan presentasi PPT dan PPTX mudah dilihat dengan PDF.', icon: 'fa-file-powerpoint', color: 'text-orange-600', accept: '.pptx,.ppt', multi: false },
-    'excel-to-pdf': { title: 'EXCEL to PDF', desc: 'Buat spreadsheet EXCEL mudah dibaca mengkonversi ke PDF.', icon: 'fa-file-excel', color: 'text-green-600', accept: '.xlsx', multi: false },
+    'excel-to-pdf': { title: 'EXCEL to PDF', desc: 'Buat spreadsheet EXCEL mudah dibaca mengkonversi ke PDF.', icon: 'fa-file-excel', color: 'text-green-600', accept: '.xlsx,.xls', multi: false },
     'html-to-pdf': { title: 'HTML to PDF', desc: 'Konversi halaman web dalam HTML ke PDF.', icon: 'fa-html5', color: 'text-orange-500', accept: '.html', multi: false },
     'txt-to-pdf': { title: 'TXT to PDF', desc: 'Konversi file teks biasa (.txt) menjadi dokumen PDF.', icon: 'fa-file-lines', color: 'text-slate-600', accept: '.txt', multi: false },
     'rtf-to-pdf': { title: 'RTF to PDF', desc: 'Konversi file Rich Text Format (.rtf) menjadi PDF.', icon: 'fa-file-alt', color: 'text-purple-600', accept: '.rtf', multi: false },
@@ -58,7 +58,6 @@ const toolConfig = {
 };
 
 const categories = {
-    // TWIDY ECOSYSTEM DITAMBAHKAN twidy-ai
     'TWIDY ECOSYSTEM': ['twidy-bill', 'twidy-ai'],
     'ORGANIZE PDF': ['pdf-merge', 'pdf-split', 'remove-pages', 'extract-pages', 'organize-pdf', 'scan-to-pdf'],
     'OPTIMIZE PDF': ['pdf-compress', 'repair-pdf', 'ocr-pdf'],
@@ -409,6 +408,60 @@ async function processFiles() {
 // KUMPULAN FUNGSI FITUR
 // ==========================================
 
+// --- FUNGSI HELPER CONVERTAPI VERCEL ---
+async function executeConvertAPI(conversionType, targetExtension, loadingMessage) {
+    updateProgress(20, loadingMessage);
+    
+    // Menyiapkan FormData untuk dikirim ke backend /api/convert
+    const formData = new FormData();
+    formData.append('file', selectedFiles[0]);
+    formData.append('conversionType', conversionType); 
+
+    updateProgress(50, 'Mengirim dokumen ke server (ConvertAPI)...');
+    
+    const response = await fetch('/api/convert', {
+        method: 'POST',
+        body: formData
+    });
+
+    if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(errText || response.statusText);
+    }
+
+    updateProgress(80, 'Mengunduh hasil konversi...');
+    
+    // Asumsi backend mengembalikan file dalam bentuk Blob
+    const blob = await response.blob();
+    const originalName = selectedFiles[0].name;
+    const baseName = originalName.substring(0, originalName.lastIndexOf('.'));
+    const newFileName = `${baseName}.${targetExtension}`;
+
+    updateProgress(100, 'Selesai!');
+    alertUser('Berhasil dikonversi!', 'success');
+    setTimeout(() => hideProgress(), 2000);
+    
+    triggerDownload(blob, newFileName);
+}
+
+// --- OFFICE & PDF CONVERSION VIA BACKEND ---
+async function executeWordToPdf() { await executeConvertAPI('word-to-pdf', 'pdf', 'Menyiapkan file Word...'); }
+async function executePptToPdf() { await executeConvertAPI('ppt-to-pdf', 'pdf', 'Menyiapkan file PowerPoint...'); }
+async function executeExcelToPdf() { await executeConvertAPI('excel-to-pdf', 'pdf', 'Menyiapkan file Excel...'); }
+
+async function executePdfToWord() { await executeConvertAPI('pdf-to-word', 'docx', 'Menyiapkan file PDF...'); }
+async function executePdfToExcel() { await executeConvertAPI('pdf-to-excel', 'xlsx', 'Menyiapkan file PDF...'); }
+async function executePdfToPpt() { await executeConvertAPI('pdf-to-ppt', 'pptx', 'Menyiapkan file PDF...'); }
+
+
+// --- FUNGSI LOCAL / BROWSER ---
+async function executeHtmlToPdf() {
+    updateProgress(50, 'Mengonversi format ke PDF...');
+    const htmlContent = '<h1>Dokumen Hasil Konversi</h1><p>Berhasil diproses melalui TwidyTools.</p>';
+    await html2pdf().from(htmlContent).save('Twidy_Converted.pdf');
+    updateProgress(100, 'Selesai!'); hideProgress();
+}
+
 async function executeTxtToPdf() {
     updateProgress(40, 'Membaca file teks...');
     const text = await selectedFiles[0].text();
@@ -516,17 +569,6 @@ async function executeComparePdf() {
 }
 
 async function executeImageToPdf() { await executeScanToPdf(); }
-
-async function executeWordToPdf() {
-    updateProgress(50, 'Mengonversi format ke PDF...');
-    const htmlContent = '<h1>Dokumen Hasil Konversi</h1><p>Berhasil diproses melalui TwidyTools.</p>';
-    await html2pdf().from(htmlContent).save('Twidy_Converted.pdf');
-    updateProgress(100, 'Selesai!'); hideProgress();
-}
-
-async function executePptToPdf() { await executeWordToPdf(); }
-async function executeHtmlToPdf() { await executeWordToPdf(); }
-async function executePdfToPpt() { await executePdfToWord(); }
 
 async function executePdfRotate() {
     updateProgress(50, 'Memutar halaman...');
@@ -665,33 +707,6 @@ async function executeCompress() {
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
     updateProgress(100, 'Selesai!'); alertUser('Berhasil dikompresi!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await doc.save()], {type: 'application/pdf'}), 'Twidy_Compressed.pdf');
-}
-
-async function executePdfToWord() {
-    updateProgress(50, 'Konversi teks...');
-    const pdf = await pdfjsLib.getDocument({data: await selectedFiles[0].arrayBuffer()}).promise;
-    let txt = "";
-    for(let i=1; i<=pdf.numPages; i++) txt += (await (await pdf.getPage(i)).getTextContent()).items.map(t=>t.str).join(" ") + "<br>";
-    const docText = `<html xmlns:w='urn:schemas-microsoft-com:office:word'><body>${txt}</body></html>`;
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
-    triggerDownload(new Blob(['\ufeff' + docText], {type: 'application/msword'}), selectedFiles[0].name.replace('.pdf', '.doc'));
-}
-
-async function executePdfToExcel() {
-    updateProgress(50, 'Ekstrak tabel...');
-    const pdf = await pdfjsLib.getDocument({data: await selectedFiles[0].arrayBuffer()}).promise;
-    let rows = [];
-    for(let i=1; i<=pdf.numPages; i++) {
-        let line = [];
-        (await (await pdf.getPage(i)).getTextContent()).items.forEach(t => {
-            line.push(t.str); if(line.length>4){ rows.push(line); line=[]; }
-        });
-    }
-    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "Data");
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil ditarik!', 'success'); setTimeout(() => hideProgress(), 2000);
-    
-    const excelBuffer = XLSX.write(wb, {bookType: 'xlsx', type: 'array'});
-    triggerDownload(new Blob([excelBuffer], {type: 'application/octet-stream'}), selectedFiles[0].name.replace('.pdf', '.xlsx'));
 }
 
 async function executePdfToImage() {
