@@ -430,17 +430,27 @@ async function executeConvertAPI(conversionType, targetExtension, loadingMessage
 
     updateProgress(80, 'Mengunduh hasil konversi...');
     
-    // Membaca nama file asli yang diberikan oleh backend ConvertAPI
+    // --- PERBAIKAN PENAMAAN FILE ---
     let newFileName = 'Hasil_Konversi.' + targetExtension;
     const disposition = response.headers.get('Content-Disposition');
+    let serverFileName = "";
+    
     if (disposition && disposition.includes('filename=')) {
         const match = disposition.match(/filename="?([^"]+)"?/);
         if (match && match[1]) {
-            newFileName = match[1];
+            serverFileName = match[1];
         }
-    } else {
-        const baseName = selectedFiles[0].name.substring(0, selectedFiles[0].name.lastIndexOf('.'));
+    }
+    
+    // Cek apakah nama dari server bermasalah (undefined/kosong)
+    if (!serverFileName || serverFileName === 'undefined' || serverFileName === 'undefined.undefined' || serverFileName.includes('undefined')) {
+        // Abaikan nama dari server, paksa gunakan nama file asli dari user
+        const originalName = selectedFiles[0].name;
+        const lastDotIndex = originalName.lastIndexOf('.');
+        const baseName = lastDotIndex !== -1 ? originalName.substring(0, lastDotIndex) : originalName;
         newFileName = `${baseName}.${targetExtension}`;
+    } else {
+        newFileName = serverFileName;
     }
 
     const blob = await response.blob();
