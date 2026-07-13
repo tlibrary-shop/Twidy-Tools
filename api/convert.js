@@ -20,56 +20,43 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'Server Error: CONVERTAPI_SECRET belum dikonfigurasi di Vercel.' });
     }
 
-    // --- KUNCI PERBAIKANNYA DI SINI ---
     const form = formidable({
-        keepExtensions: true, // Wajib di-true agar .docx/.pdf tidak hilang
-        maxFileSize: 20 * 1024 * 1024, // Batas maksimal 20MB
+        keepExtensions: true, 
+        maxFileSize: 20 * 1024 * 1024, 
     });
 
     try {
         const [fields, files] = await form.parse(req);
         
-        // Memastikan kompatibilitas dengan berbagai versi formidable
         const fileData = files.file ? (Array.isArray(files.file) ? files.file[0] : files.file) : null;
         const conversionType = fields.conversionType ? (Array.isArray(fields.conversionType) ? fields.conversionType[0] : fields.conversionType) : null;
 
         if (!fileData || !conversionType) {
-            return res.status(400).json({ error: 'File atau tipe konversi (conversionType) tidak ditemukan.' });
+            return res.status(400).json({ error: 'File atau tipe konversi tidak ditemukan.' });
         }
 
         let fromFormat = '';
         let toFormat = '';
 
+        // --- PENAMBAHAN FORMAT BARU DI SINI ---
         switch (conversionType) {
-            case 'word-to-pdf':
-                fromFormat = 'docx'; 
-                toFormat = 'pdf';
-                break;
-            case 'excel-to-pdf':
-                fromFormat = 'xlsx';
-                toFormat = 'pdf';
-                break;
-            case 'ppt-to-pdf':
-                fromFormat = 'pptx';
-                toFormat = 'pdf';
-                break;
-            case 'pdf-to-word':
-                fromFormat = 'pdf';
-                toFormat = 'docx';
-                break;
-            case 'pdf-to-excel':
-                fromFormat = 'pdf';
-                toFormat = 'xlsx';
-                break;
-            case 'pdf-to-ppt':
-                fromFormat = 'pdf';
-                toFormat = 'pptx';
-                break;
+            case 'word-to-pdf': fromFormat = 'docx'; toFormat = 'pdf'; break;
+            case 'excel-to-pdf': fromFormat = 'xlsx'; toFormat = 'pdf'; break;
+            case 'ppt-to-pdf': fromFormat = 'pptx'; toFormat = 'pdf'; break;
+            
+            case 'html-to-pdf': fromFormat = 'html'; toFormat = 'pdf'; break;
+            case 'txt-to-pdf': fromFormat = 'txt'; toFormat = 'pdf'; break;
+            case 'rtf-to-pdf': fromFormat = 'rtf'; toFormat = 'pdf'; break;
+            
+            case 'pdf-to-word': fromFormat = 'pdf'; toFormat = 'docx'; break;
+            case 'pdf-to-excel': fromFormat = 'pdf'; toFormat = 'xlsx'; break;
+            case 'pdf-to-ppt': fromFormat = 'pdf'; toFormat = 'pptx'; break;
+            case 'pdf-to-pdfa': fromFormat = 'pdf'; toFormat = 'pdfa'; break;
+            
             default:
                 return res.status(400).json({ error: `Tipe konversi '${conversionType}' tidak didukung.` });
         }
 
-        // Proses konversi via ConvertAPI
         const result = await convertapi.convert(toFormat, {
             File: fileData.filepath
         }, fromFormat);
@@ -85,7 +72,6 @@ export default async function handler(req, res) {
         const arrayBuffer = await fileResponse.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        // Hapus file sementara
         fs.unlink(fileData.filepath, (err) => {
             if (err) console.error('Gagal menghapus berkas temp:', err);
         });
@@ -96,8 +82,6 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error('ConvertAPI Error:', error);
-        
-        // Menangkap pesan error spesifik dari ConvertAPI jika ada
         const errorMsg = error.response && error.response.data 
             ? JSON.stringify(error.response.data) 
             : error.message || 'Terjadi kesalahan saat memproses dokumen.';
