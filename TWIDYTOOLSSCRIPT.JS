@@ -13,7 +13,9 @@ const toolConfig = {
     'remove-pages': { title: 'Remove pages', desc: 'Hapus halaman tertentu dari dokumen PDF.', icon: 'fa-minus-circle', color: 'text-rose-500', accept: '.pdf', multi: false, settings: [{ id: 'remove-range', label: 'Halaman yang dihapus (Contoh: 1, 3, 5-7)', type: 'text', placeholder: 'Ketik halaman di sini' }] },
     'extract-pages': { title: 'Extract pages', desc: 'Dapatkan dokumen baru berisi halaman yang Anda ekstrak.', icon: 'fa-share-square', color: 'text-blue-500', accept: '.pdf', multi: false, settings: [{ id: 'extract-range', label: 'Halaman yang diambil (Contoh: 2, 4-6)', type: 'text', placeholder: 'Ketik halaman di sini' }] },
     'organize-pdf': { title: 'Organize PDF', desc: 'Susun ulang urutan halaman PDF.', icon: 'fa-sort-alpha-down', color: 'text-indigo-500', accept: '.pdf', multi: false, settings: [{ id: 'organize-order', label: 'Urutan Halaman Baru (Contoh: 3, 1, 2)', type: 'text', placeholder: 'Ketik urutan baru' }] },
-    'scan-to-pdf': { title: 'Scan to PDF', desc: 'Gabungkan gambar pindaian dokumen menjadi satu file PDF profesional (High Contrast).', icon: 'fa-qrcode', color: 'text-slate-500', accept: '.jpg,.jpeg,.png', multi: true },
+    
+    // SCANNER ALIAS CAMSCANNER (UPDATED)
+    'scan-to-pdf': { title: 'Scan to PDF', desc: 'Kamera Scanner dokumen dengan fitur Magic Color, Preview, & Export Gambar/PDF.', icon: 'fa-qrcode', color: 'text-slate-500', accept: '.jpg,.jpeg,.png', multi: true },
     
     'pdf-compress': { title: 'Compress PDF', desc: 'Kurangi ukuran file sambil mengoptimalkan kualitas maksimal.', icon: 'fa-compress-arrows-alt', color: 'text-green-500', accept: '.pdf', multi: false },
     'repair-pdf': { title: 'Repair PDF', desc: 'Pulihkan struktur file PDF yang rusak ringan secara otomatis.', icon: 'fa-wrench', color: 'text-amber-500', accept: '.pdf', multi: false },
@@ -343,13 +345,6 @@ function parseRange(rangeStr, maxPages) {
     return Array.from(pages).filter(p => p >= 0 && p < maxPages).sort((a,b) => a-b);
 }
 
-function downloadAIResult() {
-    const text = document.getElementById('aiResultText').value;
-    if(!text) return;
-    const blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
-    triggerDownload(blob, `Twidy_AI_Result_${currentTool}.txt`);
-}
-
 // ==========================================
 // PUSAT EKSEKUSI (PROCESS HANDLER)
 // ==========================================
@@ -364,7 +359,7 @@ async function processFiles() {
         else if (currentTool === 'pdf-compress') { await executeCompress(); }
         else if (currentTool === 'repair-pdf') { await executeRepairPdf(); }
         else if (currentTool === 'ocr-pdf') { await executeOcrPdf(); }
-        else if (currentTool === 'scan-to-pdf') { await executeScanToPdf(); }
+        else if (currentTool === 'scan-to-pdf') { await executeScanToPdf(); } // Memicu Scanner UI
         
         else if (currentTool === 'image-to-pdf') { await executeImageToPdf(); }
         else if (currentTool === 'word-to-pdf') { await executeWordToPdf(); }
@@ -430,7 +425,6 @@ async function executeConvertAPI(conversionType, targetExtension, loadingMessage
 
     updateProgress(80, 'Mengunduh hasil konversi...');
     
-    // --- PERBAIKAN PENAMAAN FILE ---
     let newFileName = 'Hasil_Konversi.' + targetExtension;
     const disposition = response.headers.get('Content-Disposition');
     let serverFileName = "";
@@ -442,9 +436,7 @@ async function executeConvertAPI(conversionType, targetExtension, loadingMessage
         }
     }
     
-    // Cek apakah nama dari server bermasalah (undefined/kosong)
     if (!serverFileName || serverFileName === 'undefined' || serverFileName === 'undefined.undefined' || serverFileName.includes('undefined')) {
-        // Abaikan nama dari server, paksa gunakan nama file asli dari user
         const originalName = selectedFiles[0].name;
         const lastDotIndex = originalName.lastIndexOf('.');
         const baseName = lastDotIndex !== -1 ? originalName.substring(0, lastDotIndex) : originalName;
@@ -468,60 +460,194 @@ async function executeExcelToPdf() { await executeConvertAPI('excel-to-pdf', 'pd
 async function executeHtmlToPdf() { await executeConvertAPI('html-to-pdf', 'pdf', 'Membaca struktur HTML...'); }
 async function executeTxtToPdf() { await executeConvertAPI('txt-to-pdf', 'pdf', 'Menyiapkan file Teks...'); }
 async function executeRtfToPdf() { await executeConvertAPI('rtf-to-pdf', 'pdf', 'Membaca format file RTF...'); }
-
 async function executePdfToWord() { await executeConvertAPI('pdf-to-word', 'docx', 'Menyiapkan file PDF...'); }
 async function executePdfToExcel() { await executeConvertAPI('pdf-to-excel', 'xlsx', 'Menyiapkan file PDF...'); }
 async function executePdfToPpt() { await executeConvertAPI('pdf-to-ppt', 'pptx', 'Menyiapkan file PDF...'); }
 async function executePdfToPdfa() { await executeConvertAPI('pdf-to-pdfa', 'pdf', 'Memproses metadata PDF/A...'); }
 
-
-// --- FUNGSI LOCAL / BROWSER (IMAGE, PDF MANIPULATION, DLL) ---
-
-// --- FITUR SCANNER DENGAN MAGIC COLOR (HIGH CONTRAST) ---
+// --- FITUR SCANNER UI CAMSCANNER (BARU) ---
 async function executeScanToPdf() {
-    updateProgress(30, 'Mengoptimalkan kualitas gambar (Magic Color)...');
-    const outPdf = await PDFLib.PDFDocument.create();
+    if (selectedFiles.length === 0) return;
+
+    // 1. Buat Container Modal/Pop-up Fullscreen
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 z-[100] flex flex-col bg-slate-900 text-white';
+    modal.id = 'twidyScannerModal';
+
+    // Header Modal
+    const header = document.createElement('div');
+    header.className = 'w-full flex justify-between items-center p-4 border-b border-slate-700 bg-slate-800 shadow-md';
+    header.innerHTML = `
+        <h3 class="text-lg font-bold"><i class="fas fa-qrcode mr-2 text-indigo-400"></i> TwidyScanner</h3>
+        <button id="btnCloseScanner" class="text-2xl text-slate-400 hover:text-white transition"><i class="fas fa-times"></i></button>
+    `;
+
+    // Area Preview Canvas
+    const canvasContainer = document.createElement('div');
+    canvasContainer.className = 'relative w-full flex-1 min-h-0 flex items-center justify-center bg-black p-2 overflow-hidden';
+    const canvas = document.createElement('canvas');
+    canvas.className = 'max-w-full max-h-full object-contain shadow-2xl';
+    canvasContainer.appendChild(canvas);
+
+    // Area Kontrol Bawah
+    const bottomControls = document.createElement('div');
+    bottomControls.className = 'w-full bg-slate-800 flex flex-col p-4 border-t border-slate-700 pb-8 sm:pb-4';
     
-    for (let i = 0; i < selectedFiles.length; i++) {
-        const f = selectedFiles[i];
-        
-        // Load gambar ke Image Object
-        const imgBitmap = await createImageBitmap(f);
-        const canvas = document.createElement('canvas');
+    // Tombol Filter
+    const filterControls = document.createElement('div');
+    filterControls.className = 'flex gap-3 overflow-x-auto justify-center mb-5 pb-2 no-scrollbar';
+    filterControls.innerHTML = `
+        <button id="btnFilterOrg" class="flex flex-col items-center min-w-[80px] p-2 rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 transition"><i class="fas fa-image text-xl mb-1"></i><span class="text-xs font-semibold">Original</span></button>
+        <button id="btnFilterMagic" class="flex flex-col items-center min-w-[80px] p-2 rounded-xl bg-indigo-600 text-white shadow-lg ring-2 ring-indigo-400 transition"><i class="fas fa-magic text-xl mb-1"></i><span class="text-xs font-semibold">Magic Color</span></button>
+        <button id="btnFilterBW" class="flex flex-col items-center min-w-[80px] p-2 rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 transition"><i class="fas fa-adjust text-xl mb-1"></i><span class="text-xs font-semibold">B & W</span></button>
+    `;
+
+    // Tombol Export
+    const actionControls = document.createElement('div');
+    actionControls.className = 'flex gap-3 w-full max-w-md mx-auto justify-center';
+    actionControls.innerHTML = `
+        <button id="btnExportImg" class="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-500 transition shadow-lg flex items-center justify-center gap-2"><i class="fas fa-file-image"></i> Simpan JPG</button>
+        <button id="btnExportPdf" class="flex-1 px-4 py-3 bg-rose-600 text-white rounded-xl font-bold hover:bg-rose-500 transition shadow-lg flex items-center justify-center gap-2"><i class="fas fa-file-pdf"></i> Buat PDF</button>
+    `;
+
+    bottomControls.appendChild(filterControls);
+    bottomControls.appendChild(actionControls);
+    
+    modal.appendChild(header);
+    modal.appendChild(canvasContainer);
+    modal.appendChild(bottomControls);
+    document.body.appendChild(modal);
+
+    // Tutup Modal
+    document.getElementById('btnCloseScanner').onclick = () => modal.remove();
+
+    // 2. Siapkan Context & Gambar Asli (Ambil file pertama untuk preview)
+    const ctx = canvas.getContext('2d');
+    let currentFilter = 'magic';
+    let originalImageData = null;
+
+    try {
+        const imgBitmap = await createImageBitmap(selectedFiles[0]);
         canvas.width = imgBitmap.width;
         canvas.height = imgBitmap.height;
-        const ctx = canvas.getContext('2d');
         ctx.drawImage(imgBitmap, 0, 0);
-
-        // Terapkan Magic Color Filter (Kontras Tinggi)
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        for (let j = 0; j < data.length; j += 4) {
-            // Rumus Luminance sederhana untuk mengubah ke hitam-putih kontras tinggi
-            let avg = (data[j] * 0.299 + data[j + 1] * 0.587 + data[j + 2] * 0.114);
-            // Threshold: Nilai di atas 140 jadi putih, di bawah jadi hitam
-            let val = avg > 140 ? 255 : 0;
-            data[j] = data[j + 1] = data[j + 2] = val;
-        }
-        ctx.putImageData(imageData, 0, 0);
-
-        // Masukkan ke PDF
-        const optimizedImageBytes = await new Promise(resolve => canvas.toBlob(b => b.arrayBuffer().then(resolve), 'image/jpeg', 0.8));
-        const img = await outPdf.embedJpg(optimizedImageBytes);
-        
-        const page = outPdf.addPage([img.width, img.height]);
-        page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
-        
-        updateProgress(30 + ((i / selectedFiles.length) * 60), `Memproses gambar ${i + 1}...`);
+        originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    } catch (err) {
+        alertUser("Gagal membaca gambar preview.", "error");
+        modal.remove();
+        return;
     }
 
-    updateProgress(100, 'Selesai!'); 
-    alertUser('Berhasil membuat PDF profesional!', 'success'); 
-    setTimeout(() => hideProgress(), 2000);
+    // 3. Fungsi Inti Penerapan Filter Piksel
+    function applyFilterToContext(context, width, height, filterType, origData) {
+        context.putImageData(origData, 0, 0);
+        if (filterType === 'original') return;
+
+        const imgData = context.getImageData(0, 0, width, height);
+        const data = imgData.data;
+
+        if (filterType === 'magic') {
+            // Algoritma Magic Color (Kecerahan + Kontras)
+            const contrast = 60; // Tingkat kontras (-255 ke 255)
+            const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+            
+            for (let i = 0; i < data.length; i += 4) {
+                // Terapkan Kontras lalu Kecerahan (+35)
+                data[i] = factor * (data[i] - 128) + 128 + 35;     // Merah
+                data[i+1] = factor * (data[i+1] - 128) + 128 + 35; // Hijau
+                data[i+2] = factor * (data[i+2] - 128) + 128 + 35; // Biru
+            }
+        } else if (filterType === 'bw') {
+            // Algoritma Hitam Putih Dokumen
+            for (let i = 0; i < data.length; i += 4) {
+                let luminance = (data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114);
+                let val = luminance > 120 ? 255 : 0; // Batas hitam putih
+                data[i] = data[i+1] = data[i+2] = val;
+            }
+        }
+        context.putImageData(imgData, 0, 0);
+    }
+
+    // 4. Update UI Preview
+    function updatePreview() {
+        // Reset warna tombol
+        const btnClasses = "flex flex-col items-center min-w-[80px] p-2 rounded-xl transition ";
+        const activeClass = btnClasses + "bg-indigo-600 text-white shadow-lg ring-2 ring-indigo-400";
+        const inactiveClass = btnClasses + "bg-slate-700 text-slate-300 hover:bg-slate-600";
+        
+        document.getElementById('btnFilterOrg').className = currentFilter === 'original' ? activeClass : inactiveClass;
+        document.getElementById('btnFilterMagic').className = currentFilter === 'magic' ? activeClass : inactiveClass;
+        document.getElementById('btnFilterBW').className = currentFilter === 'bw' ? activeClass : inactiveClass;
+        
+        // Terapkan filter ke Canvas Preview
+        applyFilterToContext(ctx, canvas.width, canvas.height, currentFilter, originalImageData);
+    }
+
+    // Event Listener Filter
+    document.getElementById('btnFilterOrg').onclick = () => { currentFilter = 'original'; updatePreview(); };
+    document.getElementById('btnFilterMagic').onclick = () => { currentFilter = 'magic'; updatePreview(); };
+    document.getElementById('btnFilterBW').onclick = () => { currentFilter = 'bw'; updatePreview(); };
     
-    triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'Twidy_Scanner_Pro.pdf');
+    // Jalankan filter default saat pertama buka
+    updatePreview(); 
+
+    // 5. Fungsi Ekspor Massal
+    async function processExport(exportType) {
+        modal.remove(); // Tutup scanner UI
+        updateProgress(10, 'Menyiapkan pengeksporan...');
+        
+        let outPdf = exportType === 'pdf' ? await PDFLib.PDFDocument.create() : null;
+        let zip = exportType === 'image' && selectedFiles.length > 1 ? new JSZip() : null;
+
+        for (let i = 0; i < selectedFiles.length; i++) {
+            updateProgress(10 + ((i / selectedFiles.length) * 80), `Menerapkan filter pada gambar ${i + 1}/${selectedFiles.length}...`);
+            
+            const f = selectedFiles[i];
+            const bmp = await createImageBitmap(f);
+            const cvs = document.createElement('canvas');
+            cvs.width = bmp.width; cvs.height = bmp.height;
+            const cCtx = cvs.getContext('2d');
+            cCtx.drawImage(bmp, 0, 0);
+            
+            const oData = cCtx.getImageData(0, 0, cvs.width, cvs.height);
+            applyFilterToContext(cCtx, cvs.width, cvs.height, currentFilter, oData);
+
+            // Ubah Canvas jadi Blob (Kualitas JPG 85%)
+            const blob = await new Promise(res => cvs.toBlob(res, 'image/jpeg', 0.85));
+
+            if (exportType === 'pdf') {
+                const bytes = await blob.arrayBuffer();
+                const img = await outPdf.embedJpg(bytes);
+                const page = outPdf.addPage([img.width, img.height]);
+                page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+            } else {
+                if (selectedFiles.length === 1) {
+                    triggerDownload(blob, `TwidyScan_Filtered.jpg`);
+                } else {
+                    zip.file(`TwidyScan_${i+1}.jpg`, blob);
+                }
+            }
+        }
+
+        updateProgress(90, 'Menyimpan berkas...');
+        
+        if (exportType === 'pdf') {
+            triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'TwidyScanner_Document.pdf');
+        } else if (exportType === 'image' && selectedFiles.length > 1) {
+            triggerDownload(await zip.generateAsync({type: 'blob'}), 'TwidyScanner_Images.zip');
+        }
+
+        updateProgress(100, 'Selesai!');
+        alertUser('Dokumen Scanner berhasil disimpan!', 'success');
+        setTimeout(() => hideProgress(), 2000);
+    }
+
+    document.getElementById('btnExportPdf').onclick = () => processExport('pdf');
+    document.getElementById('btnExportImg').onclick = () => processExport('image');
 }
 
+
+// --- FUNGSI LOKAL LAINNYA ---
 async function executeImageToPdf() {
     updateProgress(30, 'Mengonversi gambar ke PDF...');
     const outPdf = await PDFLib.PDFDocument.create();
