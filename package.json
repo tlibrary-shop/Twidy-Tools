@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "convertapi": "^1.15.0",
+    "formidable": "^3.5.4"
+  }
+}
