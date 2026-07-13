@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initTheme();
     setInterval(updateDateTime, 1000);
     updateDateTime();
-    const path = window.location.pathname.substring(1); // Mengambil /pdf-merge jadi pdf-merge
+    const path = window.location.pathname.replace('/', ''); 
     if (path && toolConfig[path]) { 
         selectTool(path); 
     }
