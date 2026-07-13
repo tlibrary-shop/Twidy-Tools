@@ -2,18 +2,15 @@ import ConvertAPI from 'convertapi';
 import formidable from 'formidable';
 import fs from 'fs';
 
-// Konfigurasi wajib Vercel agar tidak mem-parse body secara otomatis (karena kita pakai formidable)
 export const config = {
     api: {
         bodyParser: false,
     },
 };
 
-// Inisialisasi ConvertAPI menggunakan API Key / Secret dari Environment Variables Vercel
 const convertapi = new ConvertAPI(process.env.CONVERTAPI_SECRET);
 
 export default async function handler(req, res) {
-    // Hanya menerima request POST
     if (req.method !== 'POST') {
         res.setHeader('Allow', ['POST']);
         return res.status(405).end(`Method ${req.method} Not Allowed`);
@@ -23,26 +20,29 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'Server Error: CONVERTAPI_SECRET belum dikonfigurasi di Vercel.' });
     }
 
-    const form = formidable({});
+    // --- KUNCI PERBAIKANNYA DI SINI ---
+    const form = formidable({
+        keepExtensions: true, // Wajib di-true agar .docx/.pdf tidak hilang
+        maxFileSize: 20 * 1024 * 1024, // Batas maksimal 20MB
+    });
 
     try {
-        // 1. Parse data berkas dan fields dari request
         const [fields, files] = await form.parse(req);
         
-        const fileData = files.file ? files.file[0] : null;
-        const conversionType = fields.conversionType ? fields.conversionType[0] : null;
+        // Memastikan kompatibilitas dengan berbagai versi formidable
+        const fileData = files.file ? (Array.isArray(files.file) ? files.file[0] : files.file) : null;
+        const conversionType = fields.conversionType ? (Array.isArray(fields.conversionType) ? fields.conversionType[0] : fields.conversionType) : null;
 
         if (!fileData || !conversionType) {
             return res.status(400).json({ error: 'File atau tipe konversi (conversionType) tidak ditemukan.' });
         }
 
-        // 2. Tentukan parameter input & output format berdasarkan conversionType dari frontend
         let fromFormat = '';
         let toFormat = '';
 
         switch (conversionType) {
             case 'word-to-pdf':
-                fromFormat = 'docx'; // ConvertAPI mendukung doc/docx langsung lewat deteksi atau spesifik format
+                fromFormat = 'docx'; 
                 toFormat = 'pdf';
                 break;
             case 'excel-to-pdf':
@@ -69,13 +69,11 @@ export default async function handler(req, res) {
                 return res.status(400).json({ error: `Tipe konversi '${conversionType}' tidak didukung.` });
         }
 
-        // 3. Jalankan proses konversi via ConvertAPI
-        // Menggunakan path file lokal sementara hasil parse dari formidable
+        // Proses konversi via ConvertAPI
         const result = await convertapi.convert(toFormat, {
             File: fileData.filepath
         }, fromFormat);
 
-        // 4. Ambil URL file hasil konversi dan unduh sebagai buffer untuk dikirim balik ke frontend
         const resultFile = result.files[0];
         const fileUrl = resultFile.url;
         
@@ -87,18 +85,23 @@ export default async function handler(req, res) {
         const arrayBuffer = await fileResponse.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        // 5. Bersihkan file sampah temporer di server Vercel agar tidak penuh
+        // Hapus file sementara
         fs.unlink(fileData.filepath, (err) => {
             if (err) console.error('Gagal menghapus berkas temp:', err);
         });
 
-        // 6. Set header response sesuai jenis file output dan kirim filenya
         res.setHeader('Content-Type', 'application/octet-stream');
-        res.setHeader('Content-Disposition', `attachment; filename=${resultFile.filename}`);
+        res.setHeader('Content-Disposition', `attachment; filename="${resultFile.filename}"`);
         return res.status(200).send(buffer);
 
     } catch (error) {
         console.error('ConvertAPI Error:', error);
-        return res.status(500).json({ error: error.message || 'Terjadi kesalahan saat memproses dokumen.' });
+        
+        // Menangkap pesan error spesifik dari ConvertAPI jika ada
+        const errorMsg = error.response && error.response.data 
+            ? JSON.stringify(error.response.data) 
+            : error.message || 'Terjadi kesalahan saat memproses dokumen.';
+            
+        return res.status(500).json({ error: errorMsg });
     }
 }
