@@ -4,11 +4,10 @@ let currentTool = null;
 let selectedFiles = [];
 
 const toolConfig = {
-    'twidy-bill': { title: 'TwidyBill', desc: 'Generate tagihan siap kirim dalam hitungan detik.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.netlify.app/' },
-    'twidy-ai': { title: 'TwidyAI', desc: 'Asisten pintar dengan 50+ tools AI untuk produktivitas & kreativitas.', icon: 'fa-robot', color: 'text-indigo-600', isIframe: true, iframeUrl: 'https://twidyai.vercel.app/' },
+    'twidy-bill': { title: 'TwidyBill (Invoice Maker)', desc: 'Buat tagihan, invoice, dan kwitansi profesional dengan mudah dalam bentuk gambar.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.netlify.app/' },
 
     'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop) atau gunakan fitur sortir otomatis.', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
-    'pdf-split': { title: 'Split PDF', desc: 'Pisahkan satu halaman atau ekstrak rentang halaman PDF.', icon: 'fa-scissors', color: 'text-orange-500', accept: '.pdf', multi: false, settings: [{ id: 'split-range', label: 'Rentang Halaman (Contoh: 1-3, 5)', type: 'text', placeholder: 'Kosongkan jika ingin memisah semua' }] },
+    'pdf-split': { title: 'Split PDF', desc: 'Pisahkan dokumen PDF menjadi beberapa bagian.', icon: 'fa-scissors', color: 'text-orange-500', accept: '.pdf', multi: false, settings: [{ id: 'split-range', label: 'Rentang Halaman (Gunakan koma untuk memisah file. Contoh: 1, 2-50)', type: 'text', placeholder: 'Kosongkan jika ingin memisah tiap halaman' }] },
     'remove-pages': { title: 'Remove pages', desc: 'Hapus halaman tertentu dari dokumen PDF.', icon: 'fa-minus-circle', color: 'text-rose-500', accept: '.pdf', multi: false, settings: [{ id: 'remove-range', label: 'Halaman yang dihapus (Contoh: 1, 3, 5-7)', type: 'text', placeholder: 'Ketik halaman di sini' }] },
     'extract-pages': { title: 'Extract pages', desc: 'Dapatkan dokumen baru berisi halaman yang Anda ekstrak.', icon: 'fa-share-square', color: 'text-blue-500', accept: '.pdf', multi: false, settings: [{ id: 'extract-range', label: 'Halaman yang diambil (Contoh: 2, 4-6)', type: 'text', placeholder: 'Ketik halaman di sini' }] },
     'organize-pdf': { title: 'Organize PDF', desc: 'Susun ulang urutan halaman PDF.', icon: 'fa-sort-alpha-down', color: 'text-indigo-500', accept: '.pdf', multi: false, settings: [{ id: 'organize-order', label: 'Urutan Halaman Baru (Contoh: 3, 1, 2)', type: 'text', placeholder: 'Ketik urutan baru' }] },
@@ -57,7 +56,7 @@ const toolConfig = {
 };
 
 const categories = {
-    'TWIDY ECOSYSTEM': ['twidy-bill', 'twidy-ai'],
+    'TWIDY ECOSYSTEM': ['twidy-bill'],
     'ORGANIZE PDF': ['pdf-merge', 'pdf-split', 'remove-pages', 'extract-pages', 'organize-pdf', 'scan-to-pdf'],
     'OPTIMIZE PDF': ['pdf-compress', 'repair-pdf', 'ocr-pdf'],
     'CONVERT TO PDF': ['image-to-pdf', 'word-to-pdf', 'ppt-to-pdf', 'excel-to-pdf', 'html-to-pdf', 'txt-to-pdf', 'rtf-to-pdf'],
@@ -564,19 +563,53 @@ async function executeMerge() {
     triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'Twidy_Merged.pdf');
 }
 
+// LOGIKA SPLIT PDF TERBARU SESUAI GRUP
 async function executeSplit() {
     updateProgress(30, 'Membaca dokumen...');
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
     const rangeInput = document.getElementById('split-range')?.value || "";
     const zip = new JSZip();
-    const pagesToSplit = parseRange(rangeInput, doc.getPageCount());
-    for(let i of pagesToSplit) {
-        if(i < 0 || i >= doc.getPageCount()) continue;
-        const sub = await PDFLib.PDFDocument.create();
-        const [p] = await sub.copyPages(doc, [i]); sub.addPage(p);
-        zip.file(`Page_${i+1}.pdf`, await sub.save());
+    const totalPages = doc.getPageCount();
+
+    if (!rangeInput) {
+        updateProgress(50, 'Memisahkan semua halaman...');
+        for (let i = 0; i < totalPages; i++) {
+            const sub = await PDFLib.PDFDocument.create();
+            const [p] = await sub.copyPages(doc, [i]);
+            sub.addPage(p);
+            zip.file(`Page_${i+1}.pdf`, await sub.save());
+        }
+    } else {
+        const parts = rangeInput.split(',');
+        for (let index = 0; index < parts.length; index++) {
+            const part = parts[index].trim();
+            let pagesToKeep = [];
+            
+            if (part.includes('-')) {
+                let [start, end] = part.split('-').map(Number);
+                if (start && end) {
+                    for (let i = start; i <= end; i++) {
+                        if (i > 0 && i <= totalPages) pagesToKeep.push(i - 1);
+                    }
+                }
+            } else {
+                let num = parseInt(part);
+                if (num > 0 && num <= totalPages) pagesToKeep.push(num - 1);
+            }
+
+            if (pagesToKeep.length > 0) {
+                updateProgress(50 + ((index / parts.length) * 40), `Membuat bagian ${index + 1}...`);
+                const sub = await PDFLib.PDFDocument.create();
+                const copiedPages = await sub.copyPages(doc, pagesToKeep);
+                copiedPages.forEach(p => sub.addPage(p));
+                zip.file(`Part_${index+1}_(Pages_${part}).pdf`, await sub.save());
+            }
+        }
     }
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil dipisah!', 'success'); setTimeout(() => hideProgress(), 2000);
+
+    updateProgress(100, 'Selesai!'); 
+    alertUser('Berhasil dipisah!', 'success'); 
+    setTimeout(() => hideProgress(), 2000);
     triggerDownload(await zip.generateAsync({type: 'blob'}), 'Twidy_Splitted.zip');
 }
 
