@@ -14,8 +14,8 @@ const toolConfig = {
     'extract-pages': { title: 'Extract pages', desc: 'Dapatkan dokumen baru berisi halaman yang Anda ekstrak.', icon: 'fa-share-square', color: 'text-blue-500', accept: '.pdf', multi: false, settings: [{ id: 'extract-range', label: 'Halaman yang diambil (Contoh: 2, 4-6)', type: 'text', placeholder: 'Ketik halaman di sini' }] },
     'organize-pdf': { title: 'Organize PDF', desc: 'Susun ulang urutan halaman PDF.', icon: 'fa-sort-alpha-down', color: 'text-indigo-500', accept: '.pdf', multi: false, settings: [{ id: 'organize-order', label: 'Urutan Halaman Baru (Contoh: 3, 1, 2)', type: 'text', placeholder: 'Ketik urutan baru' }] },
     
-    // SCANNER ALIAS CAMSCANNER (UPDATED)
-    'scan-to-pdf': { title: 'Scan to PDF', desc: 'Kamera Scanner dokumen dengan fitur Magic Color, Preview, & Export Gambar/PDF.', icon: 'fa-qrcode', color: 'text-slate-500', accept: '.jpg,.jpeg,.png', multi: true },
+    // SCANNER ALIAS CAMSCANNER (UPDATED DENGAN CROP MANUAL & 5 FILTER)
+    'scan-to-pdf': { title: 'Scan to PDF', desc: 'Kamera Scanner dokumen dengan fitur Crop Manual, Filter Cerdas, & Export Gambar/PDF.', icon: 'fa-qrcode', color: 'text-slate-500', accept: '.jpg,.jpeg,.png', multi: true },
     
     'pdf-compress': { title: 'Compress PDF', desc: 'Kurangi ukuran file sambil mengoptimalkan kualitas maksimal.', icon: 'fa-compress-arrows-alt', color: 'text-green-500', accept: '.pdf', multi: false },
     'repair-pdf': { title: 'Repair PDF', desc: 'Pulihkan struktur file PDF yang rusak ringan secara otomatis.', icon: 'fa-wrench', color: 'text-amber-500', accept: '.pdf', multi: false },
@@ -465,155 +465,273 @@ async function executePdfToExcel() { await executeConvertAPI('pdf-to-excel', 'xl
 async function executePdfToPpt() { await executeConvertAPI('pdf-to-ppt', 'pptx', 'Menyiapkan file PDF...'); }
 async function executePdfToPdfa() { await executeConvertAPI('pdf-to-pdfa', 'pdf', 'Memproses metadata PDF/A...'); }
 
-// --- FITUR SCANNER UI CAMSCANNER (BARU) ---
+// --- FITUR SCANNER UI (CROP & MULTI-FILTER) ---
+
+// Fungsi Helper untuk memuat Cropper.js secara dinamis
+async function loadCropper() {
+    if (window.Cropper) return Promise.resolve();
+    updateProgress(10, 'Memuat alat pemotong gambar...');
+    return new Promise((resolve, reject) => {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css';
+        document.head.appendChild(link);
+
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js';
+        script.onload = () => { hideProgress(); resolve(); };
+        script.onerror = () => { hideProgress(); reject(new Error('Gagal memuat modul crop.')); };
+        document.head.appendChild(script);
+    });
+}
+
 async function executeScanToPdf() {
     if (selectedFiles.length === 0) return;
+    await loadCropper();
 
-    // 1. Buat Container Modal/Pop-up Fullscreen
+    const processedImagesDataUrl = []; // Menyimpan hasil akhir per gambar
+    let currentIndex = 0;
+    let cropperInstance = null;
+    let isCropping = false;
+    let currentFilter = 'magic';
+    let baseImgSrc = ""; // Source gambar sebelum difilter (tapi sudah di-crop)
+
+    // Buat Container Modal/Pop-up Fullscreen
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 z-[100] flex flex-col bg-slate-900 text-white';
+    modal.className = 'fixed inset-0 z-[100] flex flex-col bg-slate-900 text-white select-none';
     modal.id = 'twidyScannerModal';
 
     // Header Modal
     const header = document.createElement('div');
     header.className = 'w-full flex justify-between items-center p-4 border-b border-slate-700 bg-slate-800 shadow-md';
     header.innerHTML = `
-        <h3 class="text-lg font-bold"><i class="fas fa-qrcode mr-2 text-indigo-400"></i> TwidyScanner</h3>
-        <button id="btnCloseScanner" class="text-2xl text-slate-400 hover:text-white transition"><i class="fas fa-times"></i></button>
+        <h3 id="scanModalTitle" class="text-lg font-bold"><i class="fas fa-qrcode mr-2 text-indigo-400"></i> TwidyScanner (1/${selectedFiles.length})</h3>
+        <div class="flex gap-2">
+            <button id="btnToggleCrop" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded-lg text-sm font-bold shadow transition"><i class="fas fa-crop-alt mr-1"></i> Potong</button>
+            <button id="btnCloseScanner" class="text-2xl text-slate-400 hover:text-white transition ml-3"><i class="fas fa-times"></i></button>
+        </div>
     `;
 
-    // Area Preview Canvas
-    const canvasContainer = document.createElement('div');
-    canvasContainer.className = 'relative w-full flex-1 min-h-0 flex items-center justify-center bg-black p-2 overflow-hidden';
-    const canvas = document.createElement('canvas');
-    canvas.className = 'max-w-full max-h-full object-contain shadow-2xl';
-    canvasContainer.appendChild(canvas);
+    // Area Workspace (Preview / Crop)
+    const workspace = document.createElement('div');
+    workspace.className = 'relative w-full flex-1 min-h-0 flex items-center justify-center bg-black p-4 overflow-hidden';
+    workspace.innerHTML = `
+        <canvas id="scannerCanvas" class="max-w-full max-h-full object-contain shadow-2xl transition-all duration-300"></canvas>
+        <div id="cropContainer" class="hidden w-full h-full flex items-center justify-center">
+            <img id="scannerImg" class="max-w-full max-h-full object-contain" />
+        </div>
+    `;
 
-    // Area Kontrol Bawah
+    // Area Kontrol Bawah (Filter & Aksi)
     const bottomControls = document.createElement('div');
-    bottomControls.className = 'w-full bg-slate-800 flex flex-col p-4 border-t border-slate-700 pb-8 sm:pb-4';
+    bottomControls.className = 'w-full bg-slate-800 flex flex-col p-4 border-t border-slate-700 pb-8 sm:pb-4 transition-all duration-300';
     
     // Tombol Filter
     const filterControls = document.createElement('div');
+    filterControls.id = 'filterControlsArea';
     filterControls.className = 'flex gap-3 overflow-x-auto justify-center mb-5 pb-2 no-scrollbar';
     filterControls.innerHTML = `
-        <button id="btnFilterOrg" class="flex flex-col items-center min-w-[80px] p-2 rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 transition"><i class="fas fa-image text-xl mb-1"></i><span class="text-xs font-semibold">Original</span></button>
-        <button id="btnFilterMagic" class="flex flex-col items-center min-w-[80px] p-2 rounded-xl bg-indigo-600 text-white shadow-lg ring-2 ring-indigo-400 transition"><i class="fas fa-magic text-xl mb-1"></i><span class="text-xs font-semibold">Magic Color</span></button>
-        <button id="btnFilterBW" class="flex flex-col items-center min-w-[80px] p-2 rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 transition"><i class="fas fa-adjust text-xl mb-1"></i><span class="text-xs font-semibold">B & W</span></button>
+        <button data-filter="original" class="filter-btn flex flex-col items-center min-w-[70px] p-2 rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 transition"><i class="fas fa-image text-xl mb-1"></i><span class="text-xs font-semibold">Original</span></button>
+        <button data-filter="magic" class="filter-btn flex flex-col items-center min-w-[70px] p-2 rounded-xl bg-indigo-600 text-white shadow-lg ring-2 ring-indigo-400 transition"><i class="fas fa-magic text-xl mb-1"></i><span class="text-xs font-semibold">Magic Color</span></button>
+        <button data-filter="bw" class="filter-btn flex flex-col items-center min-w-[70px] p-2 rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 transition"><i class="fas fa-adjust text-xl mb-1"></i><span class="text-xs font-semibold">B & W</span></button>
+        <button data-filter="gray" class="filter-btn flex flex-col items-center min-w-[70px] p-2 rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 transition"><i class="fas fa-tint-slash text-xl mb-1"></i><span class="text-xs font-semibold">Grayscale</span></button>
+        <button data-filter="eco" class="filter-btn flex flex-col items-center min-w-[70px] p-2 rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 transition"><i class="fas fa-leaf text-xl mb-1 text-emerald-400"></i><span class="text-xs font-semibold">Eco-Print</span></button>
     `;
 
-    // Tombol Export
+    // Tombol Aksi (Lanjut / Export)
     const actionControls = document.createElement('div');
+    actionControls.id = 'actionControlsArea';
     actionControls.className = 'flex gap-3 w-full max-w-md mx-auto justify-center';
-    actionControls.innerHTML = `
-        <button id="btnExportImg" class="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-500 transition shadow-lg flex items-center justify-center gap-2"><i class="fas fa-file-image"></i> Simpan JPG</button>
-        <button id="btnExportPdf" class="flex-1 px-4 py-3 bg-rose-600 text-white rounded-xl font-bold hover:bg-rose-500 transition shadow-lg flex items-center justify-center gap-2"><i class="fas fa-file-pdf"></i> Buat PDF</button>
+    
+    // Panel Crop Aksi (Hanya muncul saat potong)
+    const cropActionControls = document.createElement('div');
+    cropActionControls.id = 'cropActionArea';
+    cropActionControls.className = 'hidden flex gap-3 w-full max-w-md mx-auto justify-center';
+    cropActionControls.innerHTML = `
+        <button id="btnCancelCrop" class="flex-1 px-4 py-3 bg-slate-600 text-white rounded-xl font-bold hover:bg-slate-500 transition"><i class="fas fa-times mr-2"></i> Batal</button>
+        <button id="btnApplyCrop" class="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-500 transition shadow-lg"><i class="fas fa-check mr-2"></i> Terapkan Potongan</button>
     `;
 
     bottomControls.appendChild(filterControls);
     bottomControls.appendChild(actionControls);
+    bottomControls.appendChild(cropActionControls);
     
     modal.appendChild(header);
-    modal.appendChild(canvasContainer);
+    modal.appendChild(workspace);
     modal.appendChild(bottomControls);
     document.body.appendChild(modal);
 
-    // Tutup Modal
+    const canvas = document.getElementById('scannerCanvas');
+    const ctx = canvas.getContext('2d');
+    const imgCrop = document.getElementById('scannerImg');
+    const cropContainer = document.getElementById('cropContainer');
+
+    // Setup Event Listeners Statis
     document.getElementById('btnCloseScanner').onclick = () => modal.remove();
 
-    // 2. Siapkan Context & Gambar Asli (Ambil file pertama untuk preview)
-    const ctx = canvas.getContext('2d');
-    let currentFilter = 'magic';
-    let originalImageData = null;
+    // Fungsi Inti Penerapan Filter Piksel
+    function applyFilterToContext(context, width, height, filterType) {
+        if (!baseImgSrc) return;
+        const tempImg = new Image();
+        tempImg.src = baseImgSrc;
+        tempImg.onload = () => {
+            context.drawImage(tempImg, 0, 0, width, height);
+            if (filterType === 'original') return;
 
-    try {
-        const imgBitmap = await createImageBitmap(selectedFiles[0]);
-        canvas.width = imgBitmap.width;
-        canvas.height = imgBitmap.height;
-        ctx.drawImage(imgBitmap, 0, 0);
-        originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    } catch (err) {
-        alertUser("Gagal membaca gambar preview.", "error");
-        modal.remove();
-        return;
+            const imgData = context.getImageData(0, 0, width, height);
+            const data = imgData.data;
+
+            if (filterType === 'magic') {
+                // Magic Color: Kecerahan +35 & Kontras tinggi
+                const factor = (259 * (60 + 255)) / (255 * (259 - 60));
+                for (let i = 0; i < data.length; i += 4) {
+                    data[i] = factor * (data[i] - 128) + 128 + 35;
+                    data[i+1] = factor * (data[i+1] - 128) + 128 + 35;
+                    data[i+2] = factor * (data[i+2] - 128) + 128 + 35;
+                }
+            } else if (filterType === 'bw') {
+                // B&W: Hitam Putih Pekat (Threshold 130)
+                for (let i = 0; i < data.length; i += 4) {
+                    let lum = (data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114);
+                    let val = lum > 130 ? 255 : 0;
+                    data[i] = data[i+1] = data[i+2] = val;
+                }
+            } else if (filterType === 'gray') {
+                // Grayscale: Hitam putih halus
+                for (let i = 0; i < data.length; i += 4) {
+                    let lum = (data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114);
+                    data[i] = data[i+1] = data[i+2] = lum;
+                }
+            } else if (filterType === 'eco') {
+                // Eco-Print: Sangat terang, abu-abu pudar untuk hemat tinta
+                for (let i = 0; i < data.length; i += 4) {
+                    let lum = (data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114);
+                    let val = lum + 60; // Terangkan drastis
+                    data[i] = data[i+1] = data[i+2] = val > 255 ? 255 : val;
+                }
+            }
+            context.putImageData(imgData, 0, 0);
+        };
     }
 
-    // 3. Fungsi Inti Penerapan Filter Piksel
-    function applyFilterToContext(context, width, height, filterType, origData) {
-        context.putImageData(origData, 0, 0);
-        if (filterType === 'original') return;
+    function renderFilterUI() {
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            const f = btn.getAttribute('data-filter');
+            if (f === currentFilter) {
+                btn.className = "filter-btn flex flex-col items-center min-w-[70px] p-2 rounded-xl bg-indigo-600 text-white shadow-lg ring-2 ring-indigo-400 transition";
+            } else {
+                btn.className = "filter-btn flex flex-col items-center min-w-[70px] p-2 rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 transition";
+            }
+            btn.onclick = () => {
+                currentFilter = f;
+                renderFilterUI();
+                applyFilterToContext(ctx, canvas.width, canvas.height, currentFilter);
+            };
+        });
+    }
 
-        const imgData = context.getImageData(0, 0, width, height);
-        const data = imgData.data;
-
-        if (filterType === 'magic') {
-            // Algoritma Magic Color (Kecerahan + Kontras)
-            const contrast = 60; // Tingkat kontras (-255 ke 255)
-            const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+    function toggleCropMode(enable) {
+        isCropping = enable;
+        if (enable) {
+            canvas.classList.add('hidden');
+            cropContainer.classList.remove('hidden');
+            document.getElementById('filterControlsArea').classList.add('hidden');
+            document.getElementById('actionControlsArea').classList.add('hidden');
+            document.getElementById('cropActionArea').classList.remove('hidden');
+            document.getElementById('btnToggleCrop').classList.add('hidden');
             
-            for (let i = 0; i < data.length; i += 4) {
-                // Terapkan Kontras lalu Kecerahan (+35)
-                data[i] = factor * (data[i] - 128) + 128 + 35;     // Merah
-                data[i+1] = factor * (data[i+1] - 128) + 128 + 35; // Hijau
-                data[i+2] = factor * (data[i+2] - 128) + 128 + 35; // Biru
-            }
-        } else if (filterType === 'bw') {
-            // Algoritma Hitam Putih Dokumen
-            for (let i = 0; i < data.length; i += 4) {
-                let luminance = (data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114);
-                let val = luminance > 120 ? 255 : 0; // Batas hitam putih
-                data[i] = data[i+1] = data[i+2] = val;
-            }
+            imgCrop.src = baseImgSrc;
+            cropperInstance = new Cropper(imgCrop, {
+                viewMode: 1,
+                autoCropArea: 0.9,
+                background: false
+            });
+        } else {
+            if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
+            canvas.classList.remove('hidden');
+            cropContainer.classList.add('hidden');
+            document.getElementById('filterControlsArea').classList.remove('hidden');
+            document.getElementById('actionControlsArea').classList.remove('hidden');
+            document.getElementById('cropActionArea').classList.add('hidden');
+            document.getElementById('btnToggleCrop').classList.remove('hidden');
         }
-        context.putImageData(imgData, 0, 0);
     }
 
-    // 4. Update UI Preview
-    function updatePreview() {
-        // Reset warna tombol
-        const btnClasses = "flex flex-col items-center min-w-[80px] p-2 rounded-xl transition ";
-        const activeClass = btnClasses + "bg-indigo-600 text-white shadow-lg ring-2 ring-indigo-400";
-        const inactiveClass = btnClasses + "bg-slate-700 text-slate-300 hover:bg-slate-600";
-        
-        document.getElementById('btnFilterOrg').className = currentFilter === 'original' ? activeClass : inactiveClass;
-        document.getElementById('btnFilterMagic').className = currentFilter === 'magic' ? activeClass : inactiveClass;
-        document.getElementById('btnFilterBW').className = currentFilter === 'bw' ? activeClass : inactiveClass;
-        
-        // Terapkan filter ke Canvas Preview
-        applyFilterToContext(ctx, canvas.width, canvas.height, currentFilter, originalImageData);
-    }
-
-    // Event Listener Filter
-    document.getElementById('btnFilterOrg').onclick = () => { currentFilter = 'original'; updatePreview(); };
-    document.getElementById('btnFilterMagic').onclick = () => { currentFilter = 'magic'; updatePreview(); };
-    document.getElementById('btnFilterBW').onclick = () => { currentFilter = 'bw'; updatePreview(); };
+    document.getElementById('btnToggleCrop').onclick = () => toggleCropMode(true);
+    document.getElementById('btnCancelCrop').onclick = () => toggleCropMode(false);
     
-    // Jalankan filter default saat pertama buka
-    updatePreview(); 
+    document.getElementById('btnApplyCrop').onclick = () => {
+        if (!cropperInstance) return;
+        const croppedCanvas = cropperInstance.getCroppedCanvas({ imageSmoothingEnabled: true, imageSmoothingQuality: 'high' });
+        baseImgSrc = croppedCanvas.toDataURL('image/jpeg', 0.9);
+        canvas.width = croppedCanvas.width;
+        canvas.height = croppedCanvas.height;
+        toggleCropMode(false);
+        applyFilterToContext(ctx, canvas.width, canvas.height, currentFilter);
+    };
 
-    // 5. Fungsi Ekspor Massal
-    async function processExport(exportType) {
-        modal.remove(); // Tutup scanner UI
-        updateProgress(10, 'Menyiapkan pengeksporan...');
+    async function loadFileUI(index) {
+        updateProgress(50, `Memuat gambar ${index + 1}...`);
+        document.getElementById('scanModalTitle').innerHTML = `<i class="fas fa-qrcode mr-2 text-indigo-400"></i> TwidyScanner (${index + 1}/${selectedFiles.length})`;
+        
+        currentFilter = 'magic';
+        renderFilterUI();
+
+        const file = selectedFiles[index];
+        const objUrl = URL.createObjectURL(file);
+        
+        const tempImg = new Image();
+        tempImg.onload = () => {
+            canvas.width = tempImg.width;
+            canvas.height = tempImg.height;
+            // Gunakan canvas temporer untuk mendapatkan base64 murni
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = tempImg.width; tempCanvas.height = tempImg.height;
+            tempCanvas.getContext('2d').drawImage(tempImg, 0, 0);
+            baseImgSrc = tempCanvas.toDataURL('image/jpeg', 0.9);
+            
+            applyFilterToContext(ctx, canvas.width, canvas.height, currentFilter);
+            URL.revokeObjectURL(objUrl);
+            hideProgress();
+        };
+        tempImg.src = objUrl;
+
+        // Render Tombol Lanjut / Export
+        if (index < selectedFiles.length - 1) {
+            actionControls.innerHTML = `<button id="btnNextScan" class="w-full px-4 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-500 transition shadow-lg">Lanjut ke Gambar ${index + 2} <i class="fas fa-arrow-right ml-2"></i></button>`;
+            document.getElementById('btnNextScan').onclick = saveAndNext;
+        } else {
+            actionControls.innerHTML = `
+                <button id="btnExportImg" class="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-500 transition shadow-lg flex items-center justify-center gap-2"><i class="fas fa-file-image"></i> Simpan JPG</button>
+                <button id="btnExportPdf" class="flex-1 px-4 py-3 bg-rose-600 text-white rounded-xl font-bold hover:bg-rose-500 transition shadow-lg flex items-center justify-center gap-2"><i class="fas fa-file-pdf"></i> Buat PDF</button>
+            `;
+            document.getElementById('btnExportImg').onclick = () => saveAndExport('image');
+            document.getElementById('btnExportPdf').onclick = () => saveAndExport('pdf');
+        }
+    }
+
+    function saveAndNext() {
+        processedImagesDataUrl.push(canvas.toDataURL('image/jpeg', 0.85));
+        currentIndex++;
+        loadFileUI(currentIndex);
+    }
+
+    async function saveAndExport(exportType) {
+        // Simpan gambar terakhir yang sedang aktif
+        processedImagesDataUrl.push(canvas.toDataURL('image/jpeg', 0.85));
+        modal.remove(); 
+        
+        updateProgress(30, 'Merangkai dokumen...');
         
         let outPdf = exportType === 'pdf' ? await PDFLib.PDFDocument.create() : null;
-        let zip = exportType === 'image' && selectedFiles.length > 1 ? new JSZip() : null;
+        let zip = exportType === 'image' && processedImagesDataUrl.length > 1 ? new JSZip() : null;
 
-        for (let i = 0; i < selectedFiles.length; i++) {
-            updateProgress(10 + ((i / selectedFiles.length) * 80), `Menerapkan filter pada gambar ${i + 1}/${selectedFiles.length}...`);
+        for (let i = 0; i < processedImagesDataUrl.length; i++) {
+            updateProgress(30 + ((i / processedImagesDataUrl.length) * 60), `Mengekspor halaman ${i + 1}...`);
             
-            const f = selectedFiles[i];
-            const bmp = await createImageBitmap(f);
-            const cvs = document.createElement('canvas');
-            cvs.width = bmp.width; cvs.height = bmp.height;
-            const cCtx = cvs.getContext('2d');
-            cCtx.drawImage(bmp, 0, 0);
-            
-            const oData = cCtx.getImageData(0, 0, cvs.width, cvs.height);
-            applyFilterToContext(cCtx, cvs.width, cvs.height, currentFilter, oData);
-
-            // Ubah Canvas jadi Blob (Kualitas JPG 85%)
-            const blob = await new Promise(res => cvs.toBlob(res, 'image/jpeg', 0.85));
+            const dataUrl = processedImagesDataUrl[i];
+            const fetchRes = await fetch(dataUrl);
+            const blob = await fetchRes.blob();
 
             if (exportType === 'pdf') {
                 const bytes = await blob.arrayBuffer();
@@ -621,19 +739,19 @@ async function executeScanToPdf() {
                 const page = outPdf.addPage([img.width, img.height]);
                 page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
             } else {
-                if (selectedFiles.length === 1) {
-                    triggerDownload(blob, `TwidyScan_Filtered.jpg`);
+                if (processedImagesDataUrl.length === 1) {
+                    triggerDownload(blob, `TwidyScan_Document.jpg`);
                 } else {
-                    zip.file(`TwidyScan_${i+1}.jpg`, blob);
+                    zip.file(`TwidyScan_Page_${i+1}.jpg`, blob);
                 }
             }
         }
 
-        updateProgress(90, 'Menyimpan berkas...');
+        updateProgress(90, 'Menyimpan berkas akhir...');
         
         if (exportType === 'pdf') {
             triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'TwidyScanner_Document.pdf');
-        } else if (exportType === 'image' && selectedFiles.length > 1) {
+        } else if (exportType === 'image' && processedImagesDataUrl.length > 1) {
             triggerDownload(await zip.generateAsync({type: 'blob'}), 'TwidyScanner_Images.zip');
         }
 
@@ -642,10 +760,9 @@ async function executeScanToPdf() {
         setTimeout(() => hideProgress(), 2000);
     }
 
-    document.getElementById('btnExportPdf').onclick = () => processExport('pdf');
-    document.getElementById('btnExportImg').onclick = () => processExport('image');
+    // Mulai dari gambar pertama
+    loadFileUI(currentIndex);
 }
-
 
 // --- FUNGSI LOKAL LAINNYA ---
 async function executeImageToPdf() {
