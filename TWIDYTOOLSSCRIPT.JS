@@ -77,10 +77,8 @@ document.addEventListener('DOMContentLoaded', function() {
     initTheme();
     setInterval(updateDateTime, 1000);
     updateDateTime();
-    const path = window.location.pathname.replace('/', ''); 
-    if (path && toolConfig[path]) { 
-        selectTool(path); 
-    }
+    const hash = window.location.hash.substring(1);
+    if (hash && toolConfig[hash]) { selectTool(hash); }
 });
 
 function updateDateTime() {
@@ -154,7 +152,7 @@ function selectTool(toolId) {
     currentTool = toolId;
     const config = toolConfig[toolId];
     if (!config) return;
-    window.history.pushState(null, '', '/' + toolId);
+    window.location.hash = toolId;
     document.title = config.title + " - TwidyTools";
     
     document.getElementById('toolsSection').classList.add('hidden');
@@ -206,7 +204,7 @@ function selectTool(toolId) {
 }
 
 function goBack() {
-    window.history.pushState(null, '', '/');
+    history.pushState("", document.title, window.location.pathname);
     document.title = "TwidyTools - Solusi PDF & Dokumen Lengkap Online";
     document.getElementById('uploadSection').classList.add('hidden');
     document.getElementById('toolsSection').classList.remove('hidden');
