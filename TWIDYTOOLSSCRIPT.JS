@@ -79,7 +79,8 @@ document.addEventListener('DOMContentLoaded', function() {
     updateDateTime();
     const path = window.location.pathname.substring(1); // Mengambil /pdf-merge jadi pdf-merge
     if (path && toolConfig[path]) { 
-    selectTool(path);
+        selectTool(path); 
+    }
 });
 
 function updateDateTime() {
