@@ -7,6 +7,7 @@ const toolConfig = {
     // === TWIDY ECOSYSTEM ===
     'twidy-bill': { title: 'TwidyBill', desc: 'Generate tagihan siap kirim dalam hitungan detik.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.netlify.app/' },
     'twidy-ai': { title: 'Twidy AI', desc: 'Asisten AI pintar untuk membantu berbagai tugas digital Anda secara langsung.', icon: 'fa-robot', color: 'text-purple-500', isIframe: true, iframeUrl: 'https://twidyai.vercel.app/' },
+    'tlibrary': { title: 'TLIBRARY', desc: 'Asisten AI pintar untuk membantu berbagai tugas digital Anda secara langsung.', icon: 'fa-robot', color: 'text-purple-500', isIframe: true, iframeUrl: 'https://twidyai.vercel.app/' },
 
     'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop) atau gunakan fitur sortir otomatis.', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
     'pdf-split': { title: 'Split PDF', desc: 'Pisahkan dokumen PDF menjadi beberapa bagian.', icon: 'fa-scissors', color: 'text-orange-500', accept: '.pdf', multi: false, settings: [{ id: 'split-range', label: 'Rentang Halaman (Gunakan koma untuk memisah file. Contoh: 1, 2-50)', type: 'text', placeholder: 'Kosongkan jika ingin memisah tiap halaman' }] },
@@ -78,11 +79,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(updateDateTime, 1000);
     updateDateTime();
     
-    // PERBAIKAN CLEAN URL (Tanpa Hash)
-    const path = window.location.pathname.replace(/^\/|\/$/g, ''); 
-    if (path && toolConfig[path]) { 
-        selectTool(path); 
-    }
+    // KEMBALI KE HASH ROUTING (#)
+    const hash = window.location.hash.substring(1);
+    if (hash && toolConfig[hash]) { selectTool(hash); }
 });
 
 function updateDateTime() {
@@ -157,8 +156,8 @@ function selectTool(toolId) {
     const config = toolConfig[toolId];
     if (!config) return;
     
-    // PERBAIKAN URL ROUTING
-    window.history.pushState(null, '', '/' + toolId);
+    // KEMBALI MENGGUNAKAN HASH ROUTING (#)
+    window.location.hash = toolId;
     
     document.title = config.title + " - TwidyTools";
     
@@ -211,8 +210,8 @@ function selectTool(toolId) {
 }
 
 function goBack() {
-    // PERBAIKAN URL ROUTING
-    window.history.pushState(null, '', '/');
+    // KEMBALI MENGGUNAKAN HASH ROUTING (#)
+    history.pushState("", document.title, window.location.pathname);
     
     document.title = "TwidyTools - Solusi PDF & Dokumen Lengkap Online";
     document.getElementById('uploadSection').classList.add('hidden');
