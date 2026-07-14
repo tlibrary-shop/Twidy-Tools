@@ -5,8 +5,8 @@ let selectedFiles = [];
 
 const toolConfig = {
     // === TWIDY ECOSYSTEM ===
-    'twidy-bill': { title: 'TwidyBill (Invoice Maker)', desc: 'Buat tagihan, invoice, dan kwitansi profesional dengan mudah dalam bentuk gambar.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.netlify.app/' },
-    'twidy-ai': { title: 'Twidy AI (Assistant)', desc: 'Asisten AI pintar untuk membantu berbagai tugas digital Anda secara langsung.', icon: 'fa-robot', color: 'text-purple-500', isIframe: true, iframeUrl: 'https://twidyai.vercel.app/' },
+    'twidy-bill': { title: 'TwidyBill', desc: 'Generate tagihan siap kirim dalam hitungan detik.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.netlify.app/' },
+    'twidy-ai': { title: 'Twidy AI', desc: 'Asisten AI pintar untuk membantu berbagai tugas digital Anda secara langsung.', icon: 'fa-robot', color: 'text-purple-500', isIframe: true, iframeUrl: 'https://twidyai.vercel.app/' },
 
     'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop) atau gunakan fitur sortir otomatis.', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
     'pdf-split': { title: 'Split PDF', desc: 'Pisahkan dokumen PDF menjadi beberapa bagian.', icon: 'fa-scissors', color: 'text-orange-500', accept: '.pdf', multi: false, settings: [{ id: 'split-range', label: 'Rentang Halaman (Gunakan koma untuk memisah file. Contoh: 1, 2-50)', type: 'text', placeholder: 'Kosongkan jika ingin memisah tiap halaman' }] },
@@ -77,8 +77,12 @@ document.addEventListener('DOMContentLoaded', function() {
     initTheme();
     setInterval(updateDateTime, 1000);
     updateDateTime();
-    const hash = window.location.hash.substring(1);
-    if (hash && toolConfig[hash]) { selectTool(hash); }
+    
+    // PERBAIKAN CLEAN URL (Tanpa Hash)
+    const path = window.location.pathname.replace(/^\/|\/$/g, ''); 
+    if (path && toolConfig[path]) { 
+        selectTool(path); 
+    }
 });
 
 function updateDateTime() {
@@ -152,7 +156,10 @@ function selectTool(toolId) {
     currentTool = toolId;
     const config = toolConfig[toolId];
     if (!config) return;
-    window.location.hash = toolId;
+    
+    // PERBAIKAN URL ROUTING
+    window.history.pushState(null, '', '/' + toolId);
+    
     document.title = config.title + " - TwidyTools";
     
     document.getElementById('toolsSection').classList.add('hidden');
@@ -204,7 +211,9 @@ function selectTool(toolId) {
 }
 
 function goBack() {
-    history.pushState("", document.title, window.location.pathname);
+    // PERBAIKAN URL ROUTING
+    window.history.pushState(null, '', '/');
+    
     document.title = "TwidyTools - Solusi PDF & Dokumen Lengkap Online";
     document.getElementById('uploadSection').classList.add('hidden');
     document.getElementById('toolsSection').classList.remove('hidden');
@@ -359,7 +368,7 @@ async function processFiles() {
         else if (currentTool === 'pdf-compress') { await executeCompress(); }
         else if (currentTool === 'repair-pdf') { await executeRepairPdf(); }
         else if (currentTool === 'ocr-pdf') { await executeOcrPdf(); }
-        else if (currentTool === 'scan-to-pdf') { await executeScanToPdf(); } // Memicu Scanner UI
+        else if (currentTool === 'scan-to-pdf') { await executeScanToPdf(); }
         
         else if (currentTool === 'image-to-pdf') { await executeImageToPdf(); }
         else if (currentTool === 'word-to-pdf') { await executeWordToPdf(); }
@@ -466,8 +475,6 @@ async function executePdfToPpt() { await executeConvertAPI('pdf-to-ppt', 'pptx',
 async function executePdfToPdfa() { await executeConvertAPI('pdf-to-pdfa', 'pdf', 'Memproses metadata PDF/A...'); }
 
 // --- FITUR SCANNER UI (CROP & MULTI-FILTER) ---
-
-// Fungsi Helper untuk memuat Cropper.js secara dinamis
 async function loadCropper() {
     if (window.Cropper) return Promise.resolve();
     updateProgress(10, 'Memuat alat pemotong gambar...');
@@ -489,19 +496,17 @@ async function executeScanToPdf() {
     if (selectedFiles.length === 0) return;
     await loadCropper();
 
-    const processedImagesDataUrl = []; // Menyimpan hasil akhir per gambar
+    const processedImagesDataUrl = []; 
     let currentIndex = 0;
     let cropperInstance = null;
     let isCropping = false;
     let currentFilter = 'magic';
-    let baseImgSrc = ""; // Source gambar sebelum difilter (tapi sudah di-crop)
+    let baseImgSrc = ""; 
 
-    // Buat Container Modal/Pop-up Fullscreen
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 z-[100] flex flex-col bg-slate-900 text-white select-none';
     modal.id = 'twidyScannerModal';
 
-    // Header Modal
     const header = document.createElement('div');
     header.className = 'w-full flex justify-between items-center p-4 border-b border-slate-700 bg-slate-800 shadow-md';
     header.innerHTML = `
@@ -512,7 +517,6 @@ async function executeScanToPdf() {
         </div>
     `;
 
-    // Area Workspace (Preview / Crop)
     const workspace = document.createElement('div');
     workspace.className = 'relative w-full flex-1 min-h-0 flex items-center justify-center bg-black p-4 overflow-hidden';
     workspace.innerHTML = `
@@ -522,11 +526,9 @@ async function executeScanToPdf() {
         </div>
     `;
 
-    // Area Kontrol Bawah (Filter & Aksi)
     const bottomControls = document.createElement('div');
     bottomControls.className = 'w-full bg-slate-800 flex flex-col p-4 border-t border-slate-700 pb-8 sm:pb-4 transition-all duration-300';
     
-    // Tombol Filter
     const filterControls = document.createElement('div');
     filterControls.id = 'filterControlsArea';
     filterControls.className = 'flex gap-3 overflow-x-auto justify-center mb-5 pb-2 no-scrollbar';
@@ -538,12 +540,10 @@ async function executeScanToPdf() {
         <button data-filter="eco" class="filter-btn flex flex-col items-center min-w-[70px] p-2 rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 transition"><i class="fas fa-leaf text-xl mb-1 text-emerald-400"></i><span class="text-xs font-semibold">Eco-Print</span></button>
     `;
 
-    // Tombol Aksi (Lanjut / Export)
     const actionControls = document.createElement('div');
     actionControls.id = 'actionControlsArea';
     actionControls.className = 'flex gap-3 w-full max-w-md mx-auto justify-center';
     
-    // Panel Crop Aksi (Hanya muncul saat potong)
     const cropActionControls = document.createElement('div');
     cropActionControls.id = 'cropActionArea';
     cropActionControls.className = 'hidden flex gap-3 w-full max-w-md mx-auto justify-center';
@@ -566,10 +566,8 @@ async function executeScanToPdf() {
     const imgCrop = document.getElementById('scannerImg');
     const cropContainer = document.getElementById('cropContainer');
 
-    // Setup Event Listeners Statis
     document.getElementById('btnCloseScanner').onclick = () => modal.remove();
 
-    // Fungsi Inti Penerapan Filter Piksel
     function applyFilterToContext(context, width, height, filterType) {
         if (!baseImgSrc) return;
         const tempImg = new Image();
@@ -582,7 +580,6 @@ async function executeScanToPdf() {
             const data = imgData.data;
 
             if (filterType === 'magic') {
-                // Magic Color: Kecerahan +35 & Kontras tinggi
                 const factor = (259 * (60 + 255)) / (255 * (259 - 60));
                 for (let i = 0; i < data.length; i += 4) {
                     data[i] = factor * (data[i] - 128) + 128 + 35;
@@ -590,23 +587,20 @@ async function executeScanToPdf() {
                     data[i+2] = factor * (data[i+2] - 128) + 128 + 35;
                 }
             } else if (filterType === 'bw') {
-                // B&W: Hitam Putih Pekat (Threshold 130)
                 for (let i = 0; i < data.length; i += 4) {
                     let lum = (data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114);
                     let val = lum > 130 ? 255 : 0;
                     data[i] = data[i+1] = data[i+2] = val;
                 }
             } else if (filterType === 'gray') {
-                // Grayscale: Hitam putih halus
                 for (let i = 0; i < data.length; i += 4) {
                     let lum = (data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114);
                     data[i] = data[i+1] = data[i+2] = lum;
                 }
             } else if (filterType === 'eco') {
-                // Eco-Print: Sangat terang, abu-abu pudar untuk hemat tinta
                 for (let i = 0; i < data.length; i += 4) {
                     let lum = (data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114);
-                    let val = lum + 60; // Terangkan drastis
+                    let val = lum + 60; 
                     data[i] = data[i+1] = data[i+2] = val > 255 ? 255 : val;
                 }
             }
@@ -684,7 +678,6 @@ async function executeScanToPdf() {
         tempImg.onload = () => {
             canvas.width = tempImg.width;
             canvas.height = tempImg.height;
-            // Gunakan canvas temporer untuk mendapatkan base64 murni
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = tempImg.width; tempCanvas.height = tempImg.height;
             tempCanvas.getContext('2d').drawImage(tempImg, 0, 0);
@@ -696,7 +689,6 @@ async function executeScanToPdf() {
         };
         tempImg.src = objUrl;
 
-        // Render Tombol Lanjut / Export
         if (index < selectedFiles.length - 1) {
             actionControls.innerHTML = `<button id="btnNextScan" class="w-full px-4 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-500 transition shadow-lg">Lanjut ke Gambar ${index + 2} <i class="fas fa-arrow-right ml-2"></i></button>`;
             document.getElementById('btnNextScan').onclick = saveAndNext;
@@ -717,7 +709,6 @@ async function executeScanToPdf() {
     }
 
     async function saveAndExport(exportType) {
-        // Simpan gambar terakhir yang sedang aktif
         processedImagesDataUrl.push(canvas.toDataURL('image/jpeg', 0.85));
         modal.remove(); 
         
@@ -760,7 +751,6 @@ async function executeScanToPdf() {
         setTimeout(() => hideProgress(), 2000);
     }
 
-    // Mulai dari gambar pertama
     loadFileUI(currentIndex);
 }
 
