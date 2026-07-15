@@ -1054,16 +1054,22 @@ async function executePdfNup() {
 // ==========================================
 
 // --- FITUR HAPUS LATAR BELAKANG CLIENT-SIDE ---
+// --- FITUR HAPUS LATAR BELAKANG CLIENT-SIDE (OPTIMAL) ---
 async function executeRemoveBgClient() {
-    updateProgress(30, 'Memuat Modul AI Latar Belakang (Mengunduh model awal ~40MB)...');
+    if (selectedFiles.length === 0) return;
     
-    // Inject Script Dynamic Imgly versi unpkg yang lebih stabil (UMD build)
-    if (typeof imglyRemoveBackground === 'undefined') {
+    updateProgress(10, 'Inisialisasi modul AI (Mohon tunggu)...');
+
+    // Menggunakan CDN jsDelivr yang sangat stabil untuk menghindari blokir CORS
+    const scriptId = 'imgly-bg-removal-script';
+    if (!document.getElementById(scriptId)) {
         await new Promise((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = 'https://unpkg.com/@imgly/background-removal@1.4.3/dist/imglyRemoveBackground.umd.js';
+            script.id = scriptId;
+            script.src = 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.3/dist/imglyRemoveBackground.umd.min.js';
+            script.crossOrigin = 'anonymous'; // Menghindari masalah blokir CORS
             script.onload = resolve;
-            script.onerror = () => reject(new Error('Gagal memuat modul Remove BG dari server CDN. Coba periksa koneksi internet Anda.'));
+            script.onerror = () => reject(new Error('Gagal memuat modul AI dari server. Periksa koneksi internet Anda.'));
             document.head.appendChild(script);
         });
     }
@@ -1071,22 +1077,27 @@ async function executeRemoveBgClient() {
     const file = selectedFiles[0];
     const objUrl = URL.createObjectURL(file);
     
-    updateProgress(70, 'Memisahkan objek utama dari gambar...');
+    updateProgress(40, 'AI sedang menganalisis & memproses gambar...');
     
     try {
-        // Menggunakan library dari global object window
-        const imageBlob = await imglyRemoveBackground(objUrl);
+        // imglyRemoveBackground adalah fungsi global yang tersedia setelah script dimuat
+        // Kita gunakan 'model_assets' yang sudah dikonfigurasi otomatis oleh library
+        const imageBlob = await imglyRemoveBackground(objUrl, {
+            publicPath: 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.3/dist/',
+            proxyToWorker: false // Mencegah error isolasi memori pada beberapa browser
+        });
+
         updateProgress(100, 'Selesai!');
         alertUser('Latar belakang berhasil dihapus!', 'success');
         triggerDownload(imageBlob, `Twidy_NoBG_${file.name.split('.')[0]}.png`);
         setTimeout(() => hideProgress(), 2000);
     } catch (err) {
-        throw new Error("Proses Remove BG gagal. Browser Anda mungkin membatasi memori WebGL atau format gambar tidak didukung.");
+        console.error(err);
+        throw new Error("Proses Remove BG gagal. Browser Anda mungkin membatasi WebGL. Coba gunakan Google Chrome.");
     } finally {
         URL.revokeObjectURL(objUrl);
     }
 }
-
 // --- PEMROSESAN GAMBAR (CANVAS API) ---
 async function processImageFeature(action) {
     updateProgress(20, 'Memuat gambar...');
