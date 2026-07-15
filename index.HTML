@@ -21,6 +21,9 @@
         }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tambahan Library FFmpeg untuk Converter Media Tingkat Lanjut -->
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+    
     <style>
         .sidebar-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         [x-cloak] { display: none !important; }
@@ -139,6 +142,77 @@
                         <button onclick="selectTool('pdf-to-markdown')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fab fa-markdown text-slate-600 dark:text-slate-200 w-5"></i> PDF to Markdown</button>
                     </div>
                 </div>
+                
+                <!-- ================== FITUR BARU MULAI DARI SINI ================== -->
+                <div>
+                    <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">Image Tools</h4>
+                    <div class="space-y-1">
+                        <button onclick="selectTool('image-resize')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-expand-arrows-alt text-blue-500 w-5"></i> Resize</button>
+                        <button onclick="selectTool('image-compress')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-compress text-green-500 w-5"></i> Compress</button>
+                        <button onclick="selectTool('image-crop')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-crop-alt text-amber-500 w-5"></i> Crop</button>
+                        <button onclick="selectTool('image-rotate')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-sync-alt text-purple-500 w-5"></i> Rotate</button>
+                        <button onclick="selectTool('image-flip')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-arrows-alt-h text-pink-500 w-5"></i> Flip</button>
+                        <button onclick="selectTool('image-remove-bg')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-eraser text-slate-500 w-5"></i> Remove Background</button>
+                        <button onclick="selectTool('image-blur-face')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-user-secret text-indigo-400 w-5"></i> Blur Face</button>
+                        <button onclick="selectTool('image-watermark')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-stamp text-teal-500 w-5"></i> Watermark</button>
+                        <button onclick="selectTool('image-to-ico')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-icons text-orange-500 w-5"></i> Image to ICO</button>
+                        <button onclick="selectTool('ico-to-png')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-file-image text-blue-400 w-5"></i> ICO to PNG</button>
+                        <button onclick="selectTool('avif-to-png')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-exchange-alt text-emerald-500 w-5"></i> AVIF ↔ PNG</button>
+                        <button onclick="selectTool('heic-to-jpg')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-exchange-alt text-red-500 w-5"></i> HEIC ↔ JPG</button>
+                        <button onclick="selectTool('webp-to-png')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-exchange-alt text-cyan-500 w-5"></i> WEBP ↔ PNG</button>
+                        <button onclick="selectTool('svg-to-png')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-exchange-alt text-rose-500 w-5"></i> SVG ↔ PNG</button>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Image AI</h4>
+                    <div class="space-y-1">
+                        <button onclick="selectTool('ai-upscale-image')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-magic text-purple-500 w-5"></i> Upscale Image</button>
+                        <button onclick="selectTool('ai-colorize-bw')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-palette text-pink-500 w-5"></i> Colorize B&W</button>
+                        <button onclick="selectTool('ai-remove-object')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-quidditch text-indigo-500 w-5"></i> Remove Object</button>
+                        <button onclick="selectTool('ai-image-caption')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-closed-captioning text-teal-500 w-5"></i> AI Caption</button>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">Video Tools</h4>
+                    <div class="space-y-1">
+                        <button onclick="selectTool('video-compress')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-compress-arrows-alt text-green-500 w-5"></i> Compress</button>
+                        <button onclick="selectTool('video-trim')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-cut text-amber-500 w-5"></i> Trim</button>
+                        <button onclick="selectTool('video-crop')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-crop text-blue-500 w-5"></i> Crop</button>
+                        <button onclick="selectTool('video-rotate')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-undo-alt text-purple-500 w-5"></i> Rotate</button>
+                        <button onclick="selectTool('video-speed')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-tachometer-alt text-red-500 w-5"></i> Change Speed</button>
+                        <button onclick="selectTool('video-to-audio')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left font-bold text-indigo-600 dark:text-indigo-400"><i class="fas fa-music text-indigo-500 w-5"></i> Extract Audio</button>
+                        <button onclick="selectTool('video-remove-audio')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-volume-mute text-slate-500 w-5"></i> Remove Audio</button>
+                        <button onclick="selectTool('video-merge')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-layer-group text-teal-500 w-5"></i> Merge Video</button>
+                        <button onclick="selectTool('video-to-gif')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-film text-pink-500 w-5"></i> Video to GIF</button>
+                        <button onclick="selectTool('gif-to-mp4')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-play-circle text-orange-500 w-5"></i> GIF to MP4</button>
+                        <button onclick="selectTool('video-extract-frames')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-images text-cyan-500 w-5"></i> Extract Frames</button>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">Audio Tools</h4>
+                    <div class="space-y-1">
+                        <button onclick="selectTool('audio-convert')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-exchange-alt text-blue-500 w-5"></i> Convert</button>
+                        <button onclick="selectTool('audio-trim')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-cut text-red-500 w-5"></i> Trim</button>
+                        <button onclick="selectTool('audio-merge')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-object-group text-green-500 w-5"></i> Merge</button>
+                        <button onclick="selectTool('audio-volume')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-volume-up text-amber-500 w-5"></i> Volume Booster</button>
+                        <button onclick="selectTool('audio-noise-reduction')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-wave-square text-indigo-500 w-5"></i> Noise Reduction</button>
+                        <button onclick="selectTool('audio-record')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-microphone text-rose-500 w-5"></i> Voice Recorder</button>
+                        <button onclick="selectTool('audio-speed')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-forward text-teal-500 w-5"></i> Audio Speed</button>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Audio AI</h4>
+                    <div class="space-y-1">
+                        <button onclick="selectTool('ai-speech-to-text')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-file-audio text-cyan-500 w-5"></i> Speech to Text</button>
+                        <button onclick="selectTool('ai-text-to-speech')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-bullhorn text-purple-500 w-5"></i> Text to Speech</button>
+                    </div>
+                </div>
+                <!-- ================== AKHIR FITUR BARU ================== -->
+
             </div>
         </aside>
 
