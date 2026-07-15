@@ -9,92 +9,101 @@ const toolConfig = {
     'twidy-ai': { title: 'Twidy AI', desc: 'Asisten AI pintar untuk membantu berbagai tugas digital Anda secara langsung.', icon: 'fa-robot', color: 'text-purple-500', isIframe: true, iframeUrl: 'https://twidyai.vercel.app/' },
 
     // === PDF TOOLS ===
-    'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop) atau gunakan fitur sortir otomatis.', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
-    'pdf-split': { title: 'Split PDF', desc: 'Pisahkan dokumen PDF menjadi beberapa bagian.', icon: 'fa-scissors', color: 'text-orange-500', accept: '.pdf', multi: false, settings: [{ id: 'split-range', label: 'Rentang Halaman (Gunakan koma untuk memisah file. Contoh: 1, 2-50)', type: 'text', placeholder: 'Kosongkan jika ingin memisah tiap halaman' }] },
-    'remove-pages': { title: 'Remove pages', desc: 'Hapus halaman tertentu dari dokumen PDF.', icon: 'fa-minus-circle', color: 'text-rose-500', accept: '.pdf', multi: false, settings: [{ id: 'remove-range', label: 'Halaman yang dihapus (Contoh: 1, 3, 5-7)', type: 'text', placeholder: 'Ketik halaman di sini' }] },
+    'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop).', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
+    'pdf-split': { title: 'Split PDF', desc: 'Pisahkan dokumen PDF menjadi beberapa bagian.', icon: 'fa-scissors', color: 'text-orange-500', accept: '.pdf', multi: false, settings: [{ id: 'split-range', label: 'Rentang Halaman (Contoh: 1, 2-50)', type: 'text', placeholder: 'Kosongkan untuk memisah tiap halaman' }] },
+    'remove-pages': { title: 'Remove pages', desc: 'Hapus halaman tertentu dari dokumen PDF.', icon: 'fa-minus-circle', color: 'text-rose-500', accept: '.pdf', multi: false, settings: [{ id: 'remove-range', label: 'Halaman yang dihapus (Contoh: 1, 3)', type: 'text', placeholder: 'Ketik halaman di sini' }] },
     'extract-pages': { title: 'Extract pages', desc: 'Dapatkan dokumen baru berisi halaman yang Anda ekstrak.', icon: 'fa-share-square', color: 'text-blue-500', accept: '.pdf', multi: false, settings: [{ id: 'extract-range', label: 'Halaman yang diambil (Contoh: 2, 4-6)', type: 'text', placeholder: 'Ketik halaman di sini' }] },
     'organize-pdf': { title: 'Organize PDF', desc: 'Susun ulang urutan halaman PDF.', icon: 'fa-sort-alpha-down', color: 'text-indigo-500', accept: '.pdf', multi: false, settings: [{ id: 'organize-order', label: 'Urutan Halaman Baru (Contoh: 3, 1, 2)', type: 'text', placeholder: 'Ketik urutan baru' }] },
-    'scan-to-pdf': { title: 'Scan to PDF', desc: 'Kamera Scanner dokumen dengan fitur Crop Manual, Filter Cerdas, & Export Gambar/PDF.', icon: 'fa-qrcode', color: 'text-slate-500', accept: '.jpg,.jpeg,.png', multi: true },
-    'pdf-compress': { title: 'Compress PDF', desc: 'Kurangi ukuran file sambil mengoptimalkan kualitas maksimal.', icon: 'fa-compress-arrows-alt', color: 'text-green-500', accept: '.pdf', multi: false },
-    'repair-pdf': { title: 'Repair PDF', desc: 'Pulihkan struktur file PDF yang rusak ringan secara otomatis.', icon: 'fa-wrench', color: 'text-amber-500', accept: '.pdf', multi: false },
-    'ocr-pdf': { title: 'OCR PDF', desc: 'Ubah teks gambar pada halaman PDF menjadi teks digital yang bisa disalin.', icon: 'fa-search-plus', color: 'text-sky-500', accept: '.pdf', multi: false },
-    'image-to-pdf': { title: 'IMAGE to PDF', desc: 'Konversi gambar ke PDF dalam hitungan detik.', icon: 'fa-image', color: 'text-yellow-500', accept: '.jpg,.jpeg,.png', multi: true },
-    'word-to-pdf': { title: 'WORD to PDF', desc: 'Buat file DOC dan DOCX Anda mudah dibaca dengan PDF.', icon: 'fa-file-word', color: 'text-blue-600', accept: '.docx,.doc', multi: false },
-    'ppt-to-pdf': { title: 'POWERPOINT to PDF', desc: 'Jadikan presentasi PPT dan PPTX mudah dilihat dengan PDF.', icon: 'fa-file-powerpoint', color: 'text-orange-600', accept: '.pptx,.ppt', multi: false },
-    'excel-to-pdf': { title: 'EXCEL to PDF', desc: 'Buat spreadsheet EXCEL mudah dibaca mengkonversi ke PDF.', icon: 'fa-file-excel', color: 'text-green-600', accept: '.xlsx,.xls', multi: false },
-    'html-to-pdf': { title: 'HTML to PDF', desc: 'Konversi halaman web dalam HTML ke PDF.', icon: 'fa-html5', color: 'text-orange-500', accept: '.html', multi: false },
-    'txt-to-pdf': { title: 'TXT to PDF', desc: 'Konversi file teks biasa (.txt) menjadi dokumen PDF.', icon: 'fa-file-lines', color: 'text-slate-600', accept: '.txt', multi: false },
-    'rtf-to-pdf': { title: 'RTF to PDF', desc: 'Konversi file Rich Text Format (.rtf) menjadi PDF.', icon: 'fa-file-alt', color: 'text-purple-600', accept: '.rtf', multi: false },
-    'pdf-to-image': { title: 'PDF to IMAGE', desc: 'Konversi setiap halaman PDF ke JPG atau ekstrak gambar.', icon: 'fa-images', color: 'text-yellow-500', accept: '.pdf', multi: false },
-    'pdf-to-word': { title: 'PDF to WORD', desc: 'Mudah mengkonversi PDF ke DOC dan DOCX.', icon: 'fa-file-word', color: 'text-blue-500', accept: '.pdf', multi: false },
+    'scan-to-pdf': { title: 'Scan to PDF', desc: 'Kamera Scanner dokumen dengan fitur Crop Manual & Filter.', icon: 'fa-qrcode', color: 'text-slate-500', accept: '.jpg,.jpeg,.png', multi: true },
+    'pdf-compress': { title: 'Compress PDF', desc: 'Kurangi ukuran file PDF.', icon: 'fa-compress-arrows-alt', color: 'text-green-500', accept: '.pdf', multi: false },
+    'repair-pdf': { title: 'Repair PDF', desc: 'Pulihkan struktur file PDF yang rusak ringan.', icon: 'fa-wrench', color: 'text-amber-500', accept: '.pdf', multi: false },
+    'ocr-pdf': { title: 'OCR PDF', desc: 'Ubah teks gambar pada halaman PDF menjadi teks digital.', icon: 'fa-search-plus', color: 'text-sky-500', accept: '.pdf', multi: false },
+    
+    'image-to-pdf': { title: 'IMAGE to PDF', desc: 'Konversi gambar ke PDF.', icon: 'fa-image', color: 'text-yellow-500', accept: '.jpg,.jpeg,.png', multi: true },
+    'word-to-pdf': { title: 'WORD to PDF', desc: 'Konversi DOCX ke PDF.', icon: 'fa-file-word', color: 'text-blue-600', accept: '.docx,.doc', multi: false },
+    'ppt-to-pdf': { title: 'POWERPOINT to PDF', desc: 'Konversi PPTX ke PDF.', icon: 'fa-file-powerpoint', color: 'text-orange-600', accept: '.pptx,.ppt', multi: false },
+    'excel-to-pdf': { title: 'EXCEL to PDF', desc: 'Konversi XLSX ke PDF.', icon: 'fa-file-excel', color: 'text-green-600', accept: '.xlsx,.xls', multi: false },
+    'html-to-pdf': { title: 'HTML to PDF', desc: 'Konversi halaman web HTML ke PDF.', icon: 'fa-html5', color: 'text-orange-500', accept: '.html', multi: false },
+    'txt-to-pdf': { title: 'TXT to PDF', desc: 'Konversi TXT ke PDF.', icon: 'fa-file-lines', color: 'text-slate-600', accept: '.txt', multi: false },
+    'rtf-to-pdf': { title: 'RTF to PDF', desc: 'Konversi RTF ke PDF.', icon: 'fa-file-alt', color: 'text-purple-600', accept: '.rtf', multi: false },
+
+    'pdf-to-image': { title: 'PDF to IMAGE', desc: 'Ekstrak setiap halaman PDF ke JPG.', icon: 'fa-images', color: 'text-yellow-500', accept: '.pdf', multi: false },
+    'pdf-to-word': { title: 'PDF to WORD', desc: 'Konversi PDF ke DOCX.', icon: 'fa-file-word', color: 'text-blue-500', accept: '.pdf', multi: false },
     'pdf-to-ppt': { title: 'PDF to POWERPOINT', desc: 'Ubah PDF Anda menjadi presentasi PPTX.', icon: 'fa-file-powerpoint', color: 'text-orange-500', accept: '.pdf', multi: false },
-    'pdf-to-excel': { title: 'PDF to EXCEL', desc: 'Tarik data langsung dari PDF ke spreadsheet EXCEL.', icon: 'fa-file-excel', color: 'text-green-500', accept: '.pdf', multi: false },
-    'pdf-to-pdfa': { title: 'PDF to PDF/A', desc: 'Ubah PDF menjadi PDF/A untuk pengarsipan jangka panjang.', icon: 'fa-file-pdf', color: 'text-red-500', accept: '.pdf', multi: false },
+    'pdf-to-excel': { title: 'PDF to EXCEL', desc: 'Tarik data dari PDF ke spreadsheet EXCEL.', icon: 'fa-file-excel', color: 'text-green-500', accept: '.pdf', multi: false },
+    'pdf-to-pdfa': { title: 'PDF to PDF/A', desc: 'Ubah PDF menjadi PDF/A.', icon: 'fa-file-pdf', color: 'text-red-500', accept: '.pdf', multi: false },
+
     'pdf-rotate': { title: 'Rotate PDF', desc: 'Putar PDF sesuka Anda.', icon: 'fa-redo', color: 'text-purple-500', accept: '.pdf', multi: false },
-    'page-numbers': { title: 'Add page numbers', desc: 'Tambahkan nomor halaman ke bagian bawah PDF.', icon: 'fa-sort-numeric-down', color: 'text-pink-500', accept: '.pdf', multi: false },
-    'pdf-watermark': { title: 'Add watermark', desc: 'Stempel gambar atau teks ke PDF dalam hitungan detik.', icon: 'fa-stamp', color: 'text-indigo-400', accept: '.pdf', multi: false, settings: [{ id: 'wm-text', label: 'Teks Watermark', type: 'text', placeholder: 'Ketik Teks' }] },
-    'crop-pdf': { title: 'Crop PDF', desc: 'Pangkas margin atau potong halaman PDF.', icon: 'fa-crop', color: 'text-teal-500', accept: '.pdf', multi: false, settings: [{ id: 'crop-margin', label: 'Besar potongan margin (Angka 10-100 poin)', type: 'number', placeholder: '20' }] },
-    'edit-pdf': { title: 'Edit PDF', desc: 'Tambahkan teks, gambar, bentuk atau anotasi tangan.', icon: 'fa-edit', color: 'text-amber-600', accept: '.pdf', multi: false },
-    'pdf-forms': { title: 'PDF Forms', desc: 'Buat formulir interaktif atau isi formulir PDF.', icon: 'fa-list-alt', color: 'text-cyan-600', accept: '.pdf', multi: false },
-    'pdf-nup': { title: 'Padatkan (2-in-1)', desc: 'Gabungkan dua halaman PDF menjadi satu lembar untuk menghemat kertas.', icon: 'fa-columns', color: 'text-teal-600', accept: '.pdf', multi: false },
+    'page-numbers': { title: 'Add page numbers', desc: 'Tambahkan nomor halaman ke PDF.', icon: 'fa-sort-numeric-down', color: 'text-pink-500', accept: '.pdf', multi: false },
+    'pdf-watermark': { title: 'Add watermark', desc: 'Stempel teks ke PDF.', icon: 'fa-stamp', color: 'text-indigo-400', accept: '.pdf', multi: false, settings: [{ id: 'wm-text', label: 'Teks Watermark', type: 'text', placeholder: 'Ketik Teks' }] },
+    'crop-pdf': { title: 'Crop PDF', desc: 'Pangkas margin PDF.', icon: 'fa-crop', color: 'text-teal-500', accept: '.pdf', multi: false, settings: [{ id: 'crop-margin', label: 'Besar potongan margin (Poin)', type: 'number', placeholder: '20' }] },
+    'edit-pdf': { title: 'Edit PDF', desc: 'Preview dokumen di browser.', icon: 'fa-edit', color: 'text-amber-600', accept: '.pdf', multi: false },
+    'pdf-forms': { title: 'PDF Forms', desc: 'Buat formulir interaktif.', icon: 'fa-list-alt', color: 'text-cyan-600', accept: '.pdf', multi: false },
+    'pdf-nup': { title: 'Padatkan (2-in-1)', desc: 'Gabungkan dua halaman menjadi satu.', icon: 'fa-columns', color: 'text-teal-600', accept: '.pdf', multi: false },
+
     'pdf-unlock': { title: 'Unlock PDF', desc: 'Hapus pembatasan enkripsi PDF standar.', icon: 'fa-unlock', color: 'text-teal-500', accept: '.pdf', multi: false },
-    'pdf-protect': { title: 'Protect PDF', desc: 'Amankan dokumen PDF Anda dengan kata sandi.', icon: 'fa-lock', color: 'text-red-600', accept: '.pdf', multi: false, settings: [{ id: 'pt-pass', label: 'Masukkan Kata Kunci (Password)', type: 'text', placeholder: 'Ketik password di sini' }] },
-    'sign-pdf': { title: 'Sign PDF', desc: 'Tambahkan tanda tangan atau catatan pengesahan kustom.', icon: 'fa-signature', color: 'text-blue-700', accept: '.pdf', multi: false, settings: [{ id: 'sign-text', label: 'Teks Tanda Tangan Kustom', type: 'text', placeholder: 'Contoh: Disetujui oleh Nama Anda' }] },
-    'redact-pdf': { title: 'Redact PDF', desc: 'Tutup area teks sensitif dengan kotak hitam.', icon: 'fa-eraser', color: 'text-slate-800', accept: '.pdf', multi: false, settings: [{ id: 'redact-page', label: 'Halaman yang disensor (Contoh: 1)', type: 'number', placeholder: '1' }] },
-    'compare-pdf': { title: 'Compare PDF', desc: 'Bandingkan jumlah halaman dan struktur teks kedua file PDF.', icon: 'fa-not-equal', color: 'text-orange-400', accept: '.pdf', multi: true },
+    'pdf-protect': { title: 'Protect PDF', desc: 'Amankan dokumen dengan kata sandi.', icon: 'fa-lock', color: 'text-red-600', accept: '.pdf', multi: false, settings: [{ id: 'pt-pass', label: 'Masukkan Kata Kunci (Password)', type: 'text', placeholder: 'Ketik password di sini' }] },
+    'sign-pdf': { title: 'Sign PDF', desc: 'Tambahkan tanda tangan.', icon: 'fa-signature', color: 'text-blue-700', accept: '.pdf', multi: false, settings: [{ id: 'sign-text', label: 'Teks Tanda Tangan', type: 'text', placeholder: 'Disetujui oleh...' }] },
+    'redact-pdf': { title: 'Redact PDF', desc: 'Tutup area teks sensitif.', icon: 'fa-eraser', color: 'text-slate-800', accept: '.pdf', multi: false, settings: [{ id: 'redact-page', label: 'Halaman yang disensor (Contoh: 1)', type: 'number', placeholder: '1' }] },
+    'compare-pdf': { title: 'Compare PDF', desc: 'Bandingkan dua file PDF.', icon: 'fa-not-equal', color: 'text-orange-400', accept: '.pdf', multi: true },
     
     // === PDF AI ===
-    'ai-summarizer': { title: 'AI Summarizer', desc: 'Dapatkan ringkasan otomatis dari dokumen.', icon: 'fa-brain', color: 'text-purple-600', accept: '.pdf', multi: false },
-    'translate-pdf': { title: 'AI Translate PDF', desc: 'Terjemahkan seluruh isi PDF ke bahasa Indonesia menggunakan AI.', icon: 'fa-language', color: 'text-sky-600', accept: '.pdf', multi: false },
-    'ai-proofread': { title: 'AI Proofreader', desc: 'Perbaiki tata bahasa, ejaan (typo), dan struktur kalimat dokumen.', icon: 'fa-spell-check', color: 'text-green-600', accept: '.pdf', multi: false },
-    'ai-extract': { title: 'AI Extract Info', desc: 'Otomatis temukan Nama, Tanggal, dan Nominal penting di dokumen.', icon: 'fa-key', color: 'text-amber-600', accept: '.pdf', multi: false },
-    'ai-quiz': { title: 'AI Quiz Maker', desc: 'Minta AI membuat 5 soal latihan pilihan ganda dari dokumen.', icon: 'fa-question-circle', color: 'text-rose-500', accept: '.pdf', multi: false },
-    'ai-sentiment': { title: 'AI Sentiment', desc: 'Analisis emosi dan gaya bahasa/nada dari dokumen.', icon: 'fa-smile-beam', color: 'text-yellow-500', accept: '.pdf', multi: false },
-    'ai-chat': { title: 'Chat w/ PDF', desc: 'Tanya jawab spesifik tentang isi dokumen Anda.', icon: 'fa-comments', color: 'text-blue-500', accept: '.pdf', multi: false, settings: [{ id: 'ai-prompt', label: 'Tanyakan sesuatu tentang dokumen:', type: 'text', placeholder: 'Contoh: Apa kesimpulan utamanya?' }] },
-    'pdf-to-markdown': { title: 'PDF to Markdown', desc: 'Ubah teks PDF menjadi file Markdown (.md) murni.', icon: 'fa-markdown', color: 'text-slate-600', accept: '.pdf', multi: false },
+    'ai-summarizer': { title: 'AI Summarizer', desc: 'Dapatkan ringkasan otomatis.', icon: 'fa-brain', color: 'text-purple-600', accept: '.pdf', multi: false },
+    'translate-pdf': { title: 'AI Translate PDF', desc: 'Terjemahkan seluruh isi PDF.', icon: 'fa-language', color: 'text-sky-600', accept: '.pdf', multi: false },
+    'ai-proofread': { title: 'AI Proofreader', desc: 'Perbaiki tata bahasa.', icon: 'fa-spell-check', color: 'text-green-600', accept: '.pdf', multi: false },
+    'ai-extract': { title: 'AI Extract Info', desc: 'Otomatis temukan informasi penting.', icon: 'fa-key', color: 'text-amber-600', accept: '.pdf', multi: false },
+    'ai-quiz': { title: 'AI Quiz Maker', desc: 'Buat 5 soal latihan.', icon: 'fa-question-circle', color: 'text-rose-500', accept: '.pdf', multi: false },
+    'ai-sentiment': { title: 'AI Sentiment', desc: 'Analisis gaya bahasa/nada.', icon: 'fa-smile-beam', color: 'text-yellow-500', accept: '.pdf', multi: false },
+    'ai-chat': { title: 'Chat w/ PDF', desc: 'Tanya jawab tentang dokumen.', icon: 'fa-comments', color: 'text-blue-500', accept: '.pdf', multi: false, settings: [{ id: 'ai-prompt', label: 'Tanyakan sesuatu:', type: 'text', placeholder: 'Apa kesimpulan utamanya?' }] },
+    'pdf-to-markdown': { title: 'PDF to Markdown', desc: 'Ubah PDF menjadi Markdown.', icon: 'fa-markdown', color: 'text-slate-600', accept: '.pdf', multi: false },
 
-    // === REVISI MANUAL IMAGE TOOLS ===
-    'image-resize': { title: 'Resize Image', desc: 'Ubah resolusi dan dimensi gambar Anda secara manual.', icon: 'fa-expand-arrows-alt', color: 'text-blue-500', accept: 'image/*', multi: false, settings: [{ id: 'resize-width', label: 'Lebar Baru (px)', type: 'number', placeholder: 'Contoh: 1280' }, { id: 'resize-height', label: 'Tinggi Baru (px - Kosongkan jika ingin proporsional)', type: 'number', placeholder: 'Contoh: 720' }] },
-    'image-compress': { title: 'Compress Image', desc: 'Kecilkan ukuran file gambar (KB/MB) sesuai persentase kualitas.', icon: 'fa-compress', color: 'text-green-500', accept: 'image/*', multi: false, settings: [{ id: 'compress-quality', label: 'Kualitas Gambar (1-100)', type: 'number', placeholder: 'Contoh: 60' }] },
-    'image-rotate': { title: 'Rotate Image', desc: 'Putar rotasi gambar.', icon: 'fa-sync-alt', color: 'text-purple-500', accept: 'image/*', multi: false, settings: [{ id: 'rotate-degree', label: 'Derajat Rotasi (Angka)', type: 'number', placeholder: 'Contoh: 90, 180, atau -90' }] },
-    'image-watermark': { title: 'Image Watermark', desc: 'Tambahkan tulisan ke gambar.', icon: 'fa-stamp', color: 'text-teal-500', accept: 'image/*', multi: false, settings: [{ id: 'wm-text-img', label: 'Teks Watermark', type: 'text', placeholder: 'TWIDYTOOLS' }, { id: 'wm-pos', label: 'Posisi Watermark (atas / tengah / bawah)', type: 'text', placeholder: 'Ketik: bawah' }] },
-    'image-crop': { title: 'Crop Image', desc: 'Potong area tertentu dari gambar secara interaktif.', icon: 'fa-crop-alt', color: 'text-amber-500', accept: 'image/*', multi: false },
-    'image-flip': { title: 'Flip Image', desc: 'Balik gambar secara horizontal (Mirror).', icon: 'fa-arrows-alt-h', color: 'text-pink-500', accept: 'image/*', multi: false },
-    'image-remove-bg': { title: 'Remove Background', desc: 'Hapus latar belakang foto (Diproses langsung di browser Anda).', icon: 'fa-eraser', color: 'text-slate-500', accept: 'image/*', multi: false },
-    'image-blur-face': { title: 'Blur Image', desc: 'Memberikan efek blur ke seluruh gambar.', icon: 'fa-user-secret', color: 'text-indigo-400', accept: 'image/*', multi: false },
+    // === IMAGE TOOLS ===
+    'image-resize': { title: 'Resize Image', desc: 'Ubah resolusi dan dimensi gambar.', icon: 'fa-expand-arrows-alt', color: 'text-blue-500', accept: 'image/*', multi: false, settings: [{ id: 'resize-width', label: 'Lebar Baru (px)', type: 'number', placeholder: '1280' }, { id: 'resize-height', label: 'Tinggi Baru (px - Kosongkan jika proporsional)', type: 'number', placeholder: '720' }] },
+    'image-compress': { title: 'Compress Image', desc: 'Kecilkan ukuran file gambar.', icon: 'fa-compress', color: 'text-green-500', accept: 'image/*', multi: false, settings: [{ id: 'compress-quality', label: 'Kualitas (1-100)', type: 'number', placeholder: '60' }] },
+    'image-rotate': { title: 'Rotate Image', desc: 'Putar rotasi gambar.', icon: 'fa-sync-alt', color: 'text-purple-500', accept: 'image/*', multi: false, settings: [{ id: 'rotate-degree', label: 'Derajat Rotasi', type: 'number', placeholder: '90' }] },
+    'image-watermark': { title: 'Image Watermark', desc: 'Tambahkan teks ke gambar.', icon: 'fa-stamp', color: 'text-teal-500', accept: 'image/*', multi: false, settings: [{ id: 'wm-text-img', label: 'Teks Watermark', type: 'text', placeholder: 'TWIDYTOOLS' }, { id: 'wm-pos', label: 'Posisi (atas / tengah / bawah)', type: 'text', placeholder: 'bawah' }] },
+    'image-crop': { title: 'Crop Image', desc: 'Potong area gambar.', icon: 'fa-crop-alt', color: 'text-amber-500', accept: 'image/*', multi: false },
+    'image-flip': { title: 'Flip Image', desc: 'Balik gambar (Mirror).', icon: 'fa-arrows-alt-h', color: 'text-pink-500', accept: 'image/*', multi: false },
+    'image-remove-bg': { title: 'Remove Background', desc: 'Hapus latar belakang foto.', icon: 'fa-eraser', color: 'text-slate-500', accept: 'image/*', multi: false },
+    'image-blur-face': { title: 'Blur Image', desc: 'Beri efek blur.', icon: 'fa-user-secret', color: 'text-indigo-400', accept: 'image/*', multi: false },
     
     // IMAGE CONVERTERS
-    'image-to-ico': { title: 'Image to ICO', desc: 'Ubah foto menjadi file icon (.ico) untuk web.', icon: 'fa-icons', color: 'text-orange-500', accept: 'image/*', multi: false },
-    'ico-to-png': { title: 'ICO to PNG', desc: 'Ubah format icon web ke file gambar PNG biasa.', icon: 'fa-file-image', color: 'text-blue-400', accept: '.ico', multi: false },
-    'avif-to-png': { title: 'AVIF ↔ PNG', desc: 'Konversi timbal-balik format gambar generasi baru (AVIF).', icon: 'fa-exchange-alt', color: 'text-emerald-500', accept: '.avif,.png', multi: false },
-    'heic-to-jpg': { title: 'HEIC ↔ JPG', desc: 'Konversi foto iPhone HEIC/HEIF ke JPG.', icon: 'fa-exchange-alt', color: 'text-red-500', accept: '.heic,.jpg,.jpeg', multi: false },
-    'webp-to-png': { title: 'WEBP ↔ PNG', desc: 'Konversi format WEBP ke gambar PNG.', icon: 'fa-exchange-alt', color: 'text-cyan-500', accept: '.webp,.png', multi: false },
-    'svg-to-png': { title: 'SVG ↔ PNG', desc: 'Ubah vektor SVG menjadi file PNG.', icon: 'fa-exchange-alt', color: 'text-rose-500', accept: '.svg,.png', multi: false },
+    'image-to-ico': { title: 'Image to ICO', desc: 'Ubah foto jadi .ico.', icon: 'fa-icons', color: 'text-orange-500', accept: 'image/*', multi: false },
+    'ico-to-png': { title: 'ICO to PNG', desc: 'Ubah icon ke PNG.', icon: 'fa-file-image', color: 'text-blue-400', accept: '.ico', multi: false },
+    'avif-to-png': { title: 'AVIF ↔ PNG', desc: 'Konversi AVIF.', icon: 'fa-exchange-alt', color: 'text-emerald-500', accept: '.avif,.png', multi: false },
+    'heic-to-jpg': { title: 'HEIC ↔ JPG', desc: 'Konversi foto HEIC.', icon: 'fa-exchange-alt', color: 'text-red-500', accept: '.heic,.jpg,.jpeg', multi: false },
+    'webp-to-png': { title: 'WEBP ↔ PNG', desc: 'Konversi WEBP.', icon: 'fa-exchange-alt', color: 'text-cyan-500', accept: '.webp,.png', multi: false },
+    'svg-to-png': { title: 'SVG ↔ PNG', desc: 'Ubah vektor SVG.', icon: 'fa-exchange-alt', color: 'text-rose-500', accept: '.svg,.png', multi: false },
 
     // IMAGE AI
-    'ai-upscale-image': { title: 'Upscale Image', desc: 'Tidak Didukung: Membutuhkan Model Difusi Khusus.', icon: 'fa-magic', color: 'text-slate-400', accept: 'image/*', multi: false },
-    'ai-colorize-bw': { title: 'Colorize B&W', desc: 'Tidak Didukung: Membutuhkan Model Difusi Khusus.', icon: 'fa-palette', color: 'text-slate-400', accept: 'image/*', multi: false },
-    'ai-remove-object': { title: 'Remove Object', desc: 'Tidak Didukung: Membutuhkan Model Difusi Khusus.', icon: 'fa-quidditch', color: 'text-slate-400', accept: 'image/*', multi: false },
-    'ai-image-caption': { title: 'AI Caption', desc: 'Biarkan AI mendeskripsikan dan membuat caption untuk gambar Anda.', icon: 'fa-closed-captioning', color: 'text-teal-500', accept: 'image/*', multi: false },
+    'ai-upscale-image': { title: 'Upscale Image', desc: 'Membutuhkan Model Ekstra.', icon: 'fa-magic', color: 'text-slate-400', accept: 'image/*', multi: false },
+    'ai-colorize-bw': { title: 'Colorize B&W', desc: 'Membutuhkan Model Ekstra.', icon: 'fa-palette', color: 'text-slate-400', accept: 'image/*', multi: false },
+    'ai-remove-object': { title: 'Remove Object', desc: 'Membutuhkan Model Ekstra.', icon: 'fa-quidditch', color: 'text-slate-400', accept: 'image/*', multi: false },
+    'ai-image-caption': { title: 'AI Caption', desc: 'Biarkan AI mendeskripsikan gambar.', icon: 'fa-closed-captioning', color: 'text-teal-500', accept: 'image/*', multi: false },
 
-    // === MEDIA TOOLS (VIDEO & AUDIO) ===
-    'video-compress': { title: 'Compress Video', desc: 'Kecilkan ukuran video agar mudah dikirim.', icon: 'fa-compress-arrows-alt', color: 'text-green-500', accept: 'video/*', multi: false },
-    'video-trim': { title: 'Trim Video', desc: 'Potong 10 detik pertama durasi video.', icon: 'fa-cut', color: 'text-amber-500', accept: 'video/*', multi: false },
+    // === VIDEO TOOLS ===
+    'video-compress': { title: 'Compress Video', desc: 'Kecilkan ukuran video.', icon: 'fa-compress-arrows-alt', color: 'text-green-500', accept: 'video/*', multi: false },
+    'video-trim': { title: 'Trim Video', desc: 'Potong durasi video.', icon: 'fa-cut', color: 'text-amber-500', accept: 'video/*', multi: false, settings: [{ id: 'vid-trim-start', label: 'Waktu Mulai (Detik)', type: 'number', placeholder: '0' }, { id: 'vid-trim-dur', label: 'Durasi Potongan (Detik)', type: 'number', placeholder: '10' }] },
     'video-rotate': { title: 'Rotate Video', desc: 'Putar video 90 derajat.', icon: 'fa-undo-alt', color: 'text-purple-500', accept: 'video/*', multi: false },
-    'video-speed': { title: 'Change Speed', desc: 'Percepat video menjadi 2x lipat.', icon: 'fa-tachometer-alt', color: 'text-red-500', accept: 'video/*', multi: false },
-    'video-to-audio': { title: 'Extract Audio', desc: 'Konversi Video ke Audio dengan teknologi FFmpeg.wasm browser.', icon: 'fa-music', color: 'text-indigo-600', accept: 'video/*', multi: false, settings: [{ id: 'audio-format', label: 'Format Audio Keluaran', type: 'text', placeholder: 'Ketik mp3 atau wav (Default: mp3)' }] },
-    'video-remove-audio': { title: 'Remove Audio', desc: 'Bungkam/hilangkan suara asli dari video.', icon: 'fa-volume-mute', color: 'text-slate-500', accept: 'video/*', multi: false },
-    'video-to-gif': { title: 'Video to GIF', desc: 'Jadikan potongan 5 detik pertama video sebagai animasi GIF.', icon: 'fa-film', color: 'text-pink-500', accept: 'video/*', multi: false },
-    'gif-to-mp4': { title: 'GIF to MP4', desc: 'Ubah gambar animasi GIF menjadi video MP4.', icon: 'fa-play-circle', color: 'text-orange-500', accept: 'image/gif', multi: false },
+    'video-speed': { title: 'Change Speed', desc: 'Ubah kecepatan video.', icon: 'fa-tachometer-alt', color: 'text-red-500', accept: 'video/*', multi: false, settings: [{ id: 'vid-speed', label: 'Kecepatan (Contoh: 1.5, 2.0)', type: 'number', placeholder: '2.0' }] },
+    'video-to-audio': { title: 'Extract Audio', desc: 'Konversi Video ke mp3.', icon: 'fa-music', color: 'text-indigo-600', accept: 'video/*', multi: false },
+    'video-remove-audio': { title: 'Remove Audio', desc: 'Bungkam suara asli video.', icon: 'fa-volume-mute', color: 'text-slate-500', accept: 'video/*', multi: false },
+    'video-merge': { title: 'Merge Video', desc: 'Gabungkan beberapa klip video.', icon: 'fa-layer-group', color: 'text-teal-500', accept: 'video/*', multi: true },
+    'video-extract-frames': { title: 'Extract Frames', desc: 'Ambil gambar per-detik video.', icon: 'fa-images', color: 'text-cyan-500', accept: 'video/*', multi: false },
+    'video-to-gif': { title: 'Video to GIF', desc: 'Jadikan video animasi GIF.', icon: 'fa-film', color: 'text-pink-500', accept: 'video/*', multi: false, settings: [{ id: 'gif-dur', label: 'Durasi GIF (Detik)', type: 'number', placeholder: '5' }] },
+    'gif-to-mp4': { title: 'GIF to MP4', desc: 'Ubah GIF menjadi MP4.', icon: 'fa-play-circle', color: 'text-orange-500', accept: 'image/gif', multi: false },
     
-    'audio-convert': { title: 'Convert Audio', desc: 'Ubah file menjadi mp3.', icon: 'fa-exchange-alt', color: 'text-blue-500', accept: 'audio/*', multi: false },
-    'audio-trim': { title: 'Trim Audio', desc: 'Ambil 15 detik pertama dari lagu atau rekaman.', icon: 'fa-cut', color: 'text-red-500', accept: 'audio/*', multi: false },
-    'audio-volume': { title: 'Volume Booster', desc: 'Keraskan volume file audio 2x lipat.', icon: 'fa-volume-up', color: 'text-amber-500', accept: 'audio/*', multi: false },
-    'audio-noise-reduction': { title: 'Noise Reduction', desc: 'Hilangkan suara bising latar belakang pada rekaman.', icon: 'fa-wave-square', color: 'text-indigo-500', accept: 'audio/*', multi: false },
-    'audio-speed': { title: 'Audio Speed', desc: 'Percepat tempo lagu/rekaman audio (1.5x).', icon: 'fa-forward', color: 'text-teal-500', accept: 'audio/*', multi: false },
+    // === AUDIO TOOLS ===
+    'audio-convert': { title: 'Convert Audio', desc: 'Ubah format jadi mp3.', icon: 'fa-exchange-alt', color: 'text-blue-500', accept: 'audio/*', multi: false },
+    'audio-trim': { title: 'Trim Audio', desc: 'Potong bagian lagu.', icon: 'fa-cut', color: 'text-red-500', accept: 'audio/*', multi: false, settings: [{ id: 'aud-trim-start', label: 'Waktu Mulai (Detik)', type: 'number', placeholder: '0' }, { id: 'aud-trim-dur', label: 'Durasi Potongan (Detik)', type: 'number', placeholder: '15' }] },
+    'audio-merge': { title: 'Merge Audio', desc: 'Gabungkan lagu secara seri.', icon: 'fa-object-group', color: 'text-green-500', accept: 'audio/*', multi: true },
+    'audio-volume': { title: 'Volume Booster', desc: 'Keraskan volume lagu.', icon: 'fa-volume-up', color: 'text-amber-500', accept: 'audio/*', multi: false, settings: [{ id: 'aud-vol', label: 'Pengali Volume (Contoh: 2 = 200%)', type: 'number', placeholder: '2' }] },
+    'audio-noise-reduction': { title: 'Noise Reduction', desc: 'Kurangi bising latar belakang.', icon: 'fa-wave-square', color: 'text-indigo-500', accept: 'audio/*', multi: false },
+    'audio-speed': { title: 'Audio Speed', desc: 'Percepat tempo lagu.', icon: 'fa-forward', color: 'text-teal-500', accept: 'audio/*', multi: false, settings: [{ id: 'aud-speed', label: 'Kecepatan (Contoh: 1.5)', type: 'number', placeholder: '1.5' }] },
 
-    'ai-speech-to-text': { title: 'Speech to Text', desc: 'Transkrip suara menjadi tulisan digital menggunakan AI.', icon: 'fa-file-audio', color: 'text-cyan-500', accept: 'audio/*', multi: false },
-    'ai-text-to-speech': { title: 'Text to Speech', desc: 'Tidak didukung: Memerlukan API Khusus TTS.', icon: 'fa-bullhorn', color: 'text-slate-400', accept: '.txt,.pdf', multi: false }
+    // AUDIO AI
+    'ai-speech-to-text': { title: 'Speech to Text', desc: 'Transkrip suara pakai AI.', icon: 'fa-file-audio', color: 'text-cyan-500', accept: 'audio/*', multi: false },
+    'ai-text-to-speech': { title: 'Text to Speech', desc: 'Membutuhkan API TTS.', icon: 'fa-bullhorn', color: 'text-slate-400', accept: '.txt,.pdf', multi: false }
 };
 
 const categories = {
@@ -109,8 +118,8 @@ const categories = {
     
     'IMAGE TOOLS': ['image-resize', 'image-compress', 'image-crop', 'image-rotate', 'image-flip', 'image-remove-bg', 'image-blur-face', 'image-watermark', 'image-to-ico', 'ico-to-png', 'avif-to-png', 'heic-to-jpg', 'webp-to-png', 'svg-to-png'],
     'IMAGE AI': ['ai-upscale-image', 'ai-colorize-bw', 'ai-remove-object', 'ai-image-caption'],
-    'VIDEO TOOLS': ['video-compress', 'video-trim', 'video-rotate', 'video-speed', 'video-to-audio', 'video-remove-audio', 'video-to-gif', 'gif-to-mp4'],
-    'AUDIO TOOLS': ['audio-convert', 'audio-trim', 'audio-volume', 'audio-noise-reduction', 'audio-speed'],
+    'VIDEO TOOLS': ['video-compress', 'video-trim', 'video-rotate', 'video-speed', 'video-to-audio', 'video-remove-audio', 'video-merge', 'video-extract-frames', 'video-to-gif', 'gif-to-mp4'],
+    'AUDIO TOOLS': ['audio-convert', 'audio-trim', 'audio-merge', 'audio-volume', 'audio-noise-reduction', 'audio-speed'],
     'AUDIO AI': ['ai-speech-to-text', 'ai-text-to-speech']
 };
 
@@ -436,7 +445,7 @@ async function processFiles() {
         else if (currentTool === 'compare-pdf') { await executeComparePdf(); }
         else if (currentTool === 'pdf-to-markdown') { await executePdfToMarkdown(); }
 
-        // --- NEW FEATURES CALL ---
+        // --- IMAGE, VIDEO, AUDIO TOOLS ---
         else if (currentTool === 'image-crop') { await executeImageCrop(); }
         else if (currentTool === 'image-remove-bg') { await executeRemoveBgClient(); }
         else if (currentTool.startsWith('image-') || currentTool.includes('-to-png') || currentTool.includes('-to-jpg') || currentTool === 'image-to-ico') {
@@ -452,7 +461,7 @@ async function processFiles() {
             await executeAIFeatures(currentTool); 
         }
         else { 
-            throw new Error("Fitur ini membutuhkan API khusus, tidak bisa diproses oleh Gemini atau browser secara langsung.");
+            throw new Error("Fitur ini membutuhkan API khusus, tidak bisa diproses oleh AI Teks atau browser saat ini.");
         }
         
     } catch (e) {
@@ -567,7 +576,7 @@ async function executeImageCrop() {
     };
 }
 
-// --- SCANNER KE PDF LAMA ---
+// --- SCANNER KE PDF ---
 async function executeScanToPdf() {
     if (selectedFiles.length === 0) return;
     await loadCropper();
@@ -1046,15 +1055,15 @@ async function executePdfNup() {
 
 // --- FITUR HAPUS LATAR BELAKANG CLIENT-SIDE ---
 async function executeRemoveBgClient() {
-    updateProgress(30, 'Memuat Modul AI Latar Belakang (Proses pertama kali akan memakan waktu karena mengunduh model ~40MB)...');
+    updateProgress(30, 'Memuat Modul AI Latar Belakang (Mengunduh model awal ~40MB)...');
     
-    // Inject Script Dynamic Imgly
-    if (!window.imglyRemoveBackground) {
+    // Inject Script Dynamic Imgly versi unpkg yang lebih stabil (UMD build)
+    if (typeof imglyRemoveBackground === 'undefined') {
         await new Promise((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.3/dist/imglyRemoveBackground.umd.min.js';
+            script.src = 'https://unpkg.com/@imgly/background-removal@1.4.3/dist/imglyRemoveBackground.umd.js';
             script.onload = resolve;
-            script.onerror = () => reject(new Error('Gagal memuat modul Remove BG.'));
+            script.onerror = () => reject(new Error('Gagal memuat modul Remove BG dari server CDN. Coba periksa koneksi internet Anda.'));
             document.head.appendChild(script);
         });
     }
@@ -1065,13 +1074,14 @@ async function executeRemoveBgClient() {
     updateProgress(70, 'Memisahkan objek utama dari gambar...');
     
     try {
+        // Menggunakan library dari global object window
         const imageBlob = await imglyRemoveBackground(objUrl);
         updateProgress(100, 'Selesai!');
         alertUser('Latar belakang berhasil dihapus!', 'success');
         triggerDownload(imageBlob, `Twidy_NoBG_${file.name.split('.')[0]}.png`);
         setTimeout(() => hideProgress(), 2000);
     } catch (err) {
-        throw new Error("Proses Remove BG gagal. Browser mungkin membatasi memori WebGL.");
+        throw new Error("Proses Remove BG gagal. Browser Anda mungkin membatasi memori WebGL atau format gambar tidak didukung.");
     } finally {
         URL.revokeObjectURL(objUrl);
     }
@@ -1114,7 +1124,6 @@ async function processImageFeature(action) {
             } else if (customH) {
                 canvas.height = customH; canvas.width = img.width * (customH / img.height);
             } else {
-                // Default jika input dibiarkan kosong
                 canvas.width = img.width / 2; canvas.height = img.height / 2;
             }
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -1130,10 +1139,7 @@ async function processImageFeature(action) {
             
         case 'image-rotate':
             let deg = parseInt(document.getElementById('rotate-degree')?.value) || 90;
-            // Hindari gambar terpotong jika diputar 90/270 derajat
-            if (deg % 180 !== 0) {
-                canvas.width = img.height; canvas.height = img.width;
-            }
+            if (deg % 180 !== 0) { canvas.width = img.height; canvas.height = img.width; }
             ctx.translate(canvas.width / 2, canvas.height / 2);
             ctx.rotate(deg * Math.PI / 180);
             ctx.drawImage(img, -img.width / 2, -img.height / 2);
@@ -1151,12 +1157,12 @@ async function processImageFeature(action) {
             const wmPos = (document.getElementById('wm-pos')?.value || 'tengah').toLowerCase();
             
             ctx.font = `bold ${canvas.width * 0.05}px Arial`;
-            ctx.fillStyle = "rgba(255, 255, 255, 0.7)"; // Putih semi-transparan
+            ctx.fillStyle = "rgba(255, 255, 255, 0.7)"; 
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             
             let xPos = canvas.width / 2;
-            let yPos = canvas.height / 2; // Default Tengah
+            let yPos = canvas.height / 2; 
             
             if (wmPos.includes('atas')) yPos = canvas.height * 0.1;
             if (wmPos.includes('bawah')) yPos = canvas.height * 0.9;
@@ -1200,69 +1206,147 @@ async function processImageFeature(action) {
     }, outputType, outputQuality);
 }
 
-// --- PEMROSESAN MEDIA (FFMPEG) ---
+// --- PEMROSESAN MEDIA LENGKAP (FFMPEG SINGLE-THREADED) ---
 async function processMediaWithFFmpeg(action, mediaType) {
     updateProgress(10, 'Memuat Engine FFmpeg...');
     
     if (typeof FFmpeg === 'undefined') throw new Error("Library FFmpeg.wasm gagal dimuat. Cek koneksi Anda.");
     
-    const file = selectedFiles[0];
+    // REVISI: Menggunakan core-st (Single Threaded) agar tidak terkena error Cross-Origin-Isolation di Vercel
     const { createFFmpeg, fetchFile } = FFmpeg;
-    const ffmpeg = createFFmpeg({ log: false, corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js' });
+    const ffmpeg = createFFmpeg({ 
+        log: false, 
+        corePath: 'https://unpkg.com/@ffmpeg/core-st@0.11.1/dist/ffmpeg-core.js' 
+    });
 
-    updateProgress(30, 'Menginisialisasi modul core di browser...');
+    updateProgress(30, 'Menginisialisasi modul core di browser (Tanpa Multi-Thread)...');
     try { 
         await ffmpeg.load(); 
     } catch (err) { 
-        throw new Error("Gagal memuat. Server Anda tidak memiliki header Cross-Origin-Isolation. Anda perlu mengkonfigurasi server agar FFmpeg bisa membaca memori browser."); 
+        throw new Error("Gagal menginisialisasi modul mesin video. Pastikan Anda menggunakan Chrome/Edge versi terbaru."); 
     }
 
     updateProgress(40, 'Membaca file media...');
-    ffmpeg.FS('writeFile', file.name, await fetchFile(file));
-
+    
+    // Simpan semua file input ke dalam file system (FS) memori FFmpeg
+    for (let i = 0; i < selectedFiles.length; i++) {
+        ffmpeg.FS('writeFile', selectedFiles[i].name, await fetchFile(selectedFiles[i]));
+    }
+    
+    const file = selectedFiles[0];
     let outName = '';
     let command = [];
     let outMime = '';
 
     updateProgress(60, 'Mengeksekusi manipulasi media...');
 
-    if (mediaType === 'video') {
-        outName = 'output.mp4'; outMime = 'video/mp4';
-        switch(action) {
-            case 'video-compress': command = ['-i', file.name, '-vcodec', 'libx264', '-crf', '28', outName]; break;
-            case 'video-trim': command = ['-i', file.name, '-ss', '00:00:00', '-t', '00:00:10', '-c', 'copy', outName]; break; 
-            case 'video-rotate': command = ['-i', file.name, '-vf', 'transpose=1', outName]; break; 
-            case 'video-speed': command = ['-i', file.name, '-filter_complex', '[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]', '-map', '[v]', '-map', '[a]', outName]; break;
-            case 'video-remove-audio': command = ['-i', file.name, '-c', 'copy', '-an', outName]; break;
-            case 'video-to-gif': outName = 'output.gif'; outMime = 'image/gif'; command = ['-i', file.name, '-t', '5', '-r', '10', outName]; break; 
-            case 'gif-to-mp4': command = ['-i', file.name, '-movflags', 'faststart', '-pix_fmt', 'yuv420p', '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', outName]; break;
-            case 'video-to-audio': outName = 'output.mp3'; outMime = 'audio/mp3'; command = ['-i', file.name, '-q:a', '0', '-map', 'a', outName]; break;
-            default: command = ['-i', file.name, outName];
+    // Pengecualian khusus jika fiturnya adalah Extract Frames (Keluaran ganda)
+    if (action === 'video-extract-frames') {
+        updateProgress(75, 'Mengekstrak frame dari video (Ini memakan waktu)...');
+        // Ekstrak 1 frame setiap 1 detik
+        await ffmpeg.run('-i', file.name, '-r', '1', 'frame-%03d.jpg');
+        
+        updateProgress(85, 'Membungkus frame ke dalam ZIP...');
+        const zip = new JSZip();
+        const memFiles = ffmpeg.FS('readdir', '/');
+        let frameCount = 0;
+        
+        for (const f of memFiles) {
+            if (f.startsWith('frame-') && f.endsWith('.jpg')) {
+                const data = ffmpeg.FS('readFile', f);
+                zip.file(f, data);
+                frameCount++;
+            }
         }
-    } else if (mediaType === 'audio') {
-        outName = 'output.mp3'; outMime = 'audio/mp3';
-        switch(action) {
-            case 'audio-convert': command = ['-i', file.name, '-q:a', '0', outName]; break;
-            case 'audio-trim': command = ['-i', file.name, '-ss', '00:00:00', '-t', '00:00:15', outName]; break; 
-            case 'audio-volume': command = ['-i', file.name, '-filter:a', 'volume=2.0', outName]; break; 
-            case 'audio-speed': command = ['-i', file.name, '-filter:a', 'atempo=1.5', outName]; break; 
-            case 'audio-noise-reduction': command = ['-i', file.name, '-af', 'afftdn', outName]; break; 
-            default: command = ['-i', file.name, outName];
+        
+        if (frameCount === 0) throw new Error("Gagal mengekstrak frame dari video ini.");
+        const blob = await zip.generateAsync({type: 'blob'});
+        
+        updateProgress(100, 'Selesai!');
+        alertUser('Frame video berhasil diambil!', 'success');
+        triggerDownload(blob, `Twidy_Frames_${file.name.split('.')[0]}.zip`);
+        setTimeout(() => hideProgress(), 2000);
+        return; // Hentikan fungsi di sini karena file sudah diunduh
+    }
+
+    // Pengecualian khusus untuk Merge (Gabung Video/Audio)
+    if (action === 'video-merge' || action === 'audio-merge') {
+        if (selectedFiles.length < 2) throw new Error("Fitur ini membutuhkan minimal 2 file untuk digabung.");
+        outName = action === 'video-merge' ? 'output.mp4' : 'output.mp3';
+        outMime = action === 'video-merge' ? 'video/mp4' : 'audio/mp3';
+        
+        // Buat file concat.txt berisi list nama file untuk FFmpeg
+        let concatList = '';
+        for (let i = 0; i < selectedFiles.length; i++) {
+            concatList += `file '${selectedFiles[i].name}'\n`;
+        }
+        ffmpeg.FS('writeFile', 'concat.txt', concatList);
+        command = ['-f', 'concat', '-safe', '0', '-i', 'concat.txt', '-c', 'copy', outName];
+    } else {
+        // --- LOGIKA NORMAL (1 FILE) ---
+        if (mediaType === 'video') {
+            outName = 'output.mp4'; outMime = 'video/mp4';
+            switch(action) {
+                case 'video-compress': command = ['-i', file.name, '-vcodec', 'libx264', '-crf', '28', outName]; break;
+                case 'video-trim': 
+                    const vStart = document.getElementById('vid-trim-start')?.value || '0';
+                    const vDur = document.getElementById('vid-trim-dur')?.value || '10';
+                    command = ['-i', file.name, '-ss', vStart, '-t', vDur, '-c', 'copy', outName]; 
+                    break; 
+                case 'video-rotate': command = ['-i', file.name, '-vf', 'transpose=1', outName]; break; 
+                case 'video-speed': 
+                    const vSpeed = document.getElementById('vid-speed')?.value || '2.0';
+                    command = ['-i', file.name, '-filter_complex', `[0:v]setpts=${1/vSpeed}*PTS[v];[0:a]atempo=${vSpeed}[a]`, '-map', '[v]', '-map', '[a]', outName]; 
+                    break;
+                case 'video-remove-audio': command = ['-i', file.name, '-c', 'copy', '-an', outName]; break;
+                case 'video-to-gif': 
+                    outName = 'output.gif'; outMime = 'image/gif'; 
+                    const gifDur = document.getElementById('gif-dur')?.value || '5';
+                    command = ['-i', file.name, '-t', gifDur, '-r', '10', outName]; 
+                    break; 
+                case 'gif-to-mp4': command = ['-i', file.name, '-movflags', 'faststart', '-pix_fmt', 'yuv420p', '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', outName]; break;
+                case 'video-to-audio': outName = 'output.mp3'; outMime = 'audio/mp3'; command = ['-i', file.name, '-q:a', '0', '-map', 'a', outName]; break;
+                default: command = ['-i', file.name, outName];
+            }
+        } else if (mediaType === 'audio') {
+            outName = 'output.mp3'; outMime = 'audio/mp3';
+            switch(action) {
+                case 'audio-convert': command = ['-i', file.name, '-q:a', '0', outName]; break;
+                case 'audio-trim': 
+                    const aStart = document.getElementById('aud-trim-start')?.value || '0';
+                    const aDur = document.getElementById('aud-trim-dur')?.value || '15';
+                    command = ['-i', file.name, '-ss', aStart, '-t', aDur, outName]; 
+                    break; 
+                case 'audio-volume': 
+                    const aVol = document.getElementById('aud-vol')?.value || '2.0';
+                    command = ['-i', file.name, '-filter:a', `volume=${aVol}`, outName]; 
+                    break; 
+                case 'audio-speed': 
+                    const aSpeed = document.getElementById('aud-speed')?.value || '1.5';
+                    command = ['-i', file.name, '-filter:a', `atempo=${aSpeed}`, outName]; 
+                    break; 
+                case 'audio-noise-reduction': command = ['-i', file.name, '-af', 'afftdn', outName]; break; 
+                default: command = ['-i', file.name, outName];
+            }
         }
     }
 
-    updateProgress(80, 'Merender hasil akhir (Ini mungkin memakan waktu)...');
+    updateProgress(80, 'Merender hasil akhir (Proses render di dalam browser memerlukan waktu)...');
     await ffmpeg.run(...command);
     
-    updateProgress(90, 'Menyimpan file...');
-    const data = ffmpeg.FS('readFile', outName);
-    const blob = new Blob([data.buffer], { type: outMime });
+    updateProgress(90, 'Menyiapkan unduhan file...');
+    try {
+        const data = ffmpeg.FS('readFile', outName);
+        const blob = new Blob([data.buffer], { type: outMime });
 
-    updateProgress(100, 'Selesai!');
-    alertUser('Media berhasil diproses!', 'success');
-    
-    setTimeout(() => hideProgress(), 2000);
-    triggerDownload(blob, `TwidyTools_${action}_${file.name.split('.')[0]}.${outName.split('.')[1]}`);
+        updateProgress(100, 'Selesai!');
+        alertUser('Media berhasil diproses!', 'success');
+        
+        setTimeout(() => hideProgress(), 2000);
+        triggerDownload(blob, `Twidy_${action}_Media.${outName.split('.')[1]}`);
+    } catch (err) {
+        throw new Error("Proses render gagal. File media Anda mungkin tidak kompatibel atau ukurannya terlalu besar untuk memori browser.");
+    }
 }
 
 // --- GEMINI AI CONNECTOR ---
