@@ -8,7 +8,7 @@ const toolConfig = {
     'twidy-bill': { title: 'TwidyBill', desc: 'Generate tagihan siap kirim dalam hitungan detik.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.netlify.app/' },
     'twidy-ai': { title: 'Twidy AI', desc: 'Asisten AI pintar untuk membantu berbagai tugas digital Anda secara langsung.', icon: 'fa-robot', color: 'text-purple-500', isIframe: true, iframeUrl: 'https://twidyai.vercel.app/' },
 
-    // === PDF TOOLS (OLD CODE) ===
+    // === PDF TOOLS ===
     'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop) atau gunakan fitur sortir otomatis.', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
     'pdf-split': { title: 'Split PDF', desc: 'Pisahkan dokumen PDF menjadi beberapa bagian.', icon: 'fa-scissors', color: 'text-orange-500', accept: '.pdf', multi: false, settings: [{ id: 'split-range', label: 'Rentang Halaman (Gunakan koma untuk memisah file. Contoh: 1, 2-50)', type: 'text', placeholder: 'Kosongkan jika ingin memisah tiap halaman' }] },
     'remove-pages': { title: 'Remove pages', desc: 'Hapus halaman tertentu dari dokumen PDF.', icon: 'fa-minus-circle', color: 'text-rose-500', accept: '.pdf', multi: false, settings: [{ id: 'remove-range', label: 'Halaman yang dihapus (Contoh: 1, 3, 5-7)', type: 'text', placeholder: 'Ketik halaman di sini' }] },
@@ -58,9 +58,7 @@ const toolConfig = {
     'ai-chat': { title: 'Chat w/ PDF', desc: 'Tanya jawab spesifik tentang isi dokumen Anda.', icon: 'fa-comments', color: 'text-blue-500', accept: '.pdf', multi: false, settings: [{ id: 'ai-prompt', label: 'Tanyakan sesuatu tentang dokumen:', type: 'text', placeholder: 'Contoh: Apa kesimpulan utamanya?' }] },
     'pdf-to-markdown': { title: 'PDF to Markdown', desc: 'Ubah teks PDF menjadi file Markdown (.md) murni.', icon: 'fa-markdown', color: 'text-slate-600', accept: '.pdf', multi: false },
 
-    // === NEW MEDIA TOOLS ===
-    
-    // Image Tools
+    // === MEDIA TOOLS (IMAGE, VIDEO, AUDIO) ===
     'image-resize': { title: 'Resize Image', desc: 'Ubah resolusi dan dimensi gambar Anda.', icon: 'fa-expand-arrows-alt', color: 'text-blue-500', accept: 'image/*', multi: true },
     'image-compress': { title: 'Compress Image', desc: 'Kecilkan ukuran file gambar (KB/MB) tanpa banyak mengurangi kualitas.', icon: 'fa-compress', color: 'text-green-500', accept: 'image/*', multi: true },
     'image-crop': { title: 'Crop Image', desc: 'Potong bagian tertentu dari gambar.', icon: 'fa-crop-alt', color: 'text-amber-500', accept: 'image/*', multi: false },
@@ -76,13 +74,11 @@ const toolConfig = {
     'webp-to-png': { title: 'WEBP ↔ PNG', desc: 'Konversi format WEBP ke gambar PNG.', icon: 'fa-exchange-alt', color: 'text-cyan-500', accept: '.webp,.png', multi: true },
     'svg-to-png': { title: 'SVG ↔ PNG', desc: 'Ubah vektor SVG menjadi file PNG.', icon: 'fa-exchange-alt', color: 'text-rose-500', accept: '.svg,.png', multi: true },
 
-    // Image AI
     'ai-upscale-image': { title: 'Upscale Image', desc: 'Perbesar dan pertajam gambar pecah menggunakan AI.', icon: 'fa-magic', color: 'text-purple-500', accept: 'image/*', multi: false },
     'ai-colorize-bw': { title: 'Colorize B&W', desc: 'Warnai foto jadul hitam-putih menjadi berwarna dengan AI.', icon: 'fa-palette', color: 'text-pink-500', accept: 'image/*', multi: false },
     'ai-remove-object': { title: 'Remove Object', desc: 'Hapus objek atau orang yang mengganggu di dalam foto.', icon: 'fa-quidditch', color: 'text-indigo-500', accept: 'image/*', multi: false },
     'ai-image-caption': { title: 'AI Caption', desc: 'Biarkan AI mendeskripsikan dan membuat caption untuk gambar Anda.', icon: 'fa-closed-captioning', color: 'text-teal-500', accept: 'image/*', multi: false },
 
-    // Video Tools
     'video-compress': { title: 'Compress Video', desc: 'Kecilkan ukuran video agar mudah dikirim.', icon: 'fa-compress-arrows-alt', color: 'text-green-500', accept: 'video/*', multi: false },
     'video-trim': { title: 'Trim Video', desc: 'Potong awal atau akhir durasi video.', icon: 'fa-cut', color: 'text-amber-500', accept: 'video/*', multi: false },
     'video-crop': { title: 'Crop Video', desc: 'Potong rasio layar video.', icon: 'fa-crop', color: 'text-blue-500', accept: 'video/*', multi: false },
@@ -95,7 +91,6 @@ const toolConfig = {
     'gif-to-mp4': { title: 'GIF to MP4', desc: 'Ubah gambar animasi GIF menjadi video MP4.', icon: 'fa-play-circle', color: 'text-orange-500', accept: 'image/gif', multi: false },
     'video-extract-frames': { title: 'Extract Frames', desc: 'Ambil gambar per-frame dari setiap detik video.', icon: 'fa-images', color: 'text-cyan-500', accept: 'video/*', multi: false },
 
-    // Audio Tools
     'audio-convert': { title: 'Convert Audio', desc: 'Ubah format file audio antar format.', icon: 'fa-exchange-alt', color: 'text-blue-500', accept: 'audio/*', multi: true },
     'audio-trim': { title: 'Trim Audio', desc: 'Potong bagian tertentu dari lagu atau rekaman.', icon: 'fa-cut', color: 'text-red-500', accept: 'audio/*', multi: false },
     'audio-merge': { title: 'Merge Audio', desc: 'Gabungkan file lagu/rekaman secara seri.', icon: 'fa-object-group', color: 'text-green-500', accept: 'audio/*', multi: true },
@@ -104,7 +99,6 @@ const toolConfig = {
     'audio-record': { title: 'Voice Recorder', desc: 'Rekam langsung audio dari mic perangkat.', icon: 'fa-microphone', color: 'text-rose-500', accept: 'audio/*', multi: false },
     'audio-speed': { title: 'Audio Speed', desc: 'Ubah tempo lagu/rekaman audio.', icon: 'fa-forward', color: 'text-teal-500', accept: 'audio/*', multi: false },
 
-    // Audio AI
     'ai-speech-to-text': { title: 'Speech to Text', desc: 'Transkrip suara menjadi tulisan digital menggunakan AI.', icon: 'fa-file-audio', color: 'text-cyan-500', accept: 'audio/*', multi: false },
     'ai-text-to-speech': { title: 'Text to Speech', desc: 'Buat AI membacakan teks dengan suara natural manusia.', icon: 'fa-bullhorn', color: 'text-purple-500', accept: '.txt,.pdf', multi: false }
 };
@@ -119,7 +113,6 @@ const categories = {
     'PDF SECURITY': ['pdf-unlock', 'pdf-protect', 'sign-pdf', 'redact-pdf', 'compare-pdf'],
     'PDF INTELLIGENCE': ['ai-summarizer', 'translate-pdf', 'ai-proofread', 'ai-extract', 'ai-quiz', 'ai-sentiment', 'ai-chat', 'pdf-to-markdown'],
     
-    // NEW CATEGORIES ADDED
     'IMAGE TOOLS': ['image-resize', 'image-compress', 'image-crop', 'image-rotate', 'image-flip', 'image-remove-bg', 'image-blur-face', 'image-watermark', 'image-to-ico', 'ico-to-png', 'avif-to-png', 'heic-to-jpg', 'webp-to-png', 'svg-to-png'],
     'IMAGE AI': ['ai-upscale-image', 'ai-colorize-bw', 'ai-remove-object', 'ai-image-caption'],
     'VIDEO TOOLS': ['video-compress', 'video-trim', 'video-crop', 'video-rotate', 'video-speed', 'video-to-audio', 'video-remove-audio', 'video-merge', 'video-to-gif', 'gif-to-mp4', 'video-extract-frames'],
@@ -135,7 +128,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(updateDateTime, 1000);
     updateDateTime();
     
-    // KEMBALI KE HASH ROUTING (#)
     const hash = window.location.hash.substring(1);
     if (hash && toolConfig[hash]) { selectTool(hash); }
 });
@@ -212,9 +204,7 @@ function selectTool(toolId) {
     const config = toolConfig[toolId];
     if (!config) return;
     
-    // KEMBALI MENGGUNAKAN HASH ROUTING (#)
     window.location.hash = toolId;
-    
     document.title = config.title + " - TwidyTools";
     
     document.getElementById('toolsSection').classList.add('hidden');
@@ -266,9 +256,7 @@ function selectTool(toolId) {
 }
 
 function goBack() {
-    // KEMBALI MENGGUNAKAN HASH ROUTING (#)
     history.pushState("", document.title, window.location.pathname);
-    
     document.title = "TwidyTools - Solusi PDF & Dokumen Lengkap Online";
     document.getElementById('uploadSection').classList.add('hidden');
     document.getElementById('toolsSection').classList.remove('hidden');
@@ -454,10 +442,19 @@ async function processFiles() {
         else if (currentTool === 'compare-pdf') { await executeComparePdf(); }
         else if (currentTool === 'pdf-to-markdown') { await executePdfToMarkdown(); }
 
-        // --- NEW FEATURES CALL ---
-        else if (currentTool === 'video-to-audio') { await executeVideoToAudio(); }
-        
-        else if (currentTool.startsWith('ai-') || currentTool === 'translate-pdf') { await executeAIFeatures(currentTool); }
+        // --- MEDIA TOOLS ROUTING ---
+        else if (currentTool.startsWith('image-') || currentTool.includes('-to-png') || currentTool.includes('-to-jpg') || currentTool === 'image-to-ico') {
+            await processImageFeature(currentTool);
+        }
+        else if (currentTool.startsWith('video-') || currentTool === 'gif-to-mp4') {
+            await processMediaWithFFmpeg(currentTool, 'video');
+        }
+        else if (currentTool.startsWith('audio-')) {
+            await processMediaWithFFmpeg(currentTool, 'audio');
+        }
+        else if (currentTool.startsWith('ai-') || currentTool === 'translate-pdf') { 
+            await executeAIFeatures(currentTool); 
+        }
         else { await executeAdvancedPlaceholder(); }
         
     } catch (e) {
@@ -470,37 +467,25 @@ async function processFiles() {
 // KUMPULAN FUNGSI FITUR
 // ==========================================
 
-// --- FUNGSI HELPER CONVERTAPI VERCEL ---
 async function executeConvertAPI(conversionType, targetExtension, loadingMessage) {
     updateProgress(20, loadingMessage);
-    
     const formData = new FormData();
     formData.append('file', selectedFiles[0]);
     formData.append('conversionType', conversionType); 
-
     updateProgress(50, 'Mengirim dokumen ke server (ConvertAPI)...');
     
-    const response = await fetch('/api/convert', {
-        method: 'POST',
-        body: formData
-    });
-
+    const response = await fetch('/api/convert', { method: 'POST', body: formData });
     if (!response.ok) {
         const errText = await response.text();
         throw new Error(errText || response.statusText);
     }
-
     updateProgress(80, 'Mengunduh hasil konversi...');
-    
     let newFileName = 'Hasil_Konversi.' + targetExtension;
     const disposition = response.headers.get('Content-Disposition');
     let serverFileName = "";
-    
     if (disposition && disposition.includes('filename=')) {
         const match = disposition.match(/filename="?([^"]+)"?/);
-        if (match && match[1]) {
-            serverFileName = match[1];
-        }
+        if (match && match[1]) serverFileName = match[1];
     }
     
     if (!serverFileName || serverFileName === 'undefined' || serverFileName === 'undefined.undefined' || serverFileName.includes('undefined')) {
@@ -511,16 +496,14 @@ async function executeConvertAPI(conversionType, targetExtension, loadingMessage
     } else {
         newFileName = serverFileName;
     }
-
     const blob = await response.blob();
     updateProgress(100, 'Selesai!');
     alertUser('Berhasil dikonversi!', 'success');
     setTimeout(() => hideProgress(), 2000);
-    
     triggerDownload(blob, newFileName);
 }
 
-// --- OFFICE & TEXT CONVERSION VIA BACKEND ---
+// --- OFFICE & TEXT CONVERSION ---
 async function executeWordToPdf() { await executeConvertAPI('word-to-pdf', 'pdf', 'Menyiapkan file Word...'); }
 async function executePptToPdf() { await executeConvertAPI('ppt-to-pdf', 'pdf', 'Menyiapkan file PowerPoint...'); }
 async function executeExcelToPdf() { await executeConvertAPI('excel-to-pdf', 'pdf', 'Menyiapkan file Excel...'); }
@@ -532,71 +515,14 @@ async function executePdfToExcel() { await executeConvertAPI('pdf-to-excel', 'xl
 async function executePdfToPpt() { await executeConvertAPI('pdf-to-ppt', 'pptx', 'Menyiapkan file PDF...'); }
 async function executePdfToPdfa() { await executeConvertAPI('pdf-to-pdfa', 'pdf', 'Memproses metadata PDF/A...'); }
 
-
-// --- FFmpeg.wasm: CONVERT VIDEO -> AUDIO (Tingkat Lanjut di Browser) ---
-async function executeVideoToAudio() {
-    updateProgress(10, 'Memuat Engine FFmpeg (Canggih & Gratis)...');
-    
-    if (typeof FFmpeg === 'undefined') {
-        throw new Error("Library FFmpeg.wasm gagal dimuat, silakan cek koneksi internet Anda.");
-    }
-    
-    const format = document.getElementById('audio-format')?.value.toLowerCase().replace('.', '') || 'mp3';
-    const supportedFormats = ['mp3', 'wav', 'aac', 'ogg', 'm4a'];
-    
-    if (!supportedFormats.includes(format)) {
-        throw new Error(`Format tidak didukung. Pilihan format: ${supportedFormats.join(', ')}`);
-    }
-
-    const file = selectedFiles[0];
-    const { createFFmpeg, fetchFile } = FFmpeg;
-    
-    // Inisialisasi engine log
-    const ffmpeg = createFFmpeg({ 
-        log: true, 
-        // Mengurangi strict-origin issue di beberapa browser modern
-        corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js'
-    });
-
-    updateProgress(30, 'Menginisialisasi modul core multimedia dalam browser...');
-    try {
-        await ffmpeg.load();
-    } catch (err) {
-        throw new Error("Sistem browser ini mungkin membatasi SharedArrayBuffer. Gunakan browser versi Chrome terbaru atau izinkan Cross-Origin-Isolation.");
-    }
-
-    updateProgress(50, 'Membaca bitstream video...');
-    ffmpeg.FS('writeFile', file.name, await fetchFile(file));
-
-    const outName = 'output_audio.' + format;
-    
-    // Command FFmpeg untuk ekstrak audio tanpa video, di 192k audio bitrate
-    updateProgress(75, `Melakukan Ekstraksi (Video -> ${format.toUpperCase()})...`);
-    await ffmpeg.run('-i', file.name, '-q:a', '0', '-map', 'a', outName);
-    
-    updateProgress(90, 'Menyimpan file audio hasil proses...');
-    const data = ffmpeg.FS('readFile', outName);
-    
-    const blob = new Blob([data.buffer], { type: `audio/${format}` });
-
-    updateProgress(100, 'Selesai!');
-    alertUser('Berhasil mengekstrak audio!', 'success');
-    
-    setTimeout(() => hideProgress(), 2000);
-    triggerDownload(blob, `TwidyExtract_${file.name.split('.')[0]}.${format}`);
-}
-
-
 // --- FITUR SCANNER UI (CROP & MULTI-FILTER) ---
 async function loadCropper() {
     if (window.Cropper) return Promise.resolve();
     updateProgress(10, 'Memuat alat pemotong gambar...');
     return new Promise((resolve, reject) => {
         const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css';
+        link.rel = 'stylesheet'; link.href = 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css';
         document.head.appendChild(link);
-
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js';
         script.onload = () => { hideProgress(); resolve(); };
@@ -608,7 +534,6 @@ async function loadCropper() {
 async function executeScanToPdf() {
     if (selectedFiles.length === 0) return;
     await loadCropper();
-
     const processedImagesDataUrl = []; 
     let currentIndex = 0;
     let cropperInstance = null;
@@ -619,7 +544,6 @@ async function executeScanToPdf() {
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 z-[100] flex flex-col bg-slate-900 text-white select-none';
     modal.id = 'twidyScannerModal';
-
     const header = document.createElement('div');
     header.className = 'w-full flex justify-between items-center p-4 border-b border-slate-700 bg-slate-800 shadow-md';
     header.innerHTML = `
@@ -629,7 +553,6 @@ async function executeScanToPdf() {
             <button id="btnCloseScanner" class="text-2xl text-slate-400 hover:text-white transition ml-3"><i class="fas fa-times"></i></button>
         </div>
     `;
-
     const workspace = document.createElement('div');
     workspace.className = 'relative w-full flex-1 min-h-0 flex items-center justify-center bg-black p-4 overflow-hidden';
     workspace.innerHTML = `
@@ -638,10 +561,8 @@ async function executeScanToPdf() {
             <img id="scannerImg" class="max-w-full max-h-full object-contain" />
         </div>
     `;
-
     const bottomControls = document.createElement('div');
     bottomControls.className = 'w-full bg-slate-800 flex flex-col p-4 border-t border-slate-700 pb-8 sm:pb-4 transition-all duration-300';
-    
     const filterControls = document.createElement('div');
     filterControls.id = 'filterControlsArea';
     filterControls.className = 'flex gap-3 overflow-x-auto justify-center mb-5 pb-2 no-scrollbar';
@@ -652,11 +573,9 @@ async function executeScanToPdf() {
         <button data-filter="gray" class="filter-btn flex flex-col items-center min-w-[70px] p-2 rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 transition"><i class="fas fa-tint-slash text-xl mb-1"></i><span class="text-xs font-semibold">Grayscale</span></button>
         <button data-filter="eco" class="filter-btn flex flex-col items-center min-w-[70px] p-2 rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 transition"><i class="fas fa-leaf text-xl mb-1 text-emerald-400"></i><span class="text-xs font-semibold">Eco-Print</span></button>
     `;
-
     const actionControls = document.createElement('div');
     actionControls.id = 'actionControlsArea';
     actionControls.className = 'flex gap-3 w-full max-w-md mx-auto justify-center';
-    
     const cropActionControls = document.createElement('div');
     cropActionControls.id = 'cropActionArea';
     cropActionControls.className = 'hidden flex gap-3 w-full max-w-md mx-auto justify-center';
@@ -668,17 +587,13 @@ async function executeScanToPdf() {
     bottomControls.appendChild(filterControls);
     bottomControls.appendChild(actionControls);
     bottomControls.appendChild(cropActionControls);
-    
-    modal.appendChild(header);
-    modal.appendChild(workspace);
-    modal.appendChild(bottomControls);
+    modal.appendChild(header); modal.appendChild(workspace); modal.appendChild(bottomControls);
     document.body.appendChild(modal);
 
     const canvas = document.getElementById('scannerCanvas');
     const ctx = canvas.getContext('2d');
     const imgCrop = document.getElementById('scannerImg');
     const cropContainer = document.getElementById('cropContainer');
-
     document.getElementById('btnCloseScanner').onclick = () => modal.remove();
 
     function applyFilterToContext(context, width, height, filterType) {
@@ -688,10 +603,8 @@ async function executeScanToPdf() {
         tempImg.onload = () => {
             context.drawImage(tempImg, 0, 0, width, height);
             if (filterType === 'original') return;
-
             const imgData = context.getImageData(0, 0, width, height);
             const data = imgData.data;
-
             if (filterType === 'magic') {
                 const factor = (259 * (60 + 255)) / (255 * (259 - 60));
                 for (let i = 0; i < data.length; i += 4) {
@@ -724,15 +637,10 @@ async function executeScanToPdf() {
     function renderFilterUI() {
         document.querySelectorAll('.filter-btn').forEach(btn => {
             const f = btn.getAttribute('data-filter');
-            if (f === currentFilter) {
-                btn.className = "filter-btn flex flex-col items-center min-w-[70px] p-2 rounded-xl bg-indigo-600 text-white shadow-lg ring-2 ring-indigo-400 transition";
-            } else {
-                btn.className = "filter-btn flex flex-col items-center min-w-[70px] p-2 rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 transition";
-            }
+            if (f === currentFilter) { btn.className = "filter-btn flex flex-col items-center min-w-[70px] p-2 rounded-xl bg-indigo-600 text-white shadow-lg ring-2 ring-indigo-400 transition"; }
+            else { btn.className = "filter-btn flex flex-col items-center min-w-[70px] p-2 rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 transition"; }
             btn.onclick = () => {
-                currentFilter = f;
-                renderFilterUI();
-                applyFilterToContext(ctx, canvas.width, canvas.height, currentFilter);
+                currentFilter = f; renderFilterUI(); applyFilterToContext(ctx, canvas.width, canvas.height, currentFilter);
             };
         });
     }
@@ -740,23 +648,16 @@ async function executeScanToPdf() {
     function toggleCropMode(enable) {
         isCropping = enable;
         if (enable) {
-            canvas.classList.add('hidden');
-            cropContainer.classList.remove('hidden');
+            canvas.classList.add('hidden'); cropContainer.classList.remove('hidden');
             document.getElementById('filterControlsArea').classList.add('hidden');
             document.getElementById('actionControlsArea').classList.add('hidden');
             document.getElementById('cropActionArea').classList.remove('hidden');
             document.getElementById('btnToggleCrop').classList.add('hidden');
-            
             imgCrop.src = baseImgSrc;
-            cropperInstance = new Cropper(imgCrop, {
-                viewMode: 1,
-                autoCropArea: 0.9,
-                background: false
-            });
+            cropperInstance = new Cropper(imgCrop, { viewMode: 1, autoCropArea: 0.9, background: false });
         } else {
             if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
-            canvas.classList.remove('hidden');
-            cropContainer.classList.add('hidden');
+            canvas.classList.remove('hidden'); cropContainer.classList.add('hidden');
             document.getElementById('filterControlsArea').classList.remove('hidden');
             document.getElementById('actionControlsArea').classList.remove('hidden');
             document.getElementById('cropActionArea').classList.add('hidden');
@@ -766,39 +667,27 @@ async function executeScanToPdf() {
 
     document.getElementById('btnToggleCrop').onclick = () => toggleCropMode(true);
     document.getElementById('btnCancelCrop').onclick = () => toggleCropMode(false);
-    
     document.getElementById('btnApplyCrop').onclick = () => {
         if (!cropperInstance) return;
         const croppedCanvas = cropperInstance.getCroppedCanvas({ imageSmoothingEnabled: true, imageSmoothingQuality: 'high' });
         baseImgSrc = croppedCanvas.toDataURL('image/jpeg', 0.9);
-        canvas.width = croppedCanvas.width;
-        canvas.height = croppedCanvas.height;
-        toggleCropMode(false);
-        applyFilterToContext(ctx, canvas.width, canvas.height, currentFilter);
+        canvas.width = croppedCanvas.width; canvas.height = croppedCanvas.height;
+        toggleCropMode(false); applyFilterToContext(ctx, canvas.width, canvas.height, currentFilter);
     };
 
     async function loadFileUI(index) {
         updateProgress(50, `Memuat gambar ${index + 1}...`);
         document.getElementById('scanModalTitle').innerHTML = `<i class="fas fa-qrcode mr-2 text-indigo-400"></i> TwidyScanner (${index + 1}/${selectedFiles.length})`;
-        
-        currentFilter = 'magic';
-        renderFilterUI();
-
-        const file = selectedFiles[index];
-        const objUrl = URL.createObjectURL(file);
-        
+        currentFilter = 'magic'; renderFilterUI();
+        const file = selectedFiles[index]; const objUrl = URL.createObjectURL(file);
         const tempImg = new Image();
         tempImg.onload = () => {
-            canvas.width = tempImg.width;
-            canvas.height = tempImg.height;
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = tempImg.width; tempCanvas.height = tempImg.height;
+            canvas.width = tempImg.width; canvas.height = tempImg.height;
+            const tempCanvas = document.createElement('canvas'); tempCanvas.width = tempImg.width; tempCanvas.height = tempImg.height;
             tempCanvas.getContext('2d').drawImage(tempImg, 0, 0);
             baseImgSrc = tempCanvas.toDataURL('image/jpeg', 0.9);
-            
             applyFilterToContext(ctx, canvas.width, canvas.height, currentFilter);
-            URL.revokeObjectURL(objUrl);
-            hideProgress();
+            URL.revokeObjectURL(objUrl); hideProgress();
         };
         tempImg.src = objUrl;
 
@@ -817,66 +706,47 @@ async function executeScanToPdf() {
 
     function saveAndNext() {
         processedImagesDataUrl.push(canvas.toDataURL('image/jpeg', 0.85));
-        currentIndex++;
-        loadFileUI(currentIndex);
+        currentIndex++; loadFileUI(currentIndex);
     }
 
     async function saveAndExport(exportType) {
         processedImagesDataUrl.push(canvas.toDataURL('image/jpeg', 0.85));
         modal.remove(); 
-        
         updateProgress(30, 'Merangkai dokumen...');
-        
         let outPdf = exportType === 'pdf' ? await PDFLib.PDFDocument.create() : null;
         let zip = exportType === 'image' && processedImagesDataUrl.length > 1 ? new JSZip() : null;
 
         for (let i = 0; i < processedImagesDataUrl.length; i++) {
             updateProgress(30 + ((i / processedImagesDataUrl.length) * 60), `Mengekspor halaman ${i + 1}...`);
-            
             const dataUrl = processedImagesDataUrl[i];
-            const fetchRes = await fetch(dataUrl);
-            const blob = await fetchRes.blob();
-
+            const fetchRes = await fetch(dataUrl); const blob = await fetchRes.blob();
             if (exportType === 'pdf') {
                 const bytes = await blob.arrayBuffer();
                 const img = await outPdf.embedJpg(bytes);
                 const page = outPdf.addPage([img.width, img.height]);
                 page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
             } else {
-                if (processedImagesDataUrl.length === 1) {
-                    triggerDownload(blob, `TwidyScan_Document.jpg`);
-                } else {
-                    zip.file(`TwidyScan_Page_${i+1}.jpg`, blob);
-                }
+                if (processedImagesDataUrl.length === 1) triggerDownload(blob, `TwidyScan_Document.jpg`);
+                else zip.file(`TwidyScan_Page_${i+1}.jpg`, blob);
             }
         }
-
         updateProgress(90, 'Menyimpan berkas akhir...');
-        
-        if (exportType === 'pdf') {
-            triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'TwidyScanner_Document.pdf');
-        } else if (exportType === 'image' && processedImagesDataUrl.length > 1) {
-            triggerDownload(await zip.generateAsync({type: 'blob'}), 'TwidyScanner_Images.zip');
-        }
+        if (exportType === 'pdf') { triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'TwidyScanner_Document.pdf'); }
+        else if (exportType === 'image' && processedImagesDataUrl.length > 1) { triggerDownload(await zip.generateAsync({type: 'blob'}), 'TwidyScanner_Images.zip'); }
 
-        updateProgress(100, 'Selesai!');
-        alertUser('Dokumen Scanner berhasil disimpan!', 'success');
-        setTimeout(() => hideProgress(), 2000);
+        updateProgress(100, 'Selesai!'); alertUser('Dokumen Scanner berhasil disimpan!', 'success'); setTimeout(() => hideProgress(), 2000);
     }
-
     loadFileUI(currentIndex);
 }
 
-// --- FUNGSI LOKAL LAINNYA ---
+// --- FUNGSI LOKAL PDF ---
 async function executeImageToPdf() {
     updateProgress(30, 'Mengonversi gambar ke PDF...');
     const outPdf = await PDFLib.PDFDocument.create();
     for (let i = 0; i < selectedFiles.length; i++) {
-        const f = selectedFiles[i];
-        const bytes = await f.arrayBuffer();
+        const f = selectedFiles[i]; const bytes = await f.arrayBuffer();
         let img = f.type.includes('png') ? await outPdf.embedPng(bytes) : await outPdf.embedJpg(bytes);
-        const page = outPdf.addPage([img.width, img.height]);
-        page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+        const page = outPdf.addPage([img.width, img.height]); page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
     }
     updateProgress(100, 'Selesai!'); alertUser('Berhasil membuat PDF!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'Twidy_Images.pdf');
@@ -909,8 +779,7 @@ async function executeOcrPdf() {
     let fullOcrText = "";
     for(let i=1; i<=Math.min(pdf.numPages, 3); i++) {
         updateProgress(30 + ((i/Math.min(pdf.numPages, 3))*60), `Memproses OCR halaman ${i}...`);
-        const page = await pdf.getPage(i);
-        const vp = page.getViewport({scale: 1.5});
+        const page = await pdf.getPage(i); const vp = page.getViewport({scale: 1.5});
         const cvs = document.createElement('canvas'); cvs.width = vp.width; cvs.height = vp.height;
         await page.render({canvasContext: cvs.getContext('2d'), viewport: vp}).promise;
         const res = await Tesseract.recognize(cvs, 'eng+ind');
@@ -1010,46 +879,33 @@ async function executeSplit() {
     const rangeInput = document.getElementById('split-range')?.value || "";
     const zip = new JSZip();
     const totalPages = doc.getPageCount();
-
     if (!rangeInput) {
         updateProgress(50, 'Memisahkan semua halaman...');
         for (let i = 0; i < totalPages; i++) {
-            const sub = await PDFLib.PDFDocument.create();
-            const [p] = await sub.copyPages(doc, [i]);
-            sub.addPage(p);
-            zip.file(`Page_${i+1}.pdf`, await sub.save());
+            const sub = await PDFLib.PDFDocument.create(); const [p] = await sub.copyPages(doc, [i]);
+            sub.addPage(p); zip.file(`Page_${i+1}.pdf`, await sub.save());
         }
     } else {
         const parts = rangeInput.split(',');
         for (let index = 0; index < parts.length; index++) {
             const part = parts[index].trim();
             let pagesToKeep = [];
-            
             if (part.includes('-')) {
                 let [start, end] = part.split('-').map(Number);
-                if (start && end) {
-                    for (let i = start; i <= end; i++) {
-                        if (i > 0 && i <= totalPages) pagesToKeep.push(i - 1);
-                    }
-                }
+                if (start && end) { for (let i = start; i <= end; i++) { if (i > 0 && i <= totalPages) pagesToKeep.push(i - 1); } }
             } else {
                 let num = parseInt(part);
                 if (num > 0 && num <= totalPages) pagesToKeep.push(num - 1);
             }
-
             if (pagesToKeep.length > 0) {
                 updateProgress(50 + ((index / parts.length) * 40), `Membuat bagian ${index + 1}...`);
                 const sub = await PDFLib.PDFDocument.create();
-                const copiedPages = await sub.copyPages(doc, pagesToKeep);
-                copiedPages.forEach(p => sub.addPage(p));
+                const copiedPages = await sub.copyPages(doc, pagesToKeep); copiedPages.forEach(p => sub.addPage(p));
                 zip.file(`Part_${index+1}_(Pages_${part}).pdf`, await sub.save());
             }
         }
     }
-
-    updateProgress(100, 'Selesai!'); 
-    alertUser('Berhasil dipisah!', 'success'); 
-    setTimeout(() => hideProgress(), 2000);
+    updateProgress(100, 'Selesai!'); alertUser('Berhasil dipisah!', 'success'); setTimeout(() => hideProgress(), 2000);
     triggerDownload(await zip.generateAsync({type: 'blob'}), 'Twidy_Splitted.zip');
 }
 
@@ -1137,8 +993,7 @@ async function executePdfNup() {
     const pdfDoc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer());
     const newPdfDoc = await PDFLib.PDFDocument.create();
     const pages = pdfDoc.getPages();
-    const a4Width = 595.28;
-    const a4Height = 841.89;
+    const a4Width = 595.28; const a4Height = 841.89;
 
     for (let i = 0; i < pages.length; i += 2) {
         updateProgress(30 + ((i / pages.length) * 50), `Memproses halaman ${i + 1}...`);
@@ -1164,18 +1019,183 @@ async function executePdfNup() {
 }
 
 async function executeAdvancedPlaceholder() {
-    // Fungsi bawaan/pengganti untuk modul-modul lainnya (Jika diproses di backend di kemudian hari).
     throw new Error("Modul dalam tahap pengembangan/sinkronisasi dengan server.");
+}
+
+// ==========================================
+// NEW FEATURE HANDLERS (IMAGE, VIDEO, AUDIO)
+// ==========================================
+
+async function processImageFeature(action) {
+    updateProgress(20, 'Memuat gambar...');
+    const file = selectedFiles[0];
+    const img = new Image();
+    const objUrl = URL.createObjectURL(file);
+
+    await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = () => reject(new Error("Gagal membaca gambar."));
+        img.src = objUrl;
+    });
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = img.width;
+    canvas.height = img.height;
+
+    let outputType = file.type;
+    let outputQuality = 0.9;
+    let extension = file.name.split('.').pop();
+    let newFileName = `Twidy_${action}_${file.name}`;
+
+    updateProgress(50, 'Memproses manipulasi gambar...');
+
+    switch(action) {
+        case 'image-resize':
+            canvas.width = img.width / 2; 
+            canvas.height = img.height / 2;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            break;
+        case 'image-compress':
+            ctx.drawImage(img, 0, 0);
+            outputQuality = 0.5; 
+            outputType = 'image/jpeg';
+            extension = 'jpg';
+            break;
+        case 'image-rotate':
+            canvas.width = img.height;
+            canvas.height = img.width;
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(90 * Math.PI / 180);
+            ctx.drawImage(img, -img.width / 2, -img.height / 2);
+            break;
+        case 'image-flip':
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(img, 0, 0);
+            break;
+        case 'image-watermark':
+            ctx.drawImage(img, 0, 0);
+            ctx.font = `${canvas.width * 0.05}px Arial`;
+            ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+            ctx.fillText("TWIDYTOOLS", canvas.width * 0.1, canvas.height * 0.9);
+            break;
+        case 'image-to-ico':
+        case 'avif-to-png':
+        case 'webp-to-png':
+        case 'svg-to-png':
+        case 'ico-to-png':
+            ctx.drawImage(img, 0, 0);
+            outputType = 'image/png';
+            extension = action === 'image-to-ico' ? 'ico' : 'png';
+            break;
+        case 'heic-to-jpg':
+            ctx.drawImage(img, 0, 0);
+            outputType = 'image/jpeg';
+            extension = 'jpg';
+            break;
+        case 'image-blur-face':
+            ctx.filter = 'blur(10px)';
+            ctx.drawImage(img, 0, 0);
+            break;
+        case 'image-remove-bg':
+            throw new Error("Fitur Remove BG membutuhkan server AI khusus. Silakan gunakan fitur AI Endpoint Anda.");
+        default:
+            ctx.drawImage(img, 0, 0);
+    }
+
+    updateProgress(80, 'Mengekspor gambar...');
+    
+    canvas.toBlob((blob) => {
+        updateProgress(100, 'Selesai!');
+        alertUser('Gambar berhasil diproses!', 'success');
+        triggerDownload(blob, newFileName.replace(/\.[^/.]+$/, `.${extension}`));
+        setTimeout(() => hideProgress(), 2000);
+        URL.revokeObjectURL(objUrl);
+    }, outputType, outputQuality);
+}
+
+async function processMediaWithFFmpeg(action, mediaType) {
+    updateProgress(10, 'Memuat Engine FFmpeg...');
+    
+    if (typeof FFmpeg === 'undefined') throw new Error("Library FFmpeg.wasm gagal dimuat. Cek koneksi Anda.");
+    
+    const file = selectedFiles[0];
+    const { createFFmpeg, fetchFile } = FFmpeg;
+    const ffmpeg = createFFmpeg({ log: false, corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js' });
+
+    updateProgress(30, 'Menginisialisasi modul core di browser...');
+    try { await ffmpeg.load(); } catch (err) { throw new Error("Sistem browser membatasi memori. Gunakan Chrome versi terbaru."); }
+
+    updateProgress(40, 'Membaca file media...');
+    ffmpeg.FS('writeFile', file.name, await fetchFile(file));
+
+    let outName = '';
+    let command = [];
+    let outMime = '';
+
+    updateProgress(60, 'Mengeksekusi manipulasi media...');
+
+    if (mediaType === 'video') {
+        outName = 'output.mp4'; outMime = 'video/mp4';
+        switch(action) {
+            case 'video-compress': command = ['-i', file.name, '-vcodec', 'libx264', '-crf', '28', outName]; break;
+            case 'video-trim': command = ['-i', file.name, '-ss', '00:00:00', '-t', '00:00:10', '-c', 'copy', outName]; break; 
+            case 'video-rotate': command = ['-i', file.name, '-vf', 'transpose=1', outName]; break; 
+            case 'video-speed': command = ['-i', file.name, '-filter_complex', '[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]', '-map', '[v]', '-map', '[a]', outName]; break;
+            case 'video-remove-audio': command = ['-i', file.name, '-c', 'copy', '-an', outName]; break;
+            case 'video-to-gif': outName = 'output.gif'; outMime = 'image/gif'; command = ['-i', file.name, '-t', '5', '-r', '10', outName]; break; 
+            case 'gif-to-mp4': command = ['-i', file.name, '-movflags', 'faststart', '-pix_fmt', 'yuv420p', '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', outName]; break;
+            case 'video-to-audio': outName = 'output.mp3'; outMime = 'audio/mp3'; command = ['-i', file.name, '-q:a', '0', '-map', 'a', outName]; break;
+            case 'video-extract-frames': throw new Error("Untuk ekstrak frame (banyak gambar), fitur ini memerlukan kompresi ZIP yang belum dikonfigurasi.");
+            case 'video-merge': throw new Error("Merge video memerlukan beberapa file. Fitur ini masih disempurnakan.");
+            case 'video-crop': throw new Error("Fitur Crop Video interaktif memerlukan integrasi UI pemutar video.");
+            default: command = ['-i', file.name, outName];
+        }
+    } else if (mediaType === 'audio') {
+        outName = 'output.mp3'; outMime = 'audio/mp3';
+        switch(action) {
+            case 'audio-convert': command = ['-i', file.name, '-q:a', '0', outName]; break;
+            case 'audio-trim': command = ['-i', file.name, '-ss', '00:00:00', '-t', '00:00:15', outName]; break; 
+            case 'audio-volume': command = ['-i', file.name, '-filter:a', 'volume=2.0', outName]; break; 
+            case 'audio-speed': command = ['-i', file.name, '-filter:a', 'atempo=1.5', outName]; break; 
+            case 'audio-noise-reduction': command = ['-i', file.name, '-af', 'afftdn', outName]; break; 
+            case 'audio-merge': throw new Error("Merge audio memerlukan beberapa file. Fitur ini masih disempurnakan.");
+            case 'audio-record': throw new Error("Fitur rekam suara memerlukan izin Microphone (getUserMedia API).");
+            default: command = ['-i', file.name, outName];
+        }
+    }
+
+    updateProgress(80, 'Merender hasil akhir (Ini mungkin memakan waktu)...');
+    await ffmpeg.run(...command);
+    
+    updateProgress(90, 'Menyimpan file...');
+    const data = ffmpeg.FS('readFile', outName);
+    const blob = new Blob([data.buffer], { type: outMime });
+
+    updateProgress(100, 'Selesai!');
+    alertUser('Media berhasil diproses!', 'success');
+    
+    setTimeout(() => hideProgress(), 2000);
+    triggerDownload(blob, `TwidyTools_${action}_${file.name.split('.')[0]}.${outName.split('.')[1]}`);
 }
 
 async function executeAIFeatures(toolId) {
     document.getElementById('aiResultContainer').classList.add('hidden');
-    updateProgress(20, 'Membaca dan mengekstrak teks dari dokumen...');
     
-    // Fallback kalau ini file non-pdf
     let textToAnalyze = "";
-    
+    let fileBase64 = null;
+    let fileMimeType = null;
+
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+    });
+
     if (selectedFiles[0].type === "application/pdf") {
+        updateProgress(20, 'Membaca dan mengekstrak teks dari PDF...');
         const pdf = await pdfjsLib.getDocument({data: await selectedFiles[0].arrayBuffer()}).promise;
         let extractedText = "";
         
@@ -1187,9 +1207,8 @@ async function executeAIFeatures(toolId) {
             extractedText += textContent.items.map(t => t.str).join(" ") + "\n";
         }
 
-        if (!extractedText.trim()) {
+        if (!extractedText.trim() && window.Tesseract) {
             updateProgress(45, 'Teks tidak ditemukan. Mengaktifkan Auto-OCR...');
-            if(!window.Tesseract) throw new Error("Gagal memuat sistem OCR.");
             const ocrPages = Math.min(pdf.numPages, 3);
             for(let i=1; i<=ocrPages; i++) {
                 updateProgress(45 + ((i/ocrPages)*25), `Mengekstrak gambar ke teks (Halaman ${i})...`);
@@ -1204,7 +1223,9 @@ async function executeAIFeatures(toolId) {
         }
         textToAnalyze = extractedText.substring(0, 20000);
     } else {
-        textToAnalyze = "Ini adalah permintaan untuk file multimedia. Eksekusi ini harus dikirimkan ke server.";
+        updateProgress(30, 'Mengonversi file media untuk dianalisis AI...');
+        fileMimeType = selectedFiles[0].type;
+        fileBase64 = await toBase64(selectedFiles[0]);
     }
 
     updateProgress(75, 'Menghubungkan & memproses dengan AI...');
@@ -1218,8 +1239,15 @@ async function executeAIFeatures(toolId) {
     if (toolId === 'ai-extract') actionStr = 'extract_entities';
     if (toolId === 'ai-quiz') actionStr = 'generate_quiz';
     if (toolId === 'ai-sentiment') actionStr = 'analyze_sentiment';
+    if (toolId === 'ai-image-caption') actionStr = 'image_caption';
     if (toolId === 'ai-speech-to-text') actionStr = 'transcribe_audio';
-    if (toolId === 'ai-text-to-speech') actionStr = 'text_to_audio';
+    
+    if (['ai-upscale-image', 'ai-colorize-bw', 'ai-remove-object', 'ai-text-to-speech'].includes(toolId)) {
+        hideProgress();
+        alertUser("Fitur ini membutuhkan API khusus (Diffusion/TTS), tidak bisa diproses oleh Gemini.", "error");
+        return;
+    }
+
     if (toolId === 'ai-chat') {
         actionStr = 'ask_question';
         customPrompt = document.getElementById('ai-prompt')?.value;
@@ -1229,14 +1257,21 @@ async function executeAIFeatures(toolId) {
     const response = await fetch('/api/gemini', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: textToAnalyze, action: actionStr, customPrompt: customPrompt })
+        body: JSON.stringify({ 
+            text: textToAnalyze, 
+            action: actionStr, 
+            customPrompt: customPrompt,
+            fileData: fileBase64,
+            mimeType: fileMimeType
+        })
     });
 
+    const data = await response.json();
+
     if(!response.ok) {
-        throw new Error("Gagal terhubung ke layanan AI.");
+        throw new Error(data.error || "Gagal terhubung ke layanan AI.");
     }
     
-    const data = await response.json();
     const aiSummary = data.result || "Hasil AI kosong.";
     
     updateProgress(100, 'AI Selesai Memproses!');
@@ -1246,6 +1281,6 @@ async function executeAIFeatures(toolId) {
     resultTextarea.value = aiSummary;
     resultContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
     
-    alertUser('AI berhasil memproses dokumen!', 'success');
+    alertUser('AI berhasil memproses berkas!', 'success');
     setTimeout(() => hideProgress(), 2000);
 }
