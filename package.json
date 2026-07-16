@@ -1,4 +1,6 @@
-"dependencies": {
+{
+  "dependencies": {
     "@adobe/pdfservices-node-sdk": "^4.0.0",
-    "formidable": "^3.5.1"
+    "formidable": "^3.5.4"
+  }
 }
