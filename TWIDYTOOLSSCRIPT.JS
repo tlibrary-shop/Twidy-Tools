@@ -1055,35 +1055,63 @@ async function executePdfNup() {
 
 // --- FITUR HAPUS LATAR BELAKANG VIA API ---
 async function executeRemoveBgAPI() {
+async function executeRemoveBgAPI() {
     if (selectedFiles.length === 0) return;
     
-    updateProgress(30, 'Mengirim gambar ke server untuk dihapus latar belakangnya...');
+    updateProgress(10, 'Menyiapkan gambar...');
     const file = selectedFiles[0];
-    const formData = new FormData();
-    formData.append('file', file); 
 
-    try {
-        const response = await fetch('/api/remove-bg', { 
-            method: 'POST', 
-            body: formData 
-        });
-        
-        if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.error || response.statusText);
+    // Menggunakan FileReader untuk membaca file sebelum dikirim
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        try {
+            updateProgress(30, 'Mengirim ke server AI...');
+            const formData = new FormData();
+            formData.append('file', file); 
+
+            const response = await fetch('/api/remove-bg', { 
+                method: 'POST', 
+                body: formData 
+            });
+            
+            if (!response.ok) throw new Error("Gagal memproses di server.");
+
+            const blob = await response.blob();
+            const imageUrl = URL.createObjectURL(blob);
+
+            // Memanggil fungsi Preview
+            showPreviewModal(imageUrl, blob, file.name);
+            hideProgress();
+        } catch (err) {
+            alertUser(`Error: ${err.message}`, 'error');
+            hideProgress();
         }
+    };
+    reader.readAsArrayBuffer(file);
+}
 
-        updateProgress(80, 'Mengunduh hasil transparan...');
-        const blob = await response.blob();
-        
-        updateProgress(100, 'Selesai!');
-        alertUser('Latar belakang berhasil dihapus!', 'success');
-        triggerDownload(blob, `Twidy_NoBG_${file.name.split('.')[0]}.png`);
-        setTimeout(() => hideProgress(), 2000);
-        
-    } catch (err) {
-        throw new Error(`Gagal memproses: ${err.message}`);
-    }
+// Fungsi Modal Preview
+function showPreviewModal(url, blob, originalName) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 z-[200] flex items-center justify-center bg-black/80 p-4';
+    modal.innerHTML = `
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl max-w-lg w-full shadow-2xl text-center">
+            <h3 class="text-xl font-bold mb-4 dark:text-white">Hasil Preview</h3>
+            <img src="${url}" class="max-h-80 mx-auto mb-4 border border-slate-200 rounded-lg" />
+            <div class="flex gap-3">
+                <button id="closePreview" class="flex-1 py-2 bg-slate-200 rounded-lg font-bold">Tutup</button>
+                <button id="downloadPreview" class="flex-1 py-2 bg-indigo-600 text-white rounded-lg font-bold">Unduh Hasil</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    document.getElementById('closePreview').onclick = () => { modal.remove(); URL.revokeObjectURL(url); };
+    document.getElementById('downloadPreview').onclick = () => {
+        triggerDownload(blob, `Twidy_NoBG_${originalName.replace(/\.[^/.]+$/, "")}.png`);
+        modal.remove();
+        URL.revokeObjectURL(url);
+    };
 }
 
 // --- PEMROSESAN GAMBAR (CANVAS API) ---
