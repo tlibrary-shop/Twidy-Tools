@@ -1086,7 +1086,7 @@ async function executeRemoveBgAPI() {
             alertUser(`Error: ${err.message}`, 'error');
             hideProgress();
         }
-    };
+    }
     reader.readAsArrayBuffer(file);
 }
 
@@ -1111,7 +1111,7 @@ function showPreviewModal(url, blob, originalName) {
         triggerDownload(blob, `Twidy_NoBG_${originalName.replace(/\.[^/.]+$/, "")}.png`);
         modal.remove();
         URL.revokeObjectURL(url);
-    };
+    }
 }
 
 // --- PEMROSESAN GAMBAR (CANVAS API) ---
