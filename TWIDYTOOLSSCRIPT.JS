@@ -1089,51 +1089,63 @@ async function compressImageToLimit(file) {
 
 // --- FITUR HAPUS LATAR BELAKANG VIA API ---
 async function executeRemoveBgAPI() {
+async function executeRemoveBgAPI() {
     if (selectedFiles.length === 0) return;
     
-    let file = selectedFiles[0];
-    const maxFileSize = 3.5 * 1024 * 1024; // Batas aman Vercel (3.5 MB)
+    updateProgress(10, 'Menyiapkan gambar...');
+    const file = selectedFiles[0];
 
-    // Jika ukuran file terlalu besar, Vercel akan otomatis menampilkan error 413.
-    // Oleh karena itu, kita "compress" gambar secara diam-diam di browser sebelum dikirim!
-    if (file.size > maxFileSize) {
-        updateProgress(10, 'Mengoptimalkan ukuran gambar...');
-        file = await compressImageToLimit(file);
-    }
+    // Menggunakan FileReader untuk membaca file sebelum dikirim
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        try {
+            updateProgress(30, 'Mengirim ke server AI...');
+            const formData = new FormData();
+            formData.append('file', file); 
 
-    updateProgress(30, 'Mengirim gambar ke server untuk dihapus latar belakangnya...');
-    const formData = new FormData();
-    formData.append('file', file); 
-
-    try {
-        const response = await fetch('/api/remove-bg', { 
-            method: 'POST', 
-            body: formData 
-        });
-        
-        if (!response.ok) {
-            let errStr = response.statusText || 'Kesalahan Server Tidak Diketahui';
-            // Menangkap secara spesifik error 413 dari Vercel
-            if (response.status === 413) {
-                errStr = "Gagal karena file terlalu besar untuk diproses oleh server.";
-            }
+            const response = await fetch('/api/remove-bg', { 
+                method: 'POST', 
+                body: formData 
+            });
             
-            // Mencoba membaca pesan error JSON dari backend jika ada
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.error || errStr);
-        }
+            if (!response.ok) throw new Error("Gagal memproses di server.");
 
-        updateProgress(80, 'Mengunduh hasil transparan...');
-        const blob = await response.blob();
-        
-        updateProgress(100, 'Selesai!');
-        alertUser('Latar belakang berhasil dihapus!', 'success');
-        triggerDownload(blob, `Twidy_NoBG_${file.name.split('.')[0]}.png`);
-        setTimeout(() => hideProgress(), 2000);
-        
-    } catch (err) {
-        throw new Error(`Gagal memproses: ${err.message}`);
-    }
+            const blob = await response.blob();
+            const imageUrl = URL.createObjectURL(blob);
+
+            // Memanggil fungsi Preview
+            showPreviewModal(imageUrl, blob, file.name);
+            hideProgress();
+        } catch (err) {
+            alertUser(`Error: ${err.message}`, 'error');
+            hideProgress();
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+// Fungsi Modal Preview
+function showPreviewModal(url, blob, originalName) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 z-[200] flex items-center justify-center bg-black/80 p-4';
+    modal.innerHTML = `
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl max-w-lg w-full shadow-2xl text-center">
+            <h3 class="text-xl font-bold mb-4 dark:text-white">Hasil Preview</h3>
+            <img src="${url}" class="max-h-80 mx-auto mb-4 border border-slate-200 rounded-lg" />
+            <div class="flex gap-3">
+                <button id="closePreview" class="flex-1 py-2 bg-slate-200 rounded-lg font-bold">Tutup</button>
+                <button id="downloadPreview" class="flex-1 py-2 bg-indigo-600 text-white rounded-lg font-bold">Unduh Hasil</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    document.getElementById('closePreview').onclick = () => { modal.remove(); URL.revokeObjectURL(url); };
+    document.getElementById('downloadPreview').onclick = () => {
+        triggerDownload(blob, `Twidy_NoBG_${originalName.replace(/\.[^/.]+$/, "")}.png`);
+        modal.remove();
+        URL.revokeObjectURL(url);
+    };
 }
 
 // --- PEMROSESAN GAMBAR (CANVAS API) ---
