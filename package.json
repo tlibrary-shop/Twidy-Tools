@@ -1,6 +1,4 @@
-{
-  "dependencies": {
-    "convertapi": "^1.15.0",
-    "formidable": "^3.5.4"
-  }
+"dependencies": {
+    "@adobe/pdfservices-node-sdk": "^4.0.0",
+    "formidable": "^3.5.1"
 }
