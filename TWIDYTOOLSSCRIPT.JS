@@ -1111,28 +1111,169 @@ async function executeRemoveBgAPI() {
             body: formData 
         });
         
-        if (!response.ok) {
-            let errStr = response.statusText || 'Kesalahan Server Tidak Diketahui';
-            // Menangkap secara spesifik error 413 dari Vercel
-            if (response.status === 413) {
-                errStr = "Gagal karena file terlalu besar untuk diproses oleh server.";
-            }
-            
-            // Mencoba membaca pesan error JSON dari backend jika ada
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.error || errStr);
+// --- FUNGSI TAMBAHAN: Auto Compress Gambar sebelum dikirim ke API ---
+// Tambahkan fungsi ini di luar/di atas executeRemoveBgAPI
+function compressImageToLimit(file, limitMB = 3.5) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function(event) {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Mulai dari kualitas 0.9 dan skala 1.0
+                let quality = 0.9;
+                let scale = 1.0;
+                
+                // Fungsi rekursif untuk mencoba compress secara bertahap
+                const tryCompress = () => {
+                    canvas.width = img.width * scale;
+                    canvas.height = img.height * scale;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    canvas.toBlob((blob) => {
+                        const fileSizeMB = blob.size / (1024 * 1024);
+                        if (fileSizeMB > limitMB && quality > 0.1) {
+                            // Jika masih lebih besar dari limit, kurangi kualitas dan skala lalu coba lagi
+                            quality -= 0.1;
+                            scale -= 0.1;
+                            tryCompress();
+                        } else {
+                            // Berhasil dikompresi di bawah limit
+                            const compressedFile = new File([blob], file.name, {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            });
+                            resolve(compressedFile);
+                        }
+                    }, 'image/jpeg', quality);
+                };
+                
+                tryCompress();
+            };
+            img.onerror = (error) => reject(error);
+        };
+        reader.onerror = (error) => reject(error);
+    });
+}
+
+// --- FITUR HAPUS LATAR BELAKANG VIA API (REVISI) ---
+// Ganti fungsi executeRemoveBgAPI lama Anda dengan ini
+async function executeRemoveBgAPI() {
+    if (selectedFiles.length === 0) return;
+    let file = selectedFiles[0];
+    const maxFileSize = 3.5 * 1024 * 1024; // Batas aman Vercel (3.5 MB)
+    
+    try {
+        // 1. AUTO COMPRESS JIKA LEBIH DARI 3.5 MB
+        if (file.size > maxFileSize) {
+            updateProgress(10, 'Ukuran > 3.5MB, sedang mengompresi gambar...');
+            file = await compressImageToLimit(file, 3.5);
         }
 
-        updateProgress(80, 'Mengunduh hasil transparan...');
-        const blob = await response.blob();
+        updateProgress(30, 'Mengunggah dan memproses di AI...');
         
+        // Membaca file sebagai base64 untuk dikirim ke API
+        const base64Data = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result.split(',')[1]);
+            reader.readAsDataURL(file);
+        });
+
+        // Sesuaikan endpoint '/api/remove-bg' dengan endpoint AI Anda (bisa /api/gemini dsb)
+        const response = await fetch('/api/remove-bg', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                image_base64: base64Data,
+                mime_type: file.type || 'image/jpeg'
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Gagal menghapus latar belakang. Server error atau limit.');
+        }
+
+        const data = await response.json(); 
+        
+        // Pastikan menyesuaikan `data.result_base64` dengan key balasan dari API Anda. 
+        // Jika API Anda mengembalikan { result: 'base64...' }, gunakan data.result
+        const resultBase64 = data.result_base64 || data.result || data.image; 
+
+        if (!resultBase64) {
+            throw new Error('Hasil gambar tidak ditemukan dari AI.');
+        }
+
+        updateProgress(80, 'Menyiapkan pratinjau hasil...');
+
+        // Konversi base64 kembali ke blob gambar
+        const byteCharacters = atob(resultBase64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/png' });
+
         updateProgress(100, 'Selesai!');
         alertUser('Latar belakang berhasil dihapus!', 'success');
-        triggerDownload(blob, `Twidy_NoBG_${file.name.split('.')[0]}.png`);
-        setTimeout(() => hideProgress(), 2000);
         
-    } catch (err) {
-        throw new Error(`Gagal memproses: ${err.message}`);
+        // 2. TAMPILKAN PREVIEW (TIDAK LANGSUNG DOWNLOAD)
+        const previewUrl = URL.createObjectURL(blob);
+        const toolsSection = document.getElementById('toolsSection');
+        
+        // Buat atau gunakan container preview yang sudah ada
+        let previewContainer = document.getElementById('removeBgPreviewContainer');
+        if (!previewContainer) {
+            previewContainer = document.createElement('div');
+            previewContainer.id = 'removeBgPreviewContainer';
+            previewContainer.className = 'mt-8 bg-slate-100 dark:bg-slate-800 p-6 rounded-xl text-center border-2 border-dashed border-slate-300 dark:border-slate-600';
+            
+            const title = document.createElement('h3');
+            title.className = 'text-slate-700 dark:text-white font-bold mb-4 text-lg';
+            title.innerText = 'Pratinjau Hasil Remove BG';
+            
+            const imgEl = document.createElement('img');
+            imgEl.id = 'removeBgPreviewImage';
+            // Menambahkan background kotak-kotak transparan untuk melihat area yang di-remove BG
+            imgEl.className = 'mx-auto max-w-full max-h-[500px] rounded shadow-lg bg-[url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYGAQYcAP3uCTZ84jhqH1AAMj8RSNoHg0DBmIg5G4mFDDYDRcZBs0AQBYBwT1Q3l67gAAAABJRU5ErkJggg==")]'; 
+            
+            const downloadBtn = document.createElement('button');
+            downloadBtn.id = 'removeBgDownloadBtn';
+            downloadBtn.className = 'mt-6 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition shadow-lg';
+            downloadBtn.innerHTML = '<i class="fas fa-download mr-2"></i> Unduh Gambar (PNG)';
+            
+            previewContainer.appendChild(title);
+            previewContainer.appendChild(imgEl);
+            previewContainer.appendChild(document.createElement('br'));
+            previewContainer.appendChild(downloadBtn);
+            toolsSection.appendChild(previewContainer);
+        }
+        
+        // Setel sumber gambar pratinjau
+        const previewImage = document.getElementById('removeBgPreviewImage');
+        previewImage.src = previewUrl;
+        previewContainer.style.display = 'block'; 
+        
+        // Aksi tombol unduh
+        const downloadBtn = document.getElementById('removeBgDownloadBtn');
+        downloadBtn.onclick = () => {
+            const newFileName = `Twidy-NoBG-${file.name.replace(/\.[^/.]+$/, "")}.png`;
+            triggerDownload(blob, newFileName);
+        };
+        
+        // Gulir layar ke bagian pratinjau secara otomatis
+        previewContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+        setTimeout(() => hideProgress(), 2000);
+
+    } catch (error) {
+        console.error(error);
+        alertUser('Terjadi kesalahan: ' + error.message, 'error');
+        hideProgress();
     }
 }
 
