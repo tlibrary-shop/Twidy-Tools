@@ -70,10 +70,10 @@ const toolConfig = {
     // IMAGE CONVERTERS
     'image-to-ico': { title: 'Image to ICO', desc: 'Ubah foto jadi .ico.', icon: 'fa-icons', color: 'text-orange-500', accept: 'image/*', multi: false },
     'ico-to-png': { title: 'ICO to PNG', desc: 'Ubah icon ke PNG.', icon: 'fa-file-image', color: 'text-blue-400', accept: '.ico', multi: false },
-    'avif-to-png': { title: 'AVIF â†” PNG', desc: 'Konversi AVIF.', icon: 'fa-exchange-alt', color: 'text-emerald-500', accept: '.avif,.png', multi: false },
-    'heic-to-jpg': { title: 'HEIC â†” JPG', desc: 'Konversi foto HEIC.', icon: 'fa-exchange-alt', color: 'text-red-500', accept: '.heic,.jpg,.jpeg', multi: false },
-    'webp-to-png': { title: 'WEBP â†” PNG', desc: 'Konversi WEBP.', icon: 'fa-exchange-alt', color: 'text-cyan-500', accept: '.webp,.png', multi: false },
-    'svg-to-png': { title: 'SVG â†” PNG', desc: 'Ubah vektor SVG.', icon: 'fa-exchange-alt', color: 'text-rose-500', accept: '.svg,.png', multi: false },
+    'avif-to-png': { title: 'AVIF Ã¢â€ â€ PNG', desc: 'Konversi AVIF.', icon: 'fa-exchange-alt', color: 'text-emerald-500', accept: '.avif,.png', multi: false },
+    'heic-to-jpg': { title: 'HEIC Ã¢â€ â€ JPG', desc: 'Konversi foto HEIC.', icon: 'fa-exchange-alt', color: 'text-red-500', accept: '.heic,.jpg,.jpeg', multi: false },
+    'webp-to-png': { title: 'WEBP Ã¢â€ â€ PNG', desc: 'Konversi WEBP.', icon: 'fa-exchange-alt', color: 'text-cyan-500', accept: '.webp,.png', multi: false },
+    'svg-to-png': { title: 'SVG Ã¢â€ â€ PNG', desc: 'Ubah vektor SVG.', icon: 'fa-exchange-alt', color: 'text-rose-500', accept: '.svg,.png', multi: false },
 
     // IMAGE AI
     'ai-upscale-image': { title: 'Upscale Image', desc: 'Membutuhkan Model Ekstra.', icon: 'fa-magic', color: 'text-slate-400', accept: 'image/*', multi: false },
@@ -1056,6 +1056,8 @@ async function executePdfNup() {
 // --- FUNGSI AUTO COMPRESS (HELPER) ---
 async function compressImageToLimit(file, limitMB) {
     const limitBytes = limitMB * 1024 * 1024;
+    
+    // Jika file sudah aman, langsung kembalikan
     if (file.size <= limitBytes) return file; 
 
     return new Promise((resolve, reject) => {
@@ -1063,15 +1065,15 @@ async function compressImageToLimit(file, limitMB) {
         const objUrl = URL.createObjectURL(file);
 
         img.onload = () => {
-            URL.revokeObjectURL(objUrl);
+            URL.revokeObjectURL(objUrl); // Bersihkan memori
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
-            // Batasi dimensi maksimal agar tidak memakan memori browser terlalu besar
-            const MAX_DIMENSION = 1600;
             let width = img.width;
             let height = img.height;
             
+            // TAHAP 1: Resize drastis jika gambar terlalu besar (Max 1920px)
+            const MAX_DIMENSION = 1200;
             if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
                 const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
                 width = Math.floor(width * ratio);
@@ -1082,28 +1084,34 @@ async function compressImageToLimit(file, limitMB) {
             canvas.height = height;
             ctx.drawImage(img, 0, 0, width, height);
 
-            // Kompresi dengan kualitas bertahap
-            let quality = 0.8;
-            
-            const checkAndResolve = () => {
+            // TAHAP 2: Turunkan kualitas JPEG
+            let quality = 0.8; // Mulai dari 80%
+
+            const attemptCompression = () => {
                 canvas.toBlob((blob) => {
-                    if (!blob) return reject(new Error("Gagal membuat blob dari canvas."));
+                    if (!blob) {
+                        return reject(new Error("Sistem gagal memproses kanvas gambar."));
+                    }
                     
+                    // Cek jika ukuran sudah aman ATAU kualitas sudah batas minimal (0.3)
                     if (blob.size <= limitBytes || quality <= 0.3) {
-                        resolve(new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), { type: 'image/jpeg' }));
+                        const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
+                            type: 'image/jpeg',
+                            lastModified: Date.now(),
+                        });
+                        resolve(compressedFile);
                     } else {
-                        quality -= 0.15;
-                        checkAndResolve();
+                        // Turunkan kualitas lebih cepat (15% per iterasi) untuk mencegah freeze
+                        quality -= 0.15; 
+                        attemptCompression();
                     }
                 }, 'image/jpeg', quality);
             };
-            checkAndResolve();
+
+            attemptCompression();
         };
 
-        img.onerror = () => {
-            URL.revokeObjectURL(objUrl);
-            reject(new Error("File gambar rusak atau tidak dapat dibaca oleh browser."));
-        };
+        img.onerror = () => reject(new Error("File gambar rusak atau tidak dapat dibaca oleh browser."));
         img.src = objUrl;
     });
 }
@@ -1112,43 +1120,102 @@ async function compressImageToLimit(file, limitMB) {
 async function executeRemoveBgAPI() {
     if (selectedFiles.length === 0) return;
     let file = selectedFiles[0];
-    const maxFileSize = 3.5; 
+    const maxFileSize = 3.5; // Batas aman Vercel (3.5 MB)
     
     try {
         updateProgress(10, 'Menyiapkan gambar...');
         
-        // Pengecekan ukuran file dan kompresi jika perlu
+        // Auto Compress apabila melebihi 3.5 MB
         if (file.size > maxFileSize * 1024 * 1024) {
             updateProgress(30, 'Mengompresi ukuran gambar...');
             file = await compressImageToLimit(file, maxFileSize);
         }
 
-        updateProgress(50, 'Menghapus latar belakang...');
+        updateProgress(50, 'Menghapus latar belakang... (Memproses AI)');
 
         const formData = new FormData();
+        // Sesuaikan parameter body jika API di backend Anda memerlukan format spesifik
         formData.append('file', file); 
 
+        // Ganti URL endpoint dengan URL API Remove BG Anda
         const response = await fetch('/api/remove-bg', { 
             method: 'POST',
             body: formData,
         });
 
         if (!response.ok) {
-            throw new Error('Gagal menghapus latar belakang. Server tidak merespons.');
+            throw new Error('Gagal menghapus latar belakang. Gambar mungkin terlalu kompleks atau server penuh.');
         }
 
         const blob = await response.blob();
         updateProgress(90, 'Memuat hasil...');
 
-        // Menampilkan preview sebelum download
-        showPreviewResult(blob, `removed_bg_${file.name.replace(/\.[^/.]+$/, "")}.png`);
+        // Tampilkan Preview alih-alih langsung mendownload
+        const newFileName = `removed_bg_${file.name.replace(/\.[^/.]+$/, "")}.png`;
+        showPreviewResult(blob, newFileName);
         
         updateProgress(100, 'Selesai!');
         hideProgress();
     } catch (error) {
-        alertUser(error.message, 'error');
+        console.error(error);
+        alertUser(error.message || 'Terjadi kesalahan sistem.', 'error');
         hideProgress();
     }
+}
+
+// --- FUNGSI UNTUK MENAMPILKAN PREVIEW HASIL ---
+function showPreviewResult(blob, fileName) {
+    // Cek apakah kontainer preview sudah ada, jika belum buat baru
+    let previewContainer = document.getElementById('preview-container');
+    if (!previewContainer) {
+        previewContainer = document.createElement('div');
+        previewContainer.id = 'preview-container';
+        previewContainer.className = 'mt-6 p-4 bg-slate-800 rounded-xl flex flex-col items-center border border-slate-700 animate-fade-in mx-auto max-w-2xl';
+        
+        // Sisipkan ke area kerja (sesuaikan selector parent dengan struktur HTML Anda)
+        // Umumnya disisipkan di atas daftar file atau di bawah area drag/drop
+        const fileListContainer = document.getElementById('fileList') || document.querySelector('.main-work-area');
+        if(fileListContainer && fileListContainer.parentNode) {
+            fileListContainer.parentNode.insertBefore(previewContainer, fileListContainer);
+        } else {
+            document.body.appendChild(previewContainer);
+        }
+    }
+    
+    const objUrl = URL.createObjectURL(blob);
+    
+    // Reset isi kontainer
+    previewContainer.innerHTML = '';
+    
+    // Judul
+    const title = document.createElement('h3');
+    title.innerText = 'âœ¨ Hasil Remove Background';
+    title.className = 'text-lg font-bold mb-4 text-white';
+    
+    // Gambar Preview (Dengan background checkerboard untuk menunjukkan transparansi)
+    const img = document.createElement('img');
+    img.src = objUrl;
+    img.className = 'max-w-full max-h-80 object-contain mb-4 rounded shadow-lg bg-[url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYNgGwEg9AMw4uB5QYGBYhZ0CjFJMGoCCARjT0AAw08AAIA1AAEAQBQAAoFMC/xS1xAAAAABJRU5ErkJggg==")]';
+    
+    // Tombol Download
+    const downloadBtn = document.createElement('button');
+    downloadBtn.innerHTML = '<i class="fas fa-download mr-2"></i> Download Gambar';
+    downloadBtn.className = 'px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-lg font-bold cursor-pointer transition transform hover:scale-105';
+    
+    // Panggil fungsi bawaan triggerDownload
+    downloadBtn.onclick = () => {
+        triggerDownload(blob, fileName);
+    };
+
+    // Susun elemen
+    previewContainer.appendChild(title);
+    previewContainer.appendChild(img);
+    previewContainer.appendChild(downloadBtn);
+    
+    previewContainer.style.display = 'flex';
+    
+    // Auto-scroll agar preview terlihat pengguna
+    previewContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 // --- PEMROSESAN GAMBAR (CANVAS API) ---
