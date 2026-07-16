@@ -1,91 +1,99 @@
-import ConvertAPI from 'convertapi';
-import formidable from 'formidable';
-import fs from 'fs';
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+const { IncomingForm } = require('formidable');
+const PDFServicesSdk = require('@adobe/pdfservices-node-sdk');
 
+// Konfigurasi ini penting agar Vercel tidak memotong file yang diunggah
 export const config = {
-    api: {
-        bodyParser: false,
-    },
+    api: { bodyParser: false }
 };
 
-const convertapi = new ConvertAPI(process.env.CONVERTAPI_SECRET);
-
 export default async function handler(req, res) {
-    if (req.method !== 'POST') {
-        res.setHeader('Allow', ['POST']);
-        return res.status(405).end(`Method ${req.method} Not Allowed`);
-    }
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Hanya menerima method POST' });
 
-    if (!process.env.CONVERTAPI_SECRET) {
-        return res.status(500).json({ error: 'Server Error: CONVERTAPI_SECRET belum dikonfigurasi di Vercel.' });
-    }
+    // Membaca file dari frontend
+    const form = new IncomingForm({ keepExtensions: true });
+    
+    form.parse(req, async (err, fields, files) => {
+        if (err) return res.status(500).json({ error: 'Gagal membaca berkas yang diunggah.' });
 
-    const form = formidable({
-        keepExtensions: true, 
-        maxFileSize: 20 * 1024 * 1024, 
+        const file = Array.isArray(files.file) ? files.file[0] : files.file;
+        const convType = Array.isArray(fields.conversionType) ? fields.conversionType[0] : fields.conversionType;
+
+        if (!file) return res.status(400).json({ error: 'Tidak ada berkas yang ditemukan.' });
+
+        const clientId = process.env.ADOBE_CLIENT_ID;
+        const clientSecret = process.env.ADOBE_CLIENT_SECRET;
+
+        if (!clientId || !clientSecret) {
+            return res.status(500).json({ error: 'API Key Adobe belum dipasang di sistem Vercel.' });
+        }
+
+        try {
+            // 1. Inisialisasi Kredensial Adobe API
+            const credentials = PDFServicesSdk.Credentials.servicePrincipalCredentialsBuilder()
+                .withClientId(clientId)
+                .withClientSecret(clientSecret)
+                .build();
+
+            const executionContext = PDFServicesSdk.ExecutionContext.create(credentials);
+            
+            // 2. Siapkan lokasi file output sementara (Wajib di /tmp untuk Serverless Vercel)
+            const outputFileName = `Twidy_${Date.now()}`;
+            let outputPath = path.join(os.tmpdir(), outputFileName);
+            let operation;
+
+            // 3. Logika Penentuan Tipe Konversi Adobe
+            if (['word-to-pdf', 'ppt-to-pdf', 'excel-to-pdf', 'txt-to-pdf', 'rtf-to-pdf'].includes(convType)) {
+                // Konversi dari Office/Text menuju PDF
+                operation = PDFServicesSdk.CreatePDF.Operation.createNew();
+                const inputRef = PDFServicesSdk.FileRef.createFromLocalFile(file.filepath);
+                operation.setInput(inputRef);
+                outputPath += '.pdf';
+            } 
+            else if (['pdf-to-word', 'pdf-to-ppt', 'pdf-to-excel'].includes(convType)) {
+                // Konversi dari PDF menuju Office (Export)
+                operation = PDFServicesSdk.ExportPDF.Operation.createNew();
+                const inputRef = PDFServicesSdk.FileRef.createFromLocalFile(file.filepath);
+                operation.setInput(inputRef);
+                
+                if (convType === 'pdf-to-word') {
+                    operation.setTargetFormat(PDFServicesSdk.ExportPDF.SupportedTargetFormats.DOCX);
+                    outputPath += '.docx';
+                } else if (convType === 'pdf-to-ppt') {
+                    operation.setTargetFormat(PDFServicesSdk.ExportPDF.SupportedTargetFormats.PPTX);
+                    outputPath += '.pptx';
+                } else if (convType === 'pdf-to-excel') {
+                    operation.setTargetFormat(PDFServicesSdk.ExportPDF.SupportedTargetFormats.XLSX);
+                    outputPath += '.xlsx';
+                }
+            } else {
+                return res.status(400).json({ error: 'Tipe konversi ini belum didukung oleh mesin Adobe.' });
+            }
+
+            // 4. Eksekusi Pemrosesan ke Server Adobe
+            const result = await operation.execute(executionContext);
+            await result.saveAsFile(outputPath);
+
+            // 5. Kirim file hasil kembali ke Client/Browser pengguna
+            const stat = fs.statSync(outputPath);
+            res.writeHead(200, {
+                'Content-Length': stat.size,
+                'Content-Disposition': `attachment; filename="${path.basename(outputPath)}"`,
+            });
+
+            const readStream = fs.createReadStream(outputPath);
+            readStream.pipe(res);
+            
+            // 6. Bersihkan memori server Vercel setelah selesai
+            readStream.on('close', () => {
+                try { fs.unlinkSync(file.filepath); fs.unlinkSync(outputPath); } catch (e) { /* Abaikan error pembersihan */ }
+            });
+
+        } catch (error) {
+            console.error("Adobe API Error:", error);
+            res.status(500).json({ error: error.message || 'Gagal terhubung ke mesin Adobe PDF.' });
+        }
     });
-
-    try {
-        const [fields, files] = await form.parse(req);
-        
-        const fileData = files.file ? (Array.isArray(files.file) ? files.file[0] : files.file) : null;
-        const conversionType = fields.conversionType ? (Array.isArray(fields.conversionType) ? fields.conversionType[0] : fields.conversionType) : null;
-
-        if (!fileData || !conversionType) {
-            return res.status(400).json({ error: 'File atau tipe konversi tidak ditemukan.' });
-        }
-
-        let fromFormat = '';
-        let toFormat = '';
-
-        // --- PENAMBAHAN FORMAT BARU DI SINI ---
-        switch (conversionType) {
-            case 'word-to-pdf': fromFormat = 'docx'; toFormat = 'pdf'; break;
-            case 'excel-to-pdf': fromFormat = 'xlsx'; toFormat = 'pdf'; break;
-            case 'ppt-to-pdf': fromFormat = 'pptx'; toFormat = 'pdf'; break;
-            
-            case 'html-to-pdf': fromFormat = 'html'; toFormat = 'pdf'; break;
-            case 'txt-to-pdf': fromFormat = 'txt'; toFormat = 'pdf'; break;
-            case 'rtf-to-pdf': fromFormat = 'rtf'; toFormat = 'pdf'; break;
-            
-            case 'pdf-to-word': fromFormat = 'pdf'; toFormat = 'docx'; break;
-            case 'pdf-to-excel': fromFormat = 'pdf'; toFormat = 'xlsx'; break;
-            case 'pdf-to-ppt': fromFormat = 'pdf'; toFormat = 'pptx'; break;
-            case 'pdf-to-pdfa': fromFormat = 'pdf'; toFormat = 'pdfa'; break;
-            
-            default:
-                return res.status(400).json({ error: `Tipe konversi '${conversionType}' tidak didukung.` });
-        }
-
-        const result = await convertapi.convert(toFormat, {
-            File: fileData.filepath
-        }, fromFormat);
-
-        const resultFile = result.files[0];
-        const fileUrl = resultFile.url;
-        
-        const fileResponse = await fetch(fileUrl);
-        if (!fileResponse.ok) {
-            throw new Error('Gagal mengunduh berkas hasil konversi dari server ConvertAPI.');
-        }
-        
-        const arrayBuffer = await fileResponse.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-
-        fs.unlink(fileData.filepath, (err) => {
-            if (err) console.error('Gagal menghapus berkas temp:', err);
-        });
-
-        res.setHeader('Content-Type', 'application/octet-stream');
-        res.setHeader('Content-Disposition', `attachment; filename="${resultFile.filename}"`);
-        return res.status(200).send(buffer);
-
-    } catch (error) {
-        console.error('ConvertAPI Error:', error);
-        const errorMsg = error.response && error.response.data 
-            ? JSON.stringify(error.response.data) 
-            : error.message || 'Terjadi kesalahan saat memproses dokumen.';
-            
-        return res.status(500).json({ error: errorMsg });
-    }
 }
