@@ -1057,7 +1057,7 @@ async function executePdfNup() {
 async function compressImageToLimit(file, limitMB) {
     const limitBytes = limitMB * 1024 * 1024;
     
-    // Jika file sudah di bawah batas, tidak perlu dikompres
+    // Jika file sudah aman, langsung kembalikan
     if (file.size <= limitBytes) return file; 
 
     return new Promise((resolve, reject) => {
@@ -1065,54 +1065,53 @@ async function compressImageToLimit(file, limitMB) {
         const objUrl = URL.createObjectURL(file);
 
         img.onload = () => {
-            URL.revokeObjectURL(objUrl);
+            URL.revokeObjectURL(objUrl); // Bersihkan memori
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
-            // Nilai awal untuk dimensi dan kualitas
             let width = img.width;
             let height = img.height;
-            let quality = 0.9;
-            let compressedFile = file;
+            
+            // TAHAP 1: Resize drastis jika gambar terlalu besar (Max 1920px)
+            const MAX_DIMENSION = 1920;
+            if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+                const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
+                width = Math.floor(width * ratio);
+                height = Math.floor(height * ratio);
+            }
 
-            // Fungsi rekursif untuk mengompres gambar
-            const compress = () => {
-                canvas.width = width;
-                canvas.height = height;
-                ctx.clearRect(0, 0, width, height);
-                ctx.drawImage(img, 0, 0, width, height);
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
 
-                // Ekstrak sebagai JPEG untuk memastikan ukuran turun drastis
-                canvas.toBlob(
-                    (blob) => {
-                        // Cek apakah target ukuran tercapai atau sudah mencapai batas kualitas/ukuran terkecil
-                        if (blob.size <= limitBytes || (quality <= 0.3 && width < 500)) {
-                            // Berhasil, kembalikan file kompresi
-                            compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
-                                type: 'image/jpeg',
-                                lastModified: Date.now(),
-                            });
-                            resolve(compressedFile);
-                        } else {
-                            // Jika masih terlalu besar, kurangi resolusi 10% dan kualitas 10%
-                            width = Math.floor(width * 0.9);
-                            height = Math.floor(height * 0.9);
-                            quality -= 0.1; 
-                            
-                            if (quality < 0.3) quality = 0.3; // Jaga kualitas minimum
-                            
-                            compress(); // Lakukan kompresi ulang
-                        }
-                    },
-                    'image/jpeg',
-                    quality
-                );
+            // TAHAP 2: Turunkan kualitas JPEG
+            let quality = 0.8; // Mulai dari 80%
+
+            const attemptCompression = () => {
+                canvas.toBlob((blob) => {
+                    if (!blob) {
+                        return reject(new Error("Sistem gagal memproses kanvas gambar."));
+                    }
+                    
+                    // Cek jika ukuran sudah aman ATAU kualitas sudah batas minimal (0.3)
+                    if (blob.size <= limitBytes || quality <= 0.3) {
+                        const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
+                            type: 'image/jpeg',
+                            lastModified: Date.now(),
+                        });
+                        resolve(compressedFile);
+                    } else {
+                        // Turunkan kualitas lebih cepat (15% per iterasi) untuk mencegah freeze
+                        quality -= 0.15; 
+                        attemptCompression();
+                    }
+                }, 'image/jpeg', quality);
             };
 
-            compress();
+            attemptCompression();
         };
 
-        img.onerror = () => reject(new Error("Gagal membaca gambar untuk dioptimasi."));
+        img.onerror = () => reject(new Error("File gambar rusak atau tidak dapat dibaca oleh browser."));
         img.src = objUrl;
     });
 }
