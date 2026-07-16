@@ -1104,7 +1104,6 @@ function compressImageToLimit(file, limitMB = 3.5) {
 
 // --- FITUR HAPUS LATAR BELAKANG VIA API ---
 async function executeRemoveBgAPI() {
-async function executeRemoveBgAPI() {
     if (selectedFiles.length === 0) return;
     let file = selectedFiles[0];
     const maxFileSize = 3.5 * 1024 * 1024; // Batas aman Vercel (3.5 MB)
