@@ -39,7 +39,7 @@ export default async function handler(req, res) {
 
             const executionContext = PDFServicesSdk.ExecutionContext.create(credentials);
             
-            // 2. Siapkan lokasi file output sementara (Wajib di /tmp untuk Serverless Vercel)
+            // 2. Siapkan lokasi file output sementara
             const outputFileName = `Twidy_${Date.now()}`;
             let outputPath = path.join(os.tmpdir(), outputFileName);
             let operation;
@@ -58,14 +58,17 @@ export default async function handler(req, res) {
                 const inputRef = PDFServicesSdk.FileRef.createFromLocalFile(file.filepath);
                 operation.setInput(inputRef);
                 
+                // PERBAIKAN DI SINI: Memanggil kamus format yang benar sesuai versi SDK
+                const ExportPDFTargetFormat = PDFServicesSdk.ExportPDF.options.ExportPDFTargetFormat;
+                
                 if (convType === 'pdf-to-word') {
-                    operation.setTargetFormat(PDFServicesSdk.ExportPDF.SupportedTargetFormats.DOCX);
+                    operation.setTargetFormat(ExportPDFTargetFormat.DOCX);
                     outputPath += '.docx';
                 } else if (convType === 'pdf-to-ppt') {
-                    operation.setTargetFormat(PDFServicesSdk.ExportPDF.SupportedTargetFormats.PPTX);
+                    operation.setTargetFormat(ExportPDFTargetFormat.PPTX);
                     outputPath += '.pptx';
                 } else if (convType === 'pdf-to-excel') {
-                    operation.setTargetFormat(PDFServicesSdk.ExportPDF.SupportedTargetFormats.XLSX);
+                    operation.setTargetFormat(ExportPDFTargetFormat.XLSX);
                     outputPath += '.xlsx';
                 }
             } else {
