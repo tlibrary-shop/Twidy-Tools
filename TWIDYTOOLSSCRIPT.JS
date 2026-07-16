@@ -1055,7 +1055,6 @@ async function executePdfNup() {
 
 // --- FUNGSI AUTO COMPRESS (HELPER) ---
 // Secara otomatis memperkecil gambar agar tidak diblokir oleh Vercel Limit (4.5 MB)
-function compressImageToLimit(file, limitMB = 3.5) {
 async function compressImageToLimit(file, limitMB) {
     const limitBytes = limitMB * 1024 * 1024;
     
