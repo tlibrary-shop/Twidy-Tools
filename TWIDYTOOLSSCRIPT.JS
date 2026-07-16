@@ -64,7 +64,7 @@ const toolConfig = {
     'image-watermark': { title: 'Image Watermark', desc: 'Tambahkan teks ke gambar.', icon: 'fa-stamp', color: 'text-teal-500', accept: 'image/*', multi: false, settings: [{ id: 'wm-text-img', label: 'Teks Watermark', type: 'text', placeholder: 'TWIDYTOOLS' }, { id: 'wm-pos', label: 'Posisi (atas / tengah / bawah)', type: 'text', placeholder: 'bawah' }] },
     'image-crop': { title: 'Crop Image', desc: 'Potong area gambar.', icon: 'fa-crop-alt', color: 'text-amber-500', accept: 'image/*', multi: false },
     'image-flip': { title: 'Flip Image', desc: 'Balik gambar (Mirror).', icon: 'fa-arrows-alt-h', color: 'text-pink-500', accept: 'image/*', multi: false },
-    'image-remove-bg': { title: 'Remove Background', desc: 'Hapus latar belakang foto.', icon: 'fa-eraser', color: 'text-slate-500', accept: 'image/*', multi: false },
+    'image-remove-bg': { title: 'Remove Background', desc: 'Hapus latar belakang foto dengan presisi AI.', icon: 'fa-eraser', color: 'text-slate-500', accept: 'image/*', multi: false },
     'image-blur-face': { title: 'Blur Image', desc: 'Beri efek blur.', icon: 'fa-user-secret', color: 'text-indigo-400', accept: 'image/*', multi: false },
     
     // IMAGE CONVERTERS
@@ -447,7 +447,7 @@ async function processFiles() {
 
         // --- IMAGE, VIDEO, AUDIO TOOLS ---
         else if (currentTool === 'image-crop') { await executeImageCrop(); }
-        else if (currentTool === 'image-remove-bg') { await executeRemoveBgClient(); }
+        else if (currentTool === 'image-remove-bg') { await executeRemoveBgAPI(); }
         else if (currentTool.startsWith('image-') || currentTool.includes('-to-png') || currentTool.includes('-to-jpg') || currentTool === 'image-to-ico') {
             await processImageFeature(currentTool);
         }
@@ -1053,51 +1053,39 @@ async function executePdfNup() {
 // NEW FEATURE HANDLERS (IMAGE, VIDEO, AUDIO)
 // ==========================================
 
-// --- FITUR HAPUS LATAR BELAKANG CLIENT-SIDE ---
-// --- FITUR HAPUS LATAR BELAKANG CLIENT-SIDE (OPTIMAL) ---
-async function executeRemoveBgClient() {
+// --- FITUR HAPUS LATAR BELAKANG VIA API ---
+async function executeRemoveBgAPI() {
     if (selectedFiles.length === 0) return;
     
-    updateProgress(10, 'Inisialisasi modul AI (Mohon tunggu)...');
-
-    // Menggunakan CDN jsDelivr yang sangat stabil untuk menghindari blokir CORS
-    const scriptId = 'imgly-bg-removal-script';
-    if (!document.getElementById(scriptId)) {
-        await new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.id = scriptId;
-            script.src = 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.3/dist/imglyRemoveBackground.umd.min.js';
-            script.crossOrigin = 'anonymous'; // Menghindari masalah blokir CORS
-            script.onload = resolve;
-            script.onerror = () => reject(new Error('Gagal memuat modul AI dari server. Periksa koneksi internet Anda.'));
-            document.head.appendChild(script);
-        });
-    }
-
+    updateProgress(30, 'Mengirim gambar ke server untuk dihapus latar belakangnya...');
     const file = selectedFiles[0];
-    const objUrl = URL.createObjectURL(file);
-    
-    updateProgress(40, 'AI sedang menganalisis & memproses gambar...');
-    
-    try {
-        // imglyRemoveBackground adalah fungsi global yang tersedia setelah script dimuat
-        // Kita gunakan 'model_assets' yang sudah dikonfigurasi otomatis oleh library
-        const imageBlob = await imglyRemoveBackground(objUrl, {
-            publicPath: 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.3/dist/',
-            proxyToWorker: false // Mencegah error isolasi memori pada beberapa browser
-        });
+    const formData = new FormData();
+    formData.append('file', file); 
 
+    try {
+        const response = await fetch('/api/remove-bg', { 
+            method: 'POST', 
+            body: formData 
+        });
+        
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error || response.statusText);
+        }
+
+        updateProgress(80, 'Mengunduh hasil transparan...');
+        const blob = await response.blob();
+        
         updateProgress(100, 'Selesai!');
         alertUser('Latar belakang berhasil dihapus!', 'success');
-        triggerDownload(imageBlob, `Twidy_NoBG_${file.name.split('.')[0]}.png`);
+        triggerDownload(blob, `Twidy_NoBG_${file.name.split('.')[0]}.png`);
         setTimeout(() => hideProgress(), 2000);
+        
     } catch (err) {
-        console.error(err);
-        throw new Error("Proses Remove BG gagal. Browser Anda mungkin membatasi WebGL. Coba gunakan Google Chrome.");
-    } finally {
-        URL.revokeObjectURL(objUrl);
+        throw new Error(`Gagal memproses: ${err.message}`);
     }
 }
+
 // --- PEMROSESAN GAMBAR (CANVAS API) ---
 async function processImageFeature(action) {
     updateProgress(20, 'Memuat gambar...');
@@ -1223,7 +1211,6 @@ async function processMediaWithFFmpeg(action, mediaType) {
     
     if (typeof FFmpeg === 'undefined') throw new Error("Library FFmpeg.wasm gagal dimuat. Cek koneksi Anda.");
     
-    // REVISI: Menggunakan core-st (Single Threaded) agar tidak terkena error Cross-Origin-Isolation di Vercel
     const { createFFmpeg, fetchFile } = FFmpeg;
     const ffmpeg = createFFmpeg({ 
         log: false, 
@@ -1239,7 +1226,6 @@ async function processMediaWithFFmpeg(action, mediaType) {
 
     updateProgress(40, 'Membaca file media...');
     
-    // Simpan semua file input ke dalam file system (FS) memori FFmpeg
     for (let i = 0; i < selectedFiles.length; i++) {
         ffmpeg.FS('writeFile', selectedFiles[i].name, await fetchFile(selectedFiles[i]));
     }
@@ -1251,10 +1237,8 @@ async function processMediaWithFFmpeg(action, mediaType) {
 
     updateProgress(60, 'Mengeksekusi manipulasi media...');
 
-    // Pengecualian khusus jika fiturnya adalah Extract Frames (Keluaran ganda)
     if (action === 'video-extract-frames') {
         updateProgress(75, 'Mengekstrak frame dari video (Ini memakan waktu)...');
-        // Ekstrak 1 frame setiap 1 detik
         await ffmpeg.run('-i', file.name, '-r', '1', 'frame-%03d.jpg');
         
         updateProgress(85, 'Membungkus frame ke dalam ZIP...');
@@ -1277,16 +1261,14 @@ async function processMediaWithFFmpeg(action, mediaType) {
         alertUser('Frame video berhasil diambil!', 'success');
         triggerDownload(blob, `Twidy_Frames_${file.name.split('.')[0]}.zip`);
         setTimeout(() => hideProgress(), 2000);
-        return; // Hentikan fungsi di sini karena file sudah diunduh
+        return; 
     }
 
-    // Pengecualian khusus untuk Merge (Gabung Video/Audio)
     if (action === 'video-merge' || action === 'audio-merge') {
         if (selectedFiles.length < 2) throw new Error("Fitur ini membutuhkan minimal 2 file untuk digabung.");
         outName = action === 'video-merge' ? 'output.mp4' : 'output.mp3';
         outMime = action === 'video-merge' ? 'video/mp4' : 'audio/mp3';
         
-        // Buat file concat.txt berisi list nama file untuk FFmpeg
         let concatList = '';
         for (let i = 0; i < selectedFiles.length; i++) {
             concatList += `file '${selectedFiles[i].name}'\n`;
@@ -1294,7 +1276,6 @@ async function processMediaWithFFmpeg(action, mediaType) {
         ffmpeg.FS('writeFile', 'concat.txt', concatList);
         command = ['-f', 'concat', '-safe', '0', '-i', 'concat.txt', '-c', 'copy', outName];
     } else {
-        // --- LOGIKA NORMAL (1 FILE) ---
         if (mediaType === 'video') {
             outName = 'output.mp4'; outMime = 'video/mp4';
             switch(action) {
