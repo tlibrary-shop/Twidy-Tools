@@ -26,16 +26,18 @@ export default async function handler(req, res) {
             const fileData = fs.readFileSync(file.filepath);
             const fileBlob = new Blob([fileData], { type: file.mimetype });
 
-            // 2. Menyiapkan paket data untuk dikirim ke API Poof.bg
+            // 2. Menyiapkan paket data sesuai dokumentasi Poof.bg
             const formData = new FormData();
             formData.append('image_file', fileBlob, file.originalFilename || 'image.jpg');
+            formData.append('format', 'png');
+            formData.append('size', 'full');
 
-            // 3. Mengirim ke Endpoint API Poof.bg
-            // (Pastikan URL endpoint ini sesuai dengan dokumentasi di dashboard mereka)
-            const response = await fetch('https://api.poof.bg/v1/remove-bg', {
+            // 3. Mengirim ke Endpoint API Poof.bg (URL diperbarui)
+            const response = await fetch('https://api.poof.bg/v1/remove', {
                 method: 'POST',
                 headers: {
-                    'x-api-key': apiKey
+                    // Gunakan trim() untuk membuang spasi tidak sengaja yang ikut tersalin di Vercel
+                    'x-api-key': apiKey.trim() 
                 },
                 body: formData
             });
@@ -49,7 +51,7 @@ export default async function handler(req, res) {
             const buffer = await response.arrayBuffer();
             
             res.setHeader('Content-Type', 'image/png');
-            res.setHeader('Content-Disposition', `attachment; filename="Twidy_NoBG_${file.originalFilename}.png"`);
+            res.setHeader('Content-Disposition', `attachment; filename="Twidy_NoBG_${file.originalFilename.replace(/\.[^/.]+$/, "")}.png"`);
             res.send(Buffer.from(buffer));
 
             // 5. Bersihkan memori server
@@ -62,4 +64,3 @@ export default async function handler(req, res) {
         }
     });
 }
-  
