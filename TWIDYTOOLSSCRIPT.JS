@@ -479,7 +479,7 @@ async function executeConvertAPI(conversionType, targetExtension, loadingMessage
     const formData = new FormData();
     formData.append('file', selectedFiles[0]);
     formData.append('conversionType', conversionType); 
-    updateProgress(50, 'Mengirim dokumen ke server...');
+    updateProgress(50, 'Mengirim dokumen ke server (ConvertAPI)...');
     
     const response = await fetch('/api/convert', { method: 'POST', body: formData });
     if (!response.ok) {
@@ -1053,98 +1053,36 @@ async function executePdfNup() {
 // NEW FEATURE HANDLERS (IMAGE, VIDEO, AUDIO)
 // ==========================================
 
-// --- FUNGSI AUTO COMPRESS (HELPER) ---
-// Secara otomatis memperkecil gambar agar tidak diblokir oleh Vercel Limit (4.5 MB)
-async function compressImageToLimit(file) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        const objUrl = URL.createObjectURL(file);
-        img.onload = () => {
-            URL.revokeObjectURL(objUrl);
-            let width = img.width;
-            let height = img.height;
-            
-            // Maksimal dimensi aman agar ukuran di bawah 3.5MB
-            const maxDim = 1600; 
-            if (width > maxDim || height > maxDim) {
-                if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; } 
-                else { width = Math.round(width * maxDim / height); height = maxDim; }
-            }
-
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-            
-            canvas.toBlob((blob) => {
-                const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), { type: 'image/jpeg' });
-                resolve(newFile);
-            }, 'image/jpeg', 0.85); // Kualitas 85% untuk hasil optimal
-        };
-        img.onerror = () => reject(new Error("Gagal membaca gambar untuk dioptimasi."));
-        img.src = objUrl;
-    });
-}
-
 // --- FITUR HAPUS LATAR BELAKANG VIA API ---
-async function executeRemoveBgAPI() {
 async function executeRemoveBgAPI() {
     if (selectedFiles.length === 0) return;
     
-    updateProgress(10, 'Menyiapkan gambar...');
+    updateProgress(30, 'Mengirim gambar ke server untuk dihapus latar belakangnya...');
     const file = selectedFiles[0];
+    const formData = new FormData();
+    formData.append('file', file); 
 
-    // Menggunakan FileReader untuk membaca file sebelum dikirim
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-        try {
-            updateProgress(30, 'Mengirim ke server AI...');
-            const formData = new FormData();
-            formData.append('file', file); 
-
-            const response = await fetch('/api/remove-bg', { 
-                method: 'POST', 
-                body: formData 
-            });
-            
-            if (!response.ok) throw new Error("Gagal memproses di server.");
-
-            const blob = await response.blob();
-            const imageUrl = URL.createObjectURL(blob);
-
-            // Memanggil fungsi Preview
-            showPreviewModal(imageUrl, blob, file.name);
-            hideProgress();
-        } catch (err) {
-            alertUser(`Error: ${err.message}`, 'error');
-            hideProgress();
+    try {
+        const response = await fetch('/api/remove-bg', { 
+            method: 'POST', 
+            body: formData 
+        });
+        
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error || response.statusText);
         }
-    };
-    reader.readAsArrayBuffer(file);
-}
 
-// Fungsi Modal Preview
-function showPreviewModal(url, blob, originalName) {
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 z-[200] flex items-center justify-center bg-black/80 p-4';
-    modal.innerHTML = `
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl max-w-lg w-full shadow-2xl text-center">
-            <h3 class="text-xl font-bold mb-4 dark:text-white">Hasil Preview</h3>
-            <img src="${url}" class="max-h-80 mx-auto mb-4 border border-slate-200 rounded-lg" />
-            <div class="flex gap-3">
-                <button id="closePreview" class="flex-1 py-2 bg-slate-200 rounded-lg font-bold">Tutup</button>
-                <button id="downloadPreview" class="flex-1 py-2 bg-indigo-600 text-white rounded-lg font-bold">Unduh Hasil</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-
-    document.getElementById('closePreview').onclick = () => { modal.remove(); URL.revokeObjectURL(url); };
-    document.getElementById('downloadPreview').onclick = () => {
-        triggerDownload(blob, `Twidy_NoBG_${originalName.replace(/\.[^/.]+$/, "")}.png`);
-        modal.remove();
-        URL.revokeObjectURL(url);
+        updateProgress(80, 'Mengunduh hasil transparan...');
+        const blob = await response.blob();
+        
+        updateProgress(100, 'Selesai!');
+        alertUser('Latar belakang berhasil dihapus!', 'success');
+        triggerDownload(blob, `Twidy_NoBG_${file.name.split('.')[0]}.png`);
+        setTimeout(() => hideProgress(), 2000);
+        
+    } catch (err) {
+        throw new Error(`Gagal memproses: ${err.message}`);
     }
 }
 
