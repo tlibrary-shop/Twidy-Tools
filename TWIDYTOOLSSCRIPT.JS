@@ -479,7 +479,7 @@ async function executeConvertAPI(conversionType, targetExtension, loadingMessage
     const formData = new FormData();
     formData.append('file', selectedFiles[0]);
     formData.append('conversionType', conversionType); 
-    updateProgress(50, 'Mengirim dokumen ke server (ConvertAPI)...');
+    updateProgress(50, 'Mengirim dokumen ke server...');
     
     const response = await fetch('/api/convert', { method: 'POST', body: formData });
     if (!response.ok) {
@@ -1053,12 +1053,55 @@ async function executePdfNup() {
 // NEW FEATURE HANDLERS (IMAGE, VIDEO, AUDIO)
 // ==========================================
 
+// --- FUNGSI AUTO COMPRESS (HELPER) ---
+// Secara otomatis memperkecil gambar agar tidak diblokir oleh Vercel Limit (4.5 MB)
+async function compressImageToLimit(file) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        const objUrl = URL.createObjectURL(file);
+        img.onload = () => {
+            URL.revokeObjectURL(objUrl);
+            let width = img.width;
+            let height = img.height;
+            
+            // Maksimal dimensi aman agar ukuran di bawah 3.5MB
+            const maxDim = 1600; 
+            if (width > maxDim || height > maxDim) {
+                if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; } 
+                else { width = Math.round(width * maxDim / height); height = maxDim; }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            canvas.toBlob((blob) => {
+                const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), { type: 'image/jpeg' });
+                resolve(newFile);
+            }, 'image/jpeg', 0.85); // Kualitas 85% untuk hasil optimal
+        };
+        img.onerror = () => reject(new Error("Gagal membaca gambar untuk dioptimasi."));
+        img.src = objUrl;
+    });
+}
+
 // --- FITUR HAPUS LATAR BELAKANG VIA API ---
 async function executeRemoveBgAPI() {
     if (selectedFiles.length === 0) return;
     
+    let file = selectedFiles[0];
+    const maxFileSize = 3.5 * 1024 * 1024; // Batas aman Vercel (3.5 MB)
+
+    // Jika ukuran file terlalu besar, Vercel akan otomatis menampilkan error 413.
+    // Oleh karena itu, kita "compress" gambar secara diam-diam di browser sebelum dikirim!
+    if (file.size > maxFileSize) {
+        updateProgress(10, 'Mengoptimalkan ukuran gambar...');
+        file = await compressImageToLimit(file);
+    }
+
     updateProgress(30, 'Mengirim gambar ke server untuk dihapus latar belakangnya...');
-    const file = selectedFiles[0];
     const formData = new FormData();
     formData.append('file', file); 
 
@@ -1069,8 +1112,15 @@ async function executeRemoveBgAPI() {
         });
         
         if (!response.ok) {
+            let errStr = response.statusText || 'Kesalahan Server Tidak Diketahui';
+            // Menangkap secara spesifik error 413 dari Vercel
+            if (response.status === 413) {
+                errStr = "Gagal karena file terlalu besar untuk diproses oleh server.";
+            }
+            
+            // Mencoba membaca pesan error JSON dari backend jika ada
             const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.error || response.statusText);
+            throw new Error(errData.error || errStr);
         }
 
         updateProgress(80, 'Mengunduh hasil transparan...');
