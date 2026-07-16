@@ -1054,7 +1054,6 @@ async function executePdfNup() {
 // ==========================================
 
 // --- FUNGSI AUTO COMPRESS (HELPER) ---
-// Secara otomatis memperkecil gambar agar tidak diblokir oleh Vercel Limit (4.5 MB)
 async function compressImageToLimit(file, limitMB) {
     const limitBytes = limitMB * 1024 * 1024;
     
@@ -1118,86 +1117,6 @@ async function compressImageToLimit(file, limitMB) {
     });
 }
 
-// --- FITUR HAPUS LATAR BELAKANG VIA API ---
-async function executeRemoveBgAPI() {
-    if (selectedFiles.length === 0) return;
-    let file = selectedFiles[0];
-    const maxFileSize = 3.5 * 1024 * 1024; // Batas aman Vercel (3.5 MB)
-    
-    try {
-        // 1. AUTO COMPRESS JIKA LEBIH DARI 3.5 MB
-        if (file.size > maxFileSize) {
-            updateProgress(10, 'Ukuran > 3.5MB, sedang mengompresi gambar...');
-            file = await compressImageToLimit(file, 3.5);
-        }
-
-        updateProgress(30, 'Mengunggah dan memproses di AI...');
-        
-        // Membaca file sebagai base64 untuk dikirim ke API
-        const base64Data = await new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result.split(',')[1]);
-            reader.readAsDataURL(file);
-        });
-
-        // Sesuaikan endpoint '/api/remove-bg' dengan endpoint AI Anda (bisa /api/gemini dsb)
-        const response = await fetch('/api/remove-bg', { 
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                image_base64: base64Data,
-                mime_type: file.type || 'image/jpeg'
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error('Gagal menghapus latar belakang. Server error atau limit.');
-        }
-
-        const data = await response.json(); 
-        
-        // Pastikan menyesuaikan `data.result_base64` dengan key balasan dari API Anda. 
-        // Jika API Anda mengembalikan { result: 'base64...' }, gunakan data.result
-        const resultBase64 = data.result_base64 || data.result || data.image; 
-
-        if (!resultBase64) {
-            throw new Error('Hasil gambar tidak ditemukan dari AI.');
-        }
-
-        updateProgress(80, 'Menyiapkan pratinjau hasil...');
-
-        // Konversi base64 kembali ke blob gambar
-        const byteCharacters = atob(resultBase64);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'image/png' });
-
-        updateProgress(100, 'Selesai!');
-        alertUser('Latar belakang berhasil dihapus!', 'success');
-        
-        // 2. TAMPILKAN PREVIEW (TIDAK LANGSUNG DOWNLOAD)
-        const previewUrl = URL.createObjectURL(blob);
-        const toolsSection = document.getElementById('toolsSection');
-        
-        // Buat atau gunakan container preview yang sudah ada
-        let previewContainer = document.getElementById('removeBgPreviewContainer');
-        if (!previewContainer) {
-            previewContainer = document.createElement('div');
-            previewContainer.id = 'removeBgPreviewContainer';
-            previewContainer.className = 'mt-8 bg-slate-100 dark:bg-slate-800 p-6 rounded-xl text-center border-2 border-dashed border-slate-300 dark:border-slate-600';
-            
-            const title = document.createElement('h3');
-            title.className = 'text-slate-700 dark:text-white font-bold mb-4 text-lg';
-            title.innerText = 'Pratinjau Hasil Remove BG';
-            
-            const imgEl = document.createElement('img');
-            imgEl.id = 'removeBgPreviewImage';
-            // Menambahkan background kotak-kotak transparan untuk melihat area yang di-remove BG
-            imgEl.className = 'mx-auto max-w-full max-h-[500px] rounded shadow-lg bg-[url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYGAQYcAP3uCTZ84jhqH1AAMj8RSNoHg0DBmIg5G4mFDDYDRcZBs0AQBYBwT1Q3l67gAAAABJRU5ErkJggg==")]'; 
-            
 // --- FITUR HAPUS LATAR BELAKANG VIA API ---
 async function executeRemoveBgAPI() {
     if (selectedFiles.length === 0) return;
