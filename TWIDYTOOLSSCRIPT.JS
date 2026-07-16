@@ -1053,65 +1053,94 @@ async function executePdfNup() {
 // NEW FEATURE HANDLERS (IMAGE, VIDEO, AUDIO)
 // ==========================================
 
-// --- FUNGSI AUTO COMPRESS (HELPER) ---
+// --- FUNGSI AUTO COMPRESS (REVISI) ---
 async function compressImageToLimit(file, limitMB) {
     const limitBytes = limitMB * 1024 * 1024;
-    
-    // Jika file sudah aman, langsung kembalikan
-    if (file.size <= limitBytes) return file; 
+
+    // Kalau sudah aman
+    if (file.size <= limitBytes) return file;
 
     return new Promise((resolve, reject) => {
         const img = new Image();
         const objUrl = URL.createObjectURL(file);
 
-        img.onload = () => {
-            URL.revokeObjectURL(objUrl); // Bersihkan memori
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            
+        img.onload = async () => {
+            URL.revokeObjectURL(objUrl);
+
             let width = img.width;
             let height = img.height;
-            
-            // TAHAP 1: Resize drastis jika gambar terlalu besar (Max 1920px)
-            const MAX_DIMENSION = 1200;
-            if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-                const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
-                width = Math.floor(width * ratio);
-                height = Math.floor(height * ratio);
+
+            // Batasi ukuran awal maksimal 1920px
+            const MAX_SIZE = 1920;
+            if (width > MAX_SIZE || height > MAX_SIZE) {
+                const ratio = Math.min(MAX_SIZE / width, MAX_SIZE / height);
+                width = Math.round(width * ratio);
+                height = Math.round(height * ratio);
             }
 
-            canvas.width = width;
-            canvas.height = height;
-            ctx.drawImage(img, 0, 0, width, height);
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
 
-            // TAHAP 2: Turunkan kualitas JPEG
-            let quality = 0.8; // Mulai dari 80%
+            let lastBlob = null;
 
-            const attemptCompression = () => {
-                canvas.toBlob((blob) => {
-                    if (!blob) {
-                        return reject(new Error("Sistem gagal memproses kanvas gambar."));
+            // Resize bertahap
+            while (width >= 700 && height >= 700) {
+
+                canvas.width = width;
+                canvas.height = height;
+
+                ctx.clearRect(0, 0, width, height);
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Quality bertahap
+                for (let quality = 0.9; quality >= 0.2; quality -= 0.1) {
+
+                    const blob = await new Promise(res =>
+                        canvas.toBlob(res, "image/jpeg", quality)
+                    );
+
+                    if (!blob) continue;
+
+                    lastBlob = blob;
+
+                    if (blob.size <= limitBytes) {
+                        resolve(new File(
+                            [blob],
+                            file.name.replace(/\.[^.]+$/, ".jpg"),
+                            {
+                                type: "image/jpeg",
+                                lastModified: Date.now()
+                            }
+                        ));
+                        return;
                     }
-                    
-                    // Cek jika ukuran sudah aman ATAU kualitas sudah batas minimal (0.3)
-                    if (blob.size <= limitBytes || quality <= 0.3) {
-                        const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
-                            type: 'image/jpeg',
-                            lastModified: Date.now(),
-                        });
-                        resolve(compressedFile);
-                    } else {
-                        // Turunkan kualitas lebih cepat (15% per iterasi) untuk mencegah freeze
-                        quality -= 0.15; 
-                        attemptCompression();
-                    }
-                }, 'image/jpeg', quality);
-            };
+                }
 
-            attemptCompression();
+                // Kalau belum cukup kecil → resize lagi
+                width = Math.round(width * 0.8);
+                height = Math.round(height * 0.8);
+            }
+
+            // Kalau mentok, kirim hasil terkecil
+            if (lastBlob) {
+                resolve(new File(
+                    [lastBlob],
+                    file.name.replace(/\.[^.]+$/, ".jpg"),
+                    {
+                        type: "image/jpeg",
+                        lastModified: Date.now()
+                    }
+                ));
+            } else {
+                reject(new Error("Gagal mengompres gambar."));
+            }
         };
 
-        img.onerror = () => reject(new Error("File gambar rusak atau tidak dapat dibaca oleh browser."));
+        img.onerror = () => {
+            URL.revokeObjectURL(objUrl);
+            reject(new Error("File gambar rusak atau tidak dapat dibaca."));
+        };
+
         img.src = objUrl;
     });
 }
