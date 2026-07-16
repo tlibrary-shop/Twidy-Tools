@@ -1136,30 +1136,6 @@ async function executeRemoveBgAPI() {
     }
 }
 
-// Fungsi Modal Preview
-function showPreviewModal(url, blob, originalName) {
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 z-[200] flex items-center justify-center bg-black/80 p-4';
-    modal.innerHTML = `
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl max-w-lg w-full shadow-2xl text-center">
-            <h3 class="text-xl font-bold mb-4 dark:text-white">Hasil Preview</h3>
-            <img src="${url}" class="max-h-80 mx-auto mb-4 border border-slate-200 rounded-lg" />
-            <div class="flex gap-3">
-                <button id="closePreview" class="flex-1 py-2 bg-slate-200 rounded-lg font-bold">Tutup</button>
-                <button id="downloadPreview" class="flex-1 py-2 bg-indigo-600 text-white rounded-lg font-bold">Unduh Hasil</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-
-    document.getElementById('closePreview').onclick = () => { modal.remove(); URL.revokeObjectURL(url); };
-    document.getElementById('downloadPreview').onclick = () => {
-        triggerDownload(blob, `Twidy_NoBG_${originalName.replace(/\.[^/.]+$/, "")}.png`);
-        modal.remove();
-        URL.revokeObjectURL(url);
-    };
-}
-
 // --- PEMROSESAN GAMBAR (CANVAS API) ---
 async function processImageFeature(action) {
     updateProgress(20, 'Memuat gambar...');
