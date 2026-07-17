@@ -7,6 +7,7 @@ const toolConfig = {
     // === TWIDY ECOSYSTEM ===
     'twidy-bill': { title: 'TwidyBill', desc: 'Generate tagihan siap kirim dalam hitungan detik.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.netlify.app/' },
     'twidy-ai': { title: 'Twidy AI', desc: 'Asisten AI pintar untuk membantu berbagai tugas digital Anda secara langsung.', icon: 'fa-robot', color: 'text-purple-500', isIframe: true, iframeUrl: 'https://twidyai.vercel.app/' },
+    'twidy-translator': { title: 'Twidy Translator', desc: 'Terjemahkan teks ke puluhan bahasa dengan kecerdasan Gemini.', icon: 'fa-language', color: 'text-sky-500', isCustomUI: true },
 
     // === PDF TOOLS ===
     'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop).', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
@@ -70,10 +71,10 @@ const toolConfig = {
     // IMAGE CONVERTERS
     'image-to-ico': { title: 'Image to ICO', desc: 'Ubah foto jadi .ico.', icon: 'fa-icons', color: 'text-orange-500', accept: 'image/*', multi: false },
     'ico-to-png': { title: 'ICO to PNG', desc: 'Ubah icon ke PNG.', icon: 'fa-file-image', color: 'text-blue-400', accept: '.ico', multi: false },
-    'avif-to-png': { title: 'AVIF Ã¢â€ â€ PNG', desc: 'Konversi AVIF.', icon: 'fa-exchange-alt', color: 'text-emerald-500', accept: '.avif,.png', multi: false },
-    'heic-to-jpg': { title: 'HEIC Ã¢â€ â€ JPG', desc: 'Konversi foto HEIC.', icon: 'fa-exchange-alt', color: 'text-red-500', accept: '.heic,.jpg,.jpeg', multi: false },
-    'webp-to-png': { title: 'WEBP Ã¢â€ â€ PNG', desc: 'Konversi WEBP.', icon: 'fa-exchange-alt', color: 'text-cyan-500', accept: '.webp,.png', multi: false },
-    'svg-to-png': { title: 'SVG Ã¢â€ â€ PNG', desc: 'Ubah vektor SVG.', icon: 'fa-exchange-alt', color: 'text-rose-500', accept: '.svg,.png', multi: false },
+    'avif-to-png': { title: 'AVIF ↔ PNG', desc: 'Konversi AVIF.', icon: 'fa-exchange-alt', color: 'text-emerald-500', accept: '.avif,.png', multi: false },
+    'heic-to-jpg': { title: 'HEIC ↔ JPG', desc: 'Konversi foto HEIC.', icon: 'fa-exchange-alt', color: 'text-red-500', accept: '.heic,.jpg,.jpeg', multi: false },
+    'webp-to-png': { title: 'WEBP ↔ PNG', desc: 'Konversi WEBP.', icon: 'fa-exchange-alt', color: 'text-cyan-500', accept: '.webp,.png', multi: false },
+    'svg-to-png': { title: 'SVG ↔ PNG', desc: 'Ubah vektor SVG.', icon: 'fa-exchange-alt', color: 'text-rose-500', accept: '.svg,.png', multi: false },
 
     // IMAGE AI
     'ai-upscale-image': { title: 'Upscale Image', desc: 'Membutuhkan Model Ekstra.', icon: 'fa-magic', color: 'text-slate-400', accept: 'image/*', multi: false },
@@ -107,7 +108,7 @@ const toolConfig = {
 };
 
 const categories = {
-    'TWIDY ECOSYSTEM': ['twidy-bill', 'twidy-ai'],
+    'TWIDY ECOSYSTEM': ['twidy-bill', 'twidy-ai', 'twidy-translator'],
     'ORGANIZE PDF': ['pdf-merge', 'pdf-split', 'remove-pages', 'extract-pages', 'organize-pdf', 'scan-to-pdf'],
     'OPTIMIZE PDF': ['pdf-compress', 'repair-pdf', 'ocr-pdf'],
     'CONVERT TO PDF': ['image-to-pdf', 'word-to-pdf', 'ppt-to-pdf', 'excel-to-pdf', 'html-to-pdf', 'txt-to-pdf', 'rtf-to-pdf'],
@@ -224,11 +225,19 @@ function selectTool(toolId) {
     const fileListArea = document.getElementById('fileList');
     const actionBtnArea = document.getElementById('actionButtons');
 
+    let transContainer = document.getElementById('translatorContainer');
+
     if (config.isIframe) {
         dropZone.classList.add('hidden'); settingsPanel.classList.add('hidden'); fileListArea.classList.add('hidden'); actionBtnArea.classList.add('hidden');
+        if (transContainer) transContainer.classList.add('hidden');
         iframeContainer.classList.remove('hidden'); appIframe.src = config.iframeUrl; 
+    } else if (config.isCustomUI && currentTool === 'twidy-translator') {
+        iframeContainer.classList.add('hidden'); appIframe.src = '';
+        dropZone.classList.add('hidden'); settingsPanel.classList.add('hidden'); fileListArea.classList.add('hidden'); actionBtnArea.classList.add('hidden');
+        renderTranslatorUI();
     } else {
         iframeContainer.classList.add('hidden'); appIframe.src = ''; 
+        if (transContainer) transContainer.classList.add('hidden');
         dropZone.classList.remove('hidden'); fileListArea.classList.remove('hidden');
         
         const fInput = document.getElementById('fileInput');
@@ -266,6 +275,10 @@ function goBack() {
     document.getElementById('aiResultContainer').classList.add('hidden');
     document.getElementById('iframeContainer').classList.add('hidden');
     document.getElementById('appIframe').src = '';
+    
+    const transContainer = document.getElementById('translatorContainer');
+    if (transContainer) transContainer.classList.add('hidden');
+    
     clearFiles();
     if (window.innerWidth < 768) {
         const sidebar = document.getElementById('sidebar');
@@ -911,6 +924,7 @@ function showPdfToImagePreview(imagesData, originalFileName) {
         previewContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
 }
+
 async function executeRepairPdf() {
     updateProgress(50, 'Memulihkan struktur dokumen...');
     const doc = await PDFLib.PDFDocument.load(await selectedFiles[0].arrayBuffer(), { ignoreEncryption: true });
@@ -1157,11 +1171,8 @@ async function executePdfNup() {
 // NEW FEATURE HANDLERS (IMAGE, VIDEO, AUDIO)
 // ==========================================
 
-// --- FUNGSI AUTO COMPRESS (REVISI) ---
 async function compressImageToLimit(file, limitMB) {
     const limitBytes = limitMB * 1024 * 1024;
-
-    // Kalau sudah aman
     if (file.size <= limitBytes) return file;
 
     return new Promise((resolve, reject) => {
@@ -1174,7 +1185,6 @@ async function compressImageToLimit(file, limitMB) {
             let width = img.width;
             let height = img.height;
 
-            // Batasi ukuran awal maksimal 1920px
             const MAX_SIZE = 1920;
             if (width > MAX_SIZE || height > MAX_SIZE) {
                 const ratio = Math.min(MAX_SIZE / width, MAX_SIZE / height);
@@ -1187,54 +1197,31 @@ async function compressImageToLimit(file, limitMB) {
 
             let lastBlob = null;
 
-            // Resize bertahap
             while (width >= 700 && height >= 700) {
-
                 canvas.width = width;
                 canvas.height = height;
 
                 ctx.clearRect(0, 0, width, height);
                 ctx.drawImage(img, 0, 0, width, height);
 
-                // Quality bertahap
                 for (let quality = 0.9; quality >= 0.2; quality -= 0.1) {
-
-                    const blob = await new Promise(res =>
-                        canvas.toBlob(res, "image/jpeg", quality)
-                    );
-
+                    const blob = await new Promise(res => canvas.toBlob(res, "image/jpeg", quality));
                     if (!blob) continue;
 
                     lastBlob = blob;
 
                     if (blob.size <= limitBytes) {
-                        resolve(new File(
-                            [blob],
-                            file.name.replace(/\.[^.]+$/, ".jpg"),
-                            {
-                                type: "image/jpeg",
-                                lastModified: Date.now()
-                            }
-                        ));
+                        resolve(new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg", lastModified: Date.now() }));
                         return;
                     }
                 }
 
-                // Kalau belum cukup kecil → resize lagi
                 width = Math.round(width * 0.8);
                 height = Math.round(height * 0.8);
             }
 
-            // Kalau mentok, kirim hasil terkecil
             if (lastBlob) {
-                resolve(new File(
-                    [lastBlob],
-                    file.name.replace(/\.[^.]+$/, ".jpg"),
-                    {
-                        type: "image/jpeg",
-                        lastModified: Date.now()
-                    }
-                ));
+                resolve(new File([lastBlob], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg", lastModified: Date.now() }));
             } else {
                 reject(new Error("Gagal mengompres gambar."));
             }
@@ -1249,64 +1236,44 @@ async function compressImageToLimit(file, limitMB) {
     });
 }
 
-// --- FITUR HAPUS LATAR BELAKANG VIA API ---
 async function executeRemoveBgAPI() {
     if (selectedFiles.length === 0) return;
     let file = selectedFiles[0];
-    const maxFileSize = 3.5; // Batas aman Vercel (3.5 MB)
+    const maxFileSize = 3.5; 
     
     try {
         updateProgress(10, 'Menyiapkan gambar...');
-        
-        // Auto Compress apabila melebihi 3.5 MB
         if (file.size > maxFileSize * 1024 * 1024) {
             updateProgress(30, 'Mengompresi ukuran gambar...');
             file = await compressImageToLimit(file, maxFileSize);
         }
 
         updateProgress(50, 'Menghapus latar belakang... (Memproses AI)');
-
         const formData = new FormData();
-        // Sesuaikan parameter body jika API di backend Anda memerlukan format spesifik
         formData.append('file', file); 
 
-        // Ganti URL endpoint dengan URL API Remove BG Anda
-        const response = await fetch('/api/remove-bg', { 
-            method: 'POST',
-            body: formData,
-        });
-
-        if (!response.ok) {
-            throw new Error('Gagal menghapus latar belakang. Gambar mungkin terlalu kompleks atau server penuh.');
-        }
+        const response = await fetch('/api/remove-bg', { method: 'POST', body: formData });
+        if (!response.ok) throw new Error('Gagal menghapus latar belakang. Gambar mungkin terlalu kompleks atau server penuh.');
 
         const blob = await response.blob();
         updateProgress(90, 'Memuat hasil...');
 
-        // Tampilkan Preview alih-alih langsung mendownload
         const newFileName = `removed_bg_${file.name.replace(/\.[^/.]+$/, "")}.png`;
         showPreviewResult(blob, newFileName);
         
-        updateProgress(100, 'Selesai!');
-        hideProgress();
+        updateProgress(100, 'Selesai!'); hideProgress();
     } catch (error) {
-        console.error(error);
-        alertUser(error.message || 'Terjadi kesalahan sistem.', 'error');
-        hideProgress();
+        console.error(error); alertUser(error.message || 'Terjadi kesalahan sistem.', 'error'); hideProgress();
     }
 }
 
-// --- FUNGSI UNTUK MENAMPILKAN PREVIEW HASIL ---
 function showPreviewResult(blob, fileName) {
-    // Cek apakah kontainer preview sudah ada, jika belum buat baru
     let previewContainer = document.getElementById('preview-container');
     if (!previewContainer) {
         previewContainer = document.createElement('div');
         previewContainer.id = 'preview-container';
         previewContainer.className = 'mt-6 p-4 bg-slate-800 rounded-xl flex flex-col items-center border border-slate-700 animate-fade-in mx-auto max-w-2xl';
         
-        // Sisipkan ke area kerja (sesuaikan selector parent dengan struktur HTML Anda)
-        // Umumnya disisipkan di atas daftar file atau di bawah area drag/drop
         const fileListContainer = document.getElementById('fileList') || document.querySelector('.main-work-area');
         if(fileListContainer && fileListContainer.parentNode) {
             fileListContainer.parentNode.insertBefore(previewContainer, fileListContainer);
@@ -1316,42 +1283,28 @@ function showPreviewResult(blob, fileName) {
     }
     
     const objUrl = URL.createObjectURL(blob);
-    
-    // Reset isi kontainer
     previewContainer.innerHTML = '';
     
-    // Judul
     const title = document.createElement('h3');
-    title.innerText = 'âœ¨ Hasil Remove Background';
+    title.innerText = '✨ Hasil Remove Background';
     title.className = 'text-lg font-bold mb-4 text-white';
     
-    // Gambar Preview (Dengan background checkerboard untuk menunjukkan transparansi)
     const img = document.createElement('img');
     img.src = objUrl;
     img.className = 'max-w-full max-h-80 object-contain mb-4 rounded shadow-lg bg-[url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYNgGwEg9AMw4uB5QYGBYhZ0CjFJMGoCCARjT0AAw08AAIA1AAEAQBQAAoFMC/xS1xAAAAABJRU5ErkJggg==")]';
     
-    // Tombol Download
     const downloadBtn = document.createElement('button');
     downloadBtn.innerHTML = '<i class="fas fa-download mr-2"></i> Download Gambar';
     downloadBtn.className = 'px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-lg font-bold cursor-pointer transition transform hover:scale-105';
-    
-    // Panggil fungsi bawaan triggerDownload
-    downloadBtn.onclick = () => {
-        triggerDownload(blob, fileName);
-    };
+    downloadBtn.onclick = () => triggerDownload(blob, fileName);
 
-    // Susun elemen
     previewContainer.appendChild(title);
     previewContainer.appendChild(img);
     previewContainer.appendChild(downloadBtn);
-    
     previewContainer.style.display = 'flex';
-    
-    // Auto-scroll agar preview terlihat pengguna
     previewContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-// --- PEMROSESAN GAMBAR (CANVAS API) ---
 async function processImageFeature(action) {
     updateProgress(20, 'Memuat gambar...');
     const file = selectedFiles[0];
@@ -1380,81 +1333,48 @@ async function processImageFeature(action) {
         case 'image-resize':
             const customW = parseInt(document.getElementById('resize-width')?.value);
             const customH = parseInt(document.getElementById('resize-height')?.value);
-            
-            if (customW && customH) {
-                canvas.width = customW; canvas.height = customH;
-            } else if (customW) {
-                canvas.width = customW; canvas.height = img.height * (customW / img.width);
-            } else if (customH) {
-                canvas.height = customH; canvas.width = img.width * (customH / img.height);
-            } else {
-                canvas.width = img.width / 2; canvas.height = img.height / 2;
-            }
+            if (customW && customH) { canvas.width = customW; canvas.height = customH; } 
+            else if (customW) { canvas.width = customW; canvas.height = img.height * (customW / img.width); } 
+            else if (customH) { canvas.height = customH; canvas.width = img.width * (customH / img.height); } 
+            else { canvas.width = img.width / 2; canvas.height = img.height / 2; }
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             break;
-            
         case 'image-compress':
             ctx.drawImage(img, 0, 0);
             const qualInput = parseInt(document.getElementById('compress-quality')?.value) || 70;
-            outputQuality = qualInput / 100;
-            outputType = 'image/jpeg';
-            extension = 'jpg';
+            outputQuality = qualInput / 100; outputType = 'image/jpeg'; extension = 'jpg';
             break;
-            
         case 'image-rotate':
             let deg = parseInt(document.getElementById('rotate-degree')?.value) || 90;
             if (deg % 180 !== 0) { canvas.width = img.height; canvas.height = img.width; }
-            ctx.translate(canvas.width / 2, canvas.height / 2);
-            ctx.rotate(deg * Math.PI / 180);
-            ctx.drawImage(img, -img.width / 2, -img.height / 2);
+            ctx.translate(canvas.width / 2, canvas.height / 2); ctx.rotate(deg * Math.PI / 180); ctx.drawImage(img, -img.width / 2, -img.height / 2);
             break;
-            
         case 'image-flip':
-            ctx.translate(canvas.width, 0);
-            ctx.scale(-1, 1);
-            ctx.drawImage(img, 0, 0);
+            ctx.translate(canvas.width, 0); ctx.scale(-1, 1); ctx.drawImage(img, 0, 0);
             break;
-            
         case 'image-watermark':
             ctx.drawImage(img, 0, 0);
             const wmText = document.getElementById('wm-text-img')?.value || 'TWIDYTOOLS';
             const wmPos = (document.getElementById('wm-pos')?.value || 'tengah').toLowerCase();
-            
-            ctx.font = `bold ${canvas.width * 0.05}px Arial`;
-            ctx.fillStyle = "rgba(255, 255, 255, 0.7)"; 
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            
-            let xPos = canvas.width / 2;
-            let yPos = canvas.height / 2; 
-            
+            ctx.font = `bold ${canvas.width * 0.05}px Arial`; ctx.fillStyle = "rgba(255, 255, 255, 0.7)"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            let xPos = canvas.width / 2; let yPos = canvas.height / 2; 
             if (wmPos.includes('atas')) yPos = canvas.height * 0.1;
             if (wmPos.includes('bawah')) yPos = canvas.height * 0.9;
-            
             ctx.fillText(wmText, xPos, yPos);
             break;
-            
         case 'image-to-ico':
         case 'avif-to-png':
         case 'webp-to-png':
         case 'svg-to-png':
         case 'ico-to-png':
-            ctx.drawImage(img, 0, 0);
-            outputType = 'image/png';
-            extension = action === 'image-to-ico' ? 'ico' : 'png';
+            ctx.drawImage(img, 0, 0); outputType = 'image/png'; extension = action === 'image-to-ico' ? 'ico' : 'png';
             break;
-            
         case 'heic-to-jpg':
-            ctx.drawImage(img, 0, 0);
-            outputType = 'image/jpeg';
-            extension = 'jpg';
+            ctx.drawImage(img, 0, 0); outputType = 'image/jpeg'; extension = 'jpg';
             break;
-            
         case 'image-blur-face':
-            ctx.filter = 'blur(10px)';
-            ctx.drawImage(img, 0, 0);
+            ctx.filter = 'blur(10px)'; ctx.drawImage(img, 0, 0);
             break;
-            
         default:
             ctx.drawImage(img, 0, 0);
     }
@@ -1462,43 +1382,27 @@ async function processImageFeature(action) {
     updateProgress(80, 'Mengekspor gambar...');
     
     canvas.toBlob((blob) => {
-        updateProgress(100, 'Selesai!');
-        alertUser('Gambar berhasil diproses!', 'success');
+        updateProgress(100, 'Selesai!'); alertUser('Gambar berhasil diproses!', 'success');
         triggerDownload(blob, newFileName.replace(/\.[^/.]+$/, `.${extension}`));
-        setTimeout(() => hideProgress(), 2000);
-        URL.revokeObjectURL(objUrl);
+        setTimeout(() => hideProgress(), 2000); URL.revokeObjectURL(objUrl);
     }, outputType, outputQuality);
 }
 
-// --- PEMROSESAN MEDIA LENGKAP (FFMPEG SINGLE-THREADED) ---
 async function processMediaWithFFmpeg(action, mediaType) {
     updateProgress(10, 'Memuat Engine FFmpeg...');
-    
     if (typeof FFmpeg === 'undefined') throw new Error("Library FFmpeg.wasm gagal dimuat. Cek koneksi Anda.");
     
     const { createFFmpeg, fetchFile } = FFmpeg;
-    const ffmpeg = createFFmpeg({ 
-        log: false, 
-        corePath: 'https://unpkg.com/@ffmpeg/core-st@0.11.1/dist/ffmpeg-core.js' 
-    });
+    const ffmpeg = createFFmpeg({ log: false, corePath: 'https://unpkg.com/@ffmpeg/core-st@0.11.1/dist/ffmpeg-core.js' });
 
     updateProgress(30, 'Menginisialisasi modul core di browser (Tanpa Multi-Thread)...');
-    try { 
-        await ffmpeg.load(); 
-    } catch (err) { 
-        throw new Error("Gagal menginisialisasi modul mesin video. Pastikan Anda menggunakan Chrome/Edge versi terbaru."); 
-    }
+    try { await ffmpeg.load(); } catch (err) { throw new Error("Gagal menginisialisasi modul mesin video. Pastikan Anda menggunakan Chrome/Edge versi terbaru."); }
 
     updateProgress(40, 'Membaca file media...');
-    
-    for (let i = 0; i < selectedFiles.length; i++) {
-        ffmpeg.FS('writeFile', selectedFiles[i].name, await fetchFile(selectedFiles[i]));
-    }
+    for (let i = 0; i < selectedFiles.length; i++) { ffmpeg.FS('writeFile', selectedFiles[i].name, await fetchFile(selectedFiles[i])); }
     
     const file = selectedFiles[0];
-    let outName = '';
-    let command = [];
-    let outMime = '';
+    let outName = ''; let command = []; let outMime = '';
 
     updateProgress(60, 'Mengeksekusi manipulasi media...');
 
@@ -1522,10 +1426,8 @@ async function processMediaWithFFmpeg(action, mediaType) {
         if (frameCount === 0) throw new Error("Gagal mengekstrak frame dari video ini.");
         const blob = await zip.generateAsync({type: 'blob'});
         
-        updateProgress(100, 'Selesai!');
-        alertUser('Frame video berhasil diambil!', 'success');
-        triggerDownload(blob, `Twidy_Frames_${file.name.split('.')[0]}.zip`);
-        setTimeout(() => hideProgress(), 2000);
+        updateProgress(100, 'Selesai!'); alertUser('Frame video berhasil diambil!', 'success');
+        triggerDownload(blob, `Twidy_Frames_${file.name.split('.')[0]}.zip`); setTimeout(() => hideProgress(), 2000);
         return; 
     }
 
@@ -1535,9 +1437,7 @@ async function processMediaWithFFmpeg(action, mediaType) {
         outMime = action === 'video-merge' ? 'video/mp4' : 'audio/mp3';
         
         let concatList = '';
-        for (let i = 0; i < selectedFiles.length; i++) {
-            concatList += `file '${selectedFiles[i].name}'\n`;
-        }
+        for (let i = 0; i < selectedFiles.length; i++) { concatList += `file '${selectedFiles[i].name}'\n`; }
         ffmpeg.FS('writeFile', 'concat.txt', concatList);
         command = ['-f', 'concat', '-safe', '0', '-i', 'concat.txt', '-c', 'copy', outName];
     } else {
@@ -1595,24 +1495,16 @@ async function processMediaWithFFmpeg(action, mediaType) {
     try {
         const data = ffmpeg.FS('readFile', outName);
         const blob = new Blob([data.buffer], { type: outMime });
-
-        updateProgress(100, 'Selesai!');
-        alertUser('Media berhasil diproses!', 'success');
-        
-        setTimeout(() => hideProgress(), 2000);
-        triggerDownload(blob, `Twidy_${action}_Media.${outName.split('.')[1]}`);
+        updateProgress(100, 'Selesai!'); alertUser('Media berhasil diproses!', 'success');
+        setTimeout(() => hideProgress(), 2000); triggerDownload(blob, `Twidy_${action}_Media.${outName.split('.')[1]}`);
     } catch (err) {
         throw new Error("Proses render gagal. File media Anda mungkin tidak kompatibel atau ukurannya terlalu besar untuk memori browser.");
     }
 }
 
-// --- GEMINI AI CONNECTOR ---
 async function executeAIFeatures(toolId) {
     document.getElementById('aiResultContainer').classList.add('hidden');
-    
-    let textToAnalyze = "";
-    let fileBase64 = null;
-    let fileMimeType = null;
+    let textToAnalyze = ""; let fileBase64 = null; let fileMimeType = null;
 
     const toBase64 = file => new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -1639,10 +1531,8 @@ async function executeAIFeatures(toolId) {
             const ocrPages = Math.min(pdf.numPages, 3);
             for(let i=1; i<=ocrPages; i++) {
                 updateProgress(45 + ((i/ocrPages)*25), `Mengekstrak gambar ke teks (Halaman ${i})...`);
-                const page = await pdf.getPage(i);
-                const vp = page.getViewport({scale: 1.5});
-                const cvs = document.createElement('canvas');
-                cvs.width = vp.width; cvs.height = vp.height;
+                const page = await pdf.getPage(i); const vp = page.getViewport({scale: 1.5});
+                const cvs = document.createElement('canvas'); cvs.width = vp.width; cvs.height = vp.height;
                 await page.render({canvasContext: cvs.getContext('2d'), viewport: vp}).promise;
                 const result = await Tesseract.recognize(cvs, 'eng+ind');
                 extractedText += result.data.text + "\n";
@@ -1651,14 +1541,11 @@ async function executeAIFeatures(toolId) {
         textToAnalyze = extractedText.substring(0, 20000);
     } else {
         updateProgress(30, 'Mengonversi file media untuk dianalisis AI...');
-        fileMimeType = selectedFiles[0].type;
-        fileBase64 = await toBase64(selectedFiles[0]);
+        fileMimeType = selectedFiles[0].type; fileBase64 = await toBase64(selectedFiles[0]);
     }
 
     updateProgress(75, 'Menghubungkan & memproses dengan AI...');
-
-    let actionStr = 'summarize';
-    let customPrompt = '';
+    let actionStr = 'summarize'; let customPrompt = '';
     
     if (toolId === 'ai-summarizer') actionStr = 'summarize';
     if (toolId === 'translate-pdf') actionStr = 'translate';
@@ -1668,7 +1555,6 @@ async function executeAIFeatures(toolId) {
     if (toolId === 'ai-sentiment') actionStr = 'analyze_sentiment';
     if (toolId === 'ai-image-caption') actionStr = 'image_caption';
     if (toolId === 'ai-speech-to-text') actionStr = 'transcribe_audio';
-
     if (toolId === 'ai-chat') {
         actionStr = 'ask_question';
         customPrompt = document.getElementById('ai-prompt')?.value;
@@ -1679,23 +1565,16 @@ async function executeAIFeatures(toolId) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-            text: textToAnalyze, 
-            action: actionStr, 
-            customPrompt: customPrompt,
-            fileData: fileBase64,
-            mimeType: fileMimeType
+            text: textToAnalyze, action: actionStr, customPrompt: customPrompt, fileData: fileBase64, mimeType: fileMimeType
         })
     });
 
     const data = await response.json();
-
-    if(!response.ok) {
-        throw new Error(data.error || "Gagal terhubung ke layanan AI.");
-    }
+    if(!response.ok) throw new Error(data.error || "Gagal terhubung ke layanan AI.");
     
     const aiSummary = data.result || "Hasil AI kosong.";
-    
     updateProgress(100, 'AI Selesai Memproses!');
+    
     const resultContainer = document.getElementById('aiResultContainer');
     const resultTextarea = document.getElementById('aiResultText');
     resultContainer.classList.remove('hidden');
@@ -1704,4 +1583,128 @@ async function executeAIFeatures(toolId) {
     
     alertUser('AI berhasil memproses berkas!', 'success');
     setTimeout(() => hideProgress(), 2000);
+}
+
+// ==========================================
+// AI TRANSLATOR FEATURE (NEW)
+// ==========================================
+
+function renderTranslatorUI() {
+    let container = document.getElementById('translatorContainer');
+    
+    // Jika containernya belum ada, buat baru dan sisipkan setelah dropZone
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'translatorContainer';
+        container.className = 'w-full flex flex-col gap-4 animate-fade-in mt-4';
+        const dropZone = document.getElementById('dropZone');
+        dropZone.parentNode.insertBefore(container, dropZone.nextSibling);
+    }
+    
+    container.classList.remove('hidden');
+
+    // Desain ala Google Translate
+    container.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Kolom Kiri: Input -->
+            <div class="flex flex-col bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm transition-all focus-within:ring-2 focus-within:ring-indigo-500">
+                <div class="p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+                    <select id="trans-source-lang" class="bg-transparent font-bold text-slate-700 dark:text-slate-300 outline-none cursor-pointer">
+                        <option value="Otomatis">Deteksi Bahasa</option>
+                        <option value="Inggris">Inggris</option>
+                        <option value="Indonesia">Indonesia</option>
+                        <option value="Jepang">Jepang</option>
+                        <option value="Korea">Korea</option>
+                        <option value="Mandarin">Mandarin</option>
+                        <option value="Arab">Arab</option>
+                        <option value="Jerman">Jerman</option>
+                        <option value="Spanyol">Spanyol</option>
+                    </select>
+                </div>
+                <textarea id="trans-input" rows="8" placeholder="Ketik atau tempel teks di sini..." class="w-full p-4 bg-transparent outline-none resize-none text-slate-800 dark:text-slate-100 text-lg"></textarea>
+            </div>
+
+            <!-- Kolom Kanan: Output -->
+            <div class="flex flex-col bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
+                <div class="p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 flex justify-between items-center">
+                    <select id="trans-target-lang" class="bg-transparent font-bold text-indigo-600 dark:text-indigo-400 outline-none cursor-pointer">
+                        <option value="Indonesia" selected>Indonesia</option>
+                        <option value="Inggris">Inggris</option>
+                        <option value="Jepang">Jepang</option>
+                        <option value="Korea">Korea</option>
+                        <option value="Mandarin">Mandarin</option>
+                        <option value="Arab">Arab</option>
+                        <option value="Jerman">Jerman</option>
+                        <option value="Spanyol">Spanyol</option>
+                        <option value="Jawa">Jawa (Daerah)</option>
+                        <option value="Sunda">Sunda (Daerah)</option>
+                    </select>
+                    <button onclick="copyTranslation()" class="text-slate-400 hover:text-indigo-500 transition" title="Salin Terjemahan">
+                        <i class="fas fa-copy text-lg"></i>
+                    </button>
+                </div>
+                <textarea id="trans-output" rows="8" readonly placeholder="Hasil terjemahan akan muncul di sini..." class="w-full p-4 bg-transparent outline-none resize-none text-slate-700 dark:text-slate-300 text-lg"></textarea>
+            </div>
+        </div>
+        <div class="flex justify-center mt-4 mb-8">
+            <button id="btn-translate-action" onclick="executeTextTranslation()" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition shadow-lg flex items-center gap-2 transform hover:-translate-y-1">
+                <i class="fas fa-magic"></i> Terjemahkan Sekarang
+            </button>
+        </div>
+    `;
+}
+
+async function executeTextTranslation() {
+    const inputText = document.getElementById('trans-input').value.trim();
+    if (!inputText) return alertUser('Harap masukkan teks yang ingin diterjemahkan.', 'error');
+
+    const sourceLang = document.getElementById('trans-source-lang').value;
+    const targetLang = document.getElementById('trans-target-lang').value;
+
+    const btn = document.getElementById('btn-translate-action');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menerjemahkan...';
+    btn.disabled = true;
+
+    const prompt = `Anda adalah mesin penerjemah profesional. Terjemahkan teks berikut dari bahasa ${sourceLang} ke bahasa ${targetLang}. 
+Aturan ketat: 
+1. Berikan HANYA hasil terjemahannya saja.
+2. Dilarang memberikan pembukaan, penjelasan, atau catatan tambahan.
+3. Pertahankan format paragraf aslinya.
+
+Teks:
+${inputText}`;
+
+    try {
+        const response = await fetch('/api/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text: inputText, 
+                action: 'ask_question', 
+                customPrompt: prompt,
+                fileData: null,
+                mimeType: null
+            })
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Gagal menerjemahkan.");
+
+        document.getElementById('trans-output').value = data.result;
+    } catch (error) {
+        alertUser(error.message, 'error');
+    } finally {
+        btn.innerHTML = '<i class="fas fa-magic"></i> Terjemahkan Sekarang';
+        btn.disabled = false;
+    }
+}
+
+function copyTranslation() {
+    const outputText = document.getElementById('trans-output').value;
+    if(outputText) {
+        navigator.clipboard.writeText(outputText);
+        alertUser('Teks terjemahan berhasil disalin!', 'success');
+    } else {
+        alertUser('Belum ada hasil terjemahan untuk disalin.', 'error');
+    }
 }
