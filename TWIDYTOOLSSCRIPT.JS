@@ -7,7 +7,7 @@ const toolConfig = {
     // === TWIDY ECOSYSTEM ===
     'twidy-bill': { title: 'TwidyBill', desc: 'Generate tagihan siap kirim dalam hitungan detik.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.netlify.app/' },
     'twidy-ai': { title: 'Twidy AI', desc: 'Asisten AI pintar untuk membantu berbagai tugas digital Anda secara langsung.', icon: 'fa-robot', color: 'text-purple-500', isIframe: true, iframeUrl: 'https://twidyai.vercel.app/' },
-    'twidy-translator': { title: 'Twidy Translator', desc: 'Terjemahkan teks ke puluhan bahasa dengan kecerdasan Gemini.', icon: 'fa-language', color: 'text-sky-500', isCustomUI: true },
+    'twidy-translator': { title: 'Twidy Translator', desc: 'Terjemahkan teks dengan AI yang memahami konteks, bahasa sehari-hari, dan berbagai gaya penulisan.', icon: 'fa-language', color: 'text-sky-500', isCustomUI: true },
 
     // === PDF TOOLS ===
     'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop).', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
