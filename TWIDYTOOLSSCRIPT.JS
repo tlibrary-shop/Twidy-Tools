@@ -811,7 +811,7 @@ async function executePdfToImage() {
     updateProgress(30, 'Membaca dokumen PDF...');
     const pdf = await pdfjsLib.getDocument({data: await selectedFiles[0].arrayBuffer()}).promise;
     
-    const imagesData = []; // Array untuk menyimpan data gambar tiap halaman
+    const imagesData = []; 
     
     for(let i=1; i<=pdf.numPages; i++) {
         updateProgress(30 + ((i/pdf.numPages)*50), `Merender halaman ${i} dari ${pdf.numPages}...`);
@@ -822,7 +822,6 @@ async function executePdfToImage() {
         cvs.height = vp.height;
         await page.render({canvasContext: cvs.getContext('2d'), viewport: vp}).promise;
         
-        // Simpan hasil canvas menjadi base64 Data URL
         imagesData.push({
             pageNum: i,
             dataUrl: cvs.toDataURL('image/jpeg', 0.9)
@@ -830,8 +829,6 @@ async function executePdfToImage() {
     }
     
     updateProgress(90, 'Menyiapkan preview...');
-    
-    // Panggil fungsi untuk menampilkan antarmuka preview
     showPdfToImagePreview(imagesData, selectedFiles[0].name);
     
     updateProgress(100, 'Selesai!'); 
@@ -839,7 +836,6 @@ async function executePdfToImage() {
     setTimeout(() => hideProgress(), 2000);
 }
 
-// FUNGSI BARU UNTUK PREVIEW PDF TO IMAGE
 function showPdfToImagePreview(imagesData, originalFileName) {
     let previewContainer = document.getElementById('preview-container');
     if (!previewContainer) {
@@ -855,10 +851,8 @@ function showPdfToImagePreview(imagesData, originalFileName) {
         }
     }
     
-    // Bersihkan kontainer jika sebelumnya ada isinya
     previewContainer.innerHTML = '';
     
-    // === Bagian Header (Judul & Tombol ZIP) ===
     const headerDiv = document.createElement('div');
     headerDiv.className = 'flex flex-col sm:flex-row justify-between items-center mb-6 border-b border-slate-700 pb-4 gap-4';
     
@@ -867,7 +861,6 @@ function showPdfToImagePreview(imagesData, originalFileName) {
     title.className = 'text-lg sm:text-xl font-bold text-white';
     headerDiv.appendChild(title);
     
-    // Tombol Download All (ZIP) HANYA JIKA gambar lebih dari 1
     if (imagesData.length > 1) {
         const btnZip = document.createElement('button');
         btnZip.innerHTML = '<i class="fas fa-file-archive mr-2"></i> Download All (.zip)';
@@ -876,7 +869,6 @@ function showPdfToImagePreview(imagesData, originalFileName) {
             updateProgress(50, 'Membuat file ZIP...');
             const zip = new JSZip();
             imagesData.forEach(img => {
-                // Buang prefix "data:image/jpeg;base64,"
                 const base64Data = img.dataUrl.replace(/^data:image\/jpeg;base64,/, "");
                 zip.file(`Hal_${img.pageNum}.jpg`, base64Data, {base64: true});
             });
@@ -888,9 +880,7 @@ function showPdfToImagePreview(imagesData, originalFileName) {
     }
     previewContainer.appendChild(headerDiv);
     
-    // === Bagian Grid Gambar & Tombol Download Satuan ===
     const gridDiv = document.createElement('div');
-    // Responsive grid: 1 kolom di HP, 2 kolom di tablet, 3/4 kolom di layar besar
     gridDiv.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[60vh] overflow-y-auto no-scrollbar p-2';
     
     imagesData.forEach(img => {
@@ -905,10 +895,7 @@ function showPdfToImagePreview(imagesData, originalFileName) {
         btnDownload.innerHTML = `<i class="fas fa-download mr-1"></i> Hal ${img.pageNum} (JPG)`;
         btnDownload.className = 'w-full px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold text-sm transition shadow';
         btnDownload.onclick = () => {
-            // Konversi dari dataUrl ke blob agar proses download lebih mulus
-            fetch(img.dataUrl)
-                .then(res => res.blob())
-                .then(blob => triggerDownload(blob, `Page_${img.pageNum}_${originalFileName.replace(/\.[^/.]+$/, "")}.jpg`));
+            fetch(img.dataUrl).then(res => res.blob()).then(blob => triggerDownload(blob, `Page_${img.pageNum}_${originalFileName.replace(/\.[^/.]+$/, "")}.jpg`));
         };
         
         card.appendChild(imgEl);
@@ -919,10 +906,7 @@ function showPdfToImagePreview(imagesData, originalFileName) {
     previewContainer.appendChild(gridDiv);
     previewContainer.style.display = 'block';
     
-    // Auto-scroll ke hasil
-    setTimeout(() => {
-        previewContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
+    setTimeout(() => { previewContainer.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100);
 }
 
 async function executeRepairPdf() {
@@ -1589,10 +1573,32 @@ async function executeAIFeatures(toolId) {
 // AI TRANSLATOR FEATURE (NEW)
 // ==========================================
 
+const languageOptionsHTML = `
+    <option value="Inggris">Inggris</option>
+    <option value="Indonesia">Indonesia</option>
+    <option value="Jepang">Jepang</option>
+    <option value="Korea">Korea</option>
+    <option value="Mandarin">Mandarin</option>
+    <option value="Arab">Arab</option>
+    <option value="Jerman">Jerman</option>
+    <option value="Spanyol">Spanyol</option>
+    <option value="Prancis">Prancis</option>
+    <option value="Italia">Italia</option>
+    <option value="Rusia">Rusia</option>
+    <option value="Portugis">Portugis</option>
+    <option value="Belanda">Belanda</option>
+    <option value="Turki">Turki</option>
+    <option value="Hindi">Hindi</option>
+    <option value="Thailand">Thailand</option>
+    <option value="Vietnam">Vietnam</option>
+    <option value="Jawa">Jawa (Daerah)</option>
+    <option value="Sunda">Sunda (Daerah)</option>
+    <option value="Tagalog">Tagalog</option>
+`;
+
 function renderTranslatorUI() {
     let container = document.getElementById('translatorContainer');
     
-    // Jika containernya belum ada, buat baru dan sisipkan setelah dropZone
     if (!container) {
         container = document.createElement('div');
         container.id = 'translatorContainer';
@@ -1603,22 +1609,14 @@ function renderTranslatorUI() {
     
     container.classList.remove('hidden');
 
-    // Desain ala Google Translate
     container.innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Kolom Kiri: Input -->
             <div class="flex flex-col bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm transition-all focus-within:ring-2 focus-within:ring-indigo-500">
                 <div class="p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
-                    <select id="trans-source-lang" class="bg-transparent font-bold text-slate-700 dark:text-slate-300 outline-none cursor-pointer">
+                    <select id="trans-source-lang" class="bg-transparent font-bold text-slate-700 dark:text-slate-300 outline-none cursor-pointer max-w-full">
                         <option value="Otomatis">Deteksi Bahasa</option>
-                        <option value="Inggris">Inggris</option>
-                        <option value="Indonesia">Indonesia</option>
-                        <option value="Jepang">Jepang</option>
-                        <option value="Korea">Korea</option>
-                        <option value="Mandarin">Mandarin</option>
-                        <option value="Arab">Arab</option>
-                        <option value="Jerman">Jerman</option>
-                        <option value="Spanyol">Spanyol</option>
+                        ${languageOptionsHTML}
                     </select>
                 </div>
                 <textarea id="trans-input" rows="8" placeholder="Ketik atau tempel teks di sini..." class="w-full p-4 bg-transparent outline-none resize-none text-slate-800 dark:text-slate-100 text-lg"></textarea>
@@ -1627,17 +1625,9 @@ function renderTranslatorUI() {
             <!-- Kolom Kanan: Output -->
             <div class="flex flex-col bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
                 <div class="p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 flex justify-between items-center">
-                    <select id="trans-target-lang" class="bg-transparent font-bold text-indigo-600 dark:text-indigo-400 outline-none cursor-pointer">
+                    <select id="trans-target-lang" class="bg-transparent font-bold text-indigo-600 dark:text-indigo-400 outline-none cursor-pointer max-w-[80%]">
                         <option value="Indonesia" selected>Indonesia</option>
-                        <option value="Inggris">Inggris</option>
-                        <option value="Jepang">Jepang</option>
-                        <option value="Korea">Korea</option>
-                        <option value="Mandarin">Mandarin</option>
-                        <option value="Arab">Arab</option>
-                        <option value="Jerman">Jerman</option>
-                        <option value="Spanyol">Spanyol</option>
-                        <option value="Jawa">Jawa (Daerah)</option>
-                        <option value="Sunda">Sunda (Daerah)</option>
+                        ${languageOptionsHTML}
                     </select>
                     <button onclick="copyTranslation()" class="text-slate-400 hover:text-indigo-500 transition" title="Salin Terjemahan">
                         <i class="fas fa-copy text-lg"></i>
@@ -1652,6 +1642,26 @@ function renderTranslatorUI() {
             </button>
         </div>
     `;
+
+    // Event Listener: Mengembalikan pilihan teks "Deteksi Bahasa" saat user mengetik teks baru
+    setTimeout(() => {
+        const inputEl = document.getElementById('trans-input');
+        const sourceSel = document.getElementById('trans-source-lang');
+        
+        if(inputEl && sourceSel) {
+            inputEl.addEventListener('input', () => {
+                if(sourceSel.value === 'Otomatis' && sourceSel.options[0].text !== 'Deteksi Bahasa') {
+                    sourceSel.options[0].text = 'Deteksi Bahasa';
+                }
+            });
+
+            sourceSel.addEventListener('change', (e) => {
+                if(e.target.value === 'Otomatis') {
+                    e.target.options[0].text = 'Deteksi Bahasa';
+                }
+            });
+        }
+    }, 100);
 }
 
 async function executeTextTranslation() {
@@ -1665,14 +1675,10 @@ async function executeTextTranslation() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menerjemahkan...';
     btn.disabled = true;
 
-    const prompt = `Anda adalah mesin penerjemah profesional. Terjemahkan teks berikut dari bahasa ${sourceLang} ke bahasa ${targetLang}. 
-Aturan ketat: 
-1. Berikan HANYA hasil terjemahannya saja.
-2. Dilarang memberikan pembukaan, penjelasan, atau catatan tambahan.
-3. Pertahankan format paragraf aslinya.
-
-Teks:
-${inputText}`;
+    // Logika Prompt: Jika otomatis, kita suruh AI memisahkan nama bahasa dan hasilnya.
+    const prompt = sourceLang === 'Otomatis'
+        ? `Tugas Anda sebagai penerjemah profesional: Deteksi bahasa asli dari teks di bawah ini, lalu terjemahkan teks tersebut ke bahasa ${targetLang}. \n\nOutput HANYA boleh menggunakan format persis seperti ini (tanpa penjelasan atau basa-basi tambahan):\n[Nama Bahasa Asli]\n===SPLIT===\n[Hasil Terjemahan]\n\nTeks:\n${inputText}`
+        : `Anda adalah mesin penerjemah profesional. Terjemahkan teks berikut dari bahasa ${sourceLang} ke bahasa ${targetLang}. \nAturan ketat: Berikan HANYA hasil terjemahannya saja. Dilarang memberikan penjelasan, pembukaan, atau catatan tambahan. \n\nTeks:\n${inputText}`;
 
     try {
         const response = await fetch('/api/gemini', {
@@ -1690,7 +1696,22 @@ ${inputText}`;
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Gagal menerjemahkan.");
 
-        document.getElementById('trans-output').value = data.result;
+        let aiOutput = data.result || "";
+
+        // Logika Ekstraksi Format dari Gemini
+        if (sourceLang === 'Otomatis' && aiOutput.includes('===SPLIT===')) {
+            let parts = aiOutput.split('===SPLIT===');
+            let detectedLang = parts[0].replace(/\[|\]/g, '').trim(); 
+            let finalTranslation = parts[1].trim();
+
+            // Ubah teks menu dropdown menjadi dinamis berdasarkan bahasa yang terdeteksi
+            document.getElementById('trans-source-lang').options[0].text = `${detectedLang} - Terdeteksi`;
+            document.getElementById('trans-output').value = finalTranslation;
+        } else {
+            // Hapus pemisah jika kebetulan bocor ke output mode biasa
+            document.getElementById('trans-output').value = aiOutput.replace('===SPLIT===', '').trim();
+        }
+        
     } catch (error) {
         alertUser(error.message, 'error');
     } finally {
