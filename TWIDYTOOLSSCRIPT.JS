@@ -1071,7 +1071,7 @@ async function compressImageToLimit(file, limitMB) {
             let height = img.height;
 
             // Batasi ukuran awal maksimal 1920px
-            const MAX_SIZE = 1920;
+            const MAX_SIZE = 1200;
             if (width > MAX_SIZE || height > MAX_SIZE) {
                 const ratio = Math.min(MAX_SIZE / width, MAX_SIZE / height);
                 width = Math.round(width * ratio);
