@@ -795,17 +795,121 @@ async function executeImageToPdf() {
     triggerDownload(new Blob([await outPdf.save()], {type: 'application/pdf'}), 'Twidy_Images.pdf');
 }
 async function executePdfToImage() {
-    updateProgress(50, 'Render gambar...');
+    updateProgress(30, 'Membaca dokumen PDF...');
     const pdf = await pdfjsLib.getDocument({data: await selectedFiles[0].arrayBuffer()}).promise;
-    const zip = new JSZip();
+    
+    const imagesData = []; // Array untuk menyimpan data gambar tiap halaman
+    
     for(let i=1; i<=pdf.numPages; i++) {
-        const page = await pdf.getPage(i); const vp = page.getViewport({scale: 1.5});
-        const cvs = document.createElement('canvas'); cvs.width = vp.width; cvs.height = vp.height;
+        updateProgress(30 + ((i/pdf.numPages)*50), `Merender halaman ${i} dari ${pdf.numPages}...`);
+        const page = await pdf.getPage(i); 
+        const vp = page.getViewport({scale: 1.5});
+        const cvs = document.createElement('canvas'); 
+        cvs.width = vp.width; 
+        cvs.height = vp.height;
         await page.render({canvasContext: cvs.getContext('2d'), viewport: vp}).promise;
-        zip.file(`Page_${i}.jpg`, cvs.toDataURL('image/jpeg').replace(/^data:image\/jpeg;base64,/, ""), {base64: true});
+        
+        // Simpan hasil canvas menjadi base64 Data URL
+        imagesData.push({
+            pageNum: i,
+            dataUrl: cvs.toDataURL('image/jpeg', 0.9)
+        });
     }
-    updateProgress(100, 'Selesai!'); alertUser('Berhasil!', 'success'); setTimeout(() => hideProgress(), 2000);
-    triggerDownload(await zip.generateAsync({type: 'blob'}), 'Twidy_Images.zip');
+    
+    updateProgress(90, 'Menyiapkan preview...');
+    
+    // Panggil fungsi untuk menampilkan antarmuka preview
+    showPdfToImagePreview(imagesData, selectedFiles[0].name);
+    
+    updateProgress(100, 'Selesai!'); 
+    alertUser('Berhasil merender gambar!', 'success'); 
+    setTimeout(() => hideProgress(), 2000);
+}
+
+// FUNGSI BARU UNTUK PREVIEW PDF TO IMAGE
+function showPdfToImagePreview(imagesData, originalFileName) {
+    let previewContainer = document.getElementById('preview-container');
+    if (!previewContainer) {
+        previewContainer = document.createElement('div');
+        previewContainer.id = 'preview-container';
+        previewContainer.className = 'mt-6 p-4 sm:p-6 bg-slate-800 rounded-xl border border-slate-700 animate-fade-in mx-auto w-full';
+        
+        const fileListContainer = document.getElementById('fileList') || document.querySelector('.main-work-area');
+        if(fileListContainer && fileListContainer.parentNode) {
+            fileListContainer.parentNode.insertBefore(previewContainer, fileListContainer);
+        } else {
+            document.body.appendChild(previewContainer);
+        }
+    }
+    
+    // Bersihkan kontainer jika sebelumnya ada isinya
+    previewContainer.innerHTML = '';
+    
+    // === Bagian Header (Judul & Tombol ZIP) ===
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'flex flex-col sm:flex-row justify-between items-center mb-6 border-b border-slate-700 pb-4 gap-4';
+    
+    const title = document.createElement('h3');
+    title.innerHTML = '<i class="fas fa-images text-yellow-500 mr-2"></i> Hasil PDF to Image';
+    title.className = 'text-lg sm:text-xl font-bold text-white';
+    headerDiv.appendChild(title);
+    
+    // Tombol Download All (ZIP) HANYA JIKA gambar lebih dari 1
+    if (imagesData.length > 1) {
+        const btnZip = document.createElement('button');
+        btnZip.innerHTML = '<i class="fas fa-file-archive mr-2"></i> Download All (.zip)';
+        btnZip.className = 'w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-lg font-bold transition transform hover:scale-105 shadow-lg';
+        btnZip.onclick = async () => {
+            updateProgress(50, 'Membuat file ZIP...');
+            const zip = new JSZip();
+            imagesData.forEach(img => {
+                // Buang prefix "data:image/jpeg;base64,"
+                const base64Data = img.dataUrl.replace(/^data:image\/jpeg;base64,/, "");
+                zip.file(`Hal_${img.pageNum}.jpg`, base64Data, {base64: true});
+            });
+            const blob = await zip.generateAsync({type: 'blob'});
+            triggerDownload(blob, `TwidyTools_Images_${originalFileName.replace(/\.[^/.]+$/, "")}.zip`);
+            hideProgress();
+        };
+        headerDiv.appendChild(btnZip);
+    }
+    previewContainer.appendChild(headerDiv);
+    
+    // === Bagian Grid Gambar & Tombol Download Satuan ===
+    const gridDiv = document.createElement('div');
+    // Responsive grid: 1 kolom di HP, 2 kolom di tablet, 3/4 kolom di layar besar
+    gridDiv.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[60vh] overflow-y-auto no-scrollbar p-2';
+    
+    imagesData.forEach(img => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-700 p-3 rounded-xl flex flex-col items-center shadow-md hover:shadow-lg transition border border-slate-600 hover:border-indigo-500 group';
+        
+        const imgEl = document.createElement('img');
+        imgEl.src = img.dataUrl;
+        imgEl.className = 'w-full h-48 object-contain mb-3 bg-slate-900 rounded-lg group-hover:scale-105 transition-transform duration-300';
+        
+        const btnDownload = document.createElement('button');
+        btnDownload.innerHTML = `<i class="fas fa-download mr-1"></i> Hal ${img.pageNum} (JPG)`;
+        btnDownload.className = 'w-full px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold text-sm transition shadow';
+        btnDownload.onclick = () => {
+            // Konversi dari dataUrl ke blob agar proses download lebih mulus
+            fetch(img.dataUrl)
+                .then(res => res.blob())
+                .then(blob => triggerDownload(blob, `Page_${img.pageNum}_${originalFileName.replace(/\.[^/.]+$/, "")}.jpg`));
+        };
+        
+        card.appendChild(imgEl);
+        card.appendChild(btnDownload);
+        gridDiv.appendChild(card);
+    });
+    
+    previewContainer.appendChild(gridDiv);
+    previewContainer.style.display = 'block';
+    
+    // Auto-scroll ke hasil
+    setTimeout(() => {
+        previewContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
 }
 async function executeRepairPdf() {
     updateProgress(50, 'Memulihkan struktur dokumen...');
