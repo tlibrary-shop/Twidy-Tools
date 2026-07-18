@@ -75,6 +75,8 @@ const toolConfig = {
     'heic-to-jpg': { title: 'HEIC ↔ JPG', desc: 'Konversi foto HEIC.', icon: 'fa-exchange-alt', color: 'text-red-500', accept: '.heic,.jpg,.jpeg', multi: false },
     'webp-to-png': { title: 'WEBP ↔ PNG', desc: 'Konversi WEBP.', icon: 'fa-exchange-alt', color: 'text-cyan-500', accept: '.webp,.png', multi: false },
     'svg-to-png': { title: 'SVG ↔ PNG', desc: 'Ubah vektor SVG.', icon: 'fa-exchange-alt', color: 'text-rose-500', accept: '.svg,.png', multi: false },
+    
+    'qr-generator': { title: 'QR Generator', desc: 'Buat QR Code dari teks atau link dengan cepat.', icon: 'fa-qrcode', color: 'text-indigo-500', isCustomUI: true },
 
     // IMAGE AI
     'ai-upscale-image': { title: 'Upscale Image', desc: 'Membutuhkan Model Ekstra.', icon: 'fa-magic', color: 'text-slate-400', accept: 'image/*', multi: false },
@@ -117,7 +119,7 @@ const categories = {
     'PDF SECURITY': ['pdf-unlock', 'pdf-protect', 'sign-pdf', 'redact-pdf', 'compare-pdf'],
     'PDF INTELLIGENCE': ['ai-summarizer', 'translate-pdf', 'ai-proofread', 'ai-extract', 'ai-quiz', 'ai-sentiment', 'ai-chat', 'pdf-to-markdown'],
     
-    'IMAGE TOOLS': ['image-resize', 'image-compress', 'image-crop', 'image-rotate', 'image-flip', 'image-remove-bg', 'image-blur-face', 'image-watermark', 'image-to-ico', 'ico-to-png', 'avif-to-png', 'heic-to-jpg', 'webp-to-png', 'svg-to-png'],
+    'IMAGE TOOLS': ['image-resize', 'image-compress', 'image-crop', 'image-rotate', 'image-flip', 'image-remove-bg', 'image-blur-face', 'image-watermark', 'image-to-ico', 'ico-to-png', 'avif-to-png', 'heic-to-jpg', 'webp-to-png', 'svg-to-png', 'qr-generator'],
     'IMAGE AI': ['ai-upscale-image', 'ai-colorize-bw', 'ai-remove-object', 'ai-image-caption'],
     'VIDEO TOOLS': ['video-compress', 'video-trim', 'video-rotate', 'video-speed', 'video-to-audio', 'video-remove-audio', 'video-merge', 'video-extract-frames', 'video-to-gif', 'gif-to-mp4'],
     'AUDIO TOOLS': ['audio-convert', 'audio-trim', 'audio-merge', 'audio-volume', 'audio-noise-reduction', 'audio-speed'],
@@ -226,18 +228,27 @@ function selectTool(toolId) {
     const actionBtnArea = document.getElementById('actionButtons');
 
     let transContainer = document.getElementById('translatorContainer');
+    let qrContainer = document.getElementById('qrGeneratorContainer');
 
     if (config.isIframe) {
         dropZone.classList.add('hidden'); settingsPanel.classList.add('hidden'); fileListArea.classList.add('hidden'); actionBtnArea.classList.add('hidden');
         if (transContainer) transContainer.classList.add('hidden');
+        if (qrContainer) qrContainer.classList.add('hidden');
         iframeContainer.classList.remove('hidden'); appIframe.src = config.iframeUrl; 
     } else if (config.isCustomUI && currentTool === 'twidy-translator') {
         iframeContainer.classList.add('hidden'); appIframe.src = '';
         dropZone.classList.add('hidden'); settingsPanel.classList.add('hidden'); fileListArea.classList.add('hidden'); actionBtnArea.classList.add('hidden');
+        if (qrContainer) qrContainer.classList.add('hidden');
         renderTranslatorUI();
+    } else if (config.isCustomUI && currentTool === 'qr-generator') {
+        iframeContainer.classList.add('hidden'); appIframe.src = '';
+        dropZone.classList.add('hidden'); settingsPanel.classList.add('hidden'); fileListArea.classList.add('hidden'); actionBtnArea.classList.add('hidden');
+        if (transContainer) transContainer.classList.add('hidden');
+        renderQrGeneratorUI();
     } else {
         iframeContainer.classList.add('hidden'); appIframe.src = ''; 
         if (transContainer) transContainer.classList.add('hidden');
+        if (qrContainer) qrContainer.classList.add('hidden');
         dropZone.classList.remove('hidden'); fileListArea.classList.remove('hidden');
         
         const fInput = document.getElementById('fileInput');
@@ -278,6 +289,9 @@ function goBack() {
     
     const transContainer = document.getElementById('translatorContainer');
     if (transContainer) transContainer.classList.add('hidden');
+
+    const qrContainer = document.getElementById('qrGeneratorContainer');
+    if (qrContainer) qrContainer.classList.add('hidden');
     
     clearFiles();
     if (window.innerWidth < 768) {
@@ -1570,7 +1584,7 @@ async function executeAIFeatures(toolId) {
 }
 
 // ==========================================
-// AI TRANSLATOR FEATURE (NEW)
+// AI TRANSLATOR FEATURE 
 // ==========================================
 
 const languageOptionsHTML = `
@@ -1728,4 +1742,64 @@ function copyTranslation() {
     } else {
         alertUser('Belum ada hasil terjemahan untuk disalin.', 'error');
     }
+}
+
+// ==========================================
+// NEW FEATURE: QR GENERATOR 
+// ==========================================
+
+function renderQrGeneratorUI() {
+    let container = document.getElementById('qrGeneratorContainer');
+    
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'qrGeneratorContainer';
+        container.className = 'w-full flex flex-col gap-4 animate-fade-in mt-4 items-center';
+        const dropZone = document.getElementById('dropZone');
+        dropZone.parentNode.insertBefore(container, dropZone.nextSibling);
+    }
+    
+    container.classList.remove('hidden');
+
+    container.innerHTML = `
+        <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
+            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Masukkan Teks atau URL</label>
+            <textarea id="qr-input" rows="3" placeholder="Contoh: https://google.com" class="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500 mb-4"></textarea>
+            <button onclick="generateQrCode()" class="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition shadow-lg flex items-center justify-center gap-2 transform hover:-translate-y-1">
+                <i class="fas fa-qrcode"></i> Buat QR Code
+            </button>
+            
+            <div id="qr-output" class="mt-6 flex flex-col items-center hidden animate-fade-in">
+                <canvas id="qr-canvas" class="border p-2 bg-white rounded-lg shadow-sm mb-4"></canvas>
+                <button onclick="downloadQrCode()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition shadow-lg flex items-center gap-2">
+                    <i class="fas fa-download"></i> Unduh QR Code
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function generateQrCode() {
+    const input = document.getElementById('qr-input').value.trim();
+    if (!input) return alertUser('Harap masukkan teks atau URL terlebih dahulu.', 'error');
+    
+    const outputDiv = document.getElementById('qr-output');
+    outputDiv.classList.remove('hidden');
+    
+    const canvas = document.getElementById('qr-canvas');
+    new QRious({
+        element: canvas,
+        value: input,
+        size: 250,
+        level: 'H'
+    });
+    
+    alertUser('QR Code berhasil dibuat!', 'success');
+}
+
+function downloadQrCode() {
+    const canvas = document.getElementById('qr-canvas');
+    canvas.toBlob(function(blob) {
+        triggerDownload(blob, 'Twidy_QRCode.png');
+    });
 }
