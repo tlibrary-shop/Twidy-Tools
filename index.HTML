@@ -23,6 +23,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Tambahan Library FFmpeg untuk Converter Media Tingkat Lanjut -->
     <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+    <!-- Tambahan Library QRious untuk merender QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     
     <style>
         .sidebar-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -162,6 +164,8 @@
                         <button onclick="selectTool('heic-to-jpg')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-exchange-alt text-red-500 w-5"></i> HEIC ↔ JPG</button>
                         <button onclick="selectTool('webp-to-png')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-exchange-alt text-cyan-500 w-5"></i> WEBP ↔ PNG</button>
                         <button onclick="selectTool('svg-to-png')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left"><i class="fas fa-exchange-alt text-rose-500 w-5"></i> SVG ↔ PNG</button>
+                        <!-- QR Generator Ditambahkan Di Sini -->
+                        <button onclick="selectTool('qr-generator')" class="w-full flex items-center gap-3 px-3 py-1.5 text-sm rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-left font-bold text-indigo-600 dark:text-indigo-400"><i class="fas fa-qrcode text-indigo-500 w-5"></i> QR Generator</button>
                     </div>
                 </div>
 
