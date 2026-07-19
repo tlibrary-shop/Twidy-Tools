@@ -101,7 +101,7 @@ const toolConfig = {
     'audio-convert': { title: 'Convert Audio', desc: 'Ubah format jadi mp3.', icon: 'fa-exchange-alt', color: 'text-blue-500', accept: 'audio/*', multi: false },
     'audio-trim': { title: 'Trim Audio', desc: 'Potong bagian lagu.', icon: 'fa-cut', color: 'text-red-500', accept: 'audio/*', multi: false, settings: [{ id: 'aud-trim-start', label: 'Waktu Mulai (Detik)', type: 'number', placeholder: '0' }, { id: 'aud-trim-dur', label: 'Durasi Potongan (Detik)', type: 'number', placeholder: '15' }] },
     'audio-merge': { title: 'Merge Audio', desc: 'Gabungkan lagu secara seri.', icon: 'fa-object-group', color: 'text-green-500', accept: 'audio/*', multi: true },
-    'audio-volume': { title: 'Volume Booster', desc: 'Keraskan volume lagu.', icon: 'fa-volume-up', color: 'text-amber-500', accept: 'audio/*', multi: false, settings: [{ id: 'aud-vol', label: 'Pengali Volume (Contoh: 2 = 200%)', type: 'number', placeholder: '2' }] },
+    'audio-volume': { title: 'Volume Booster', desc: 'Keraskan volume volume lagu.', icon: 'fa-volume-up', color: 'text-amber-500', accept: 'audio/*', multi: false, settings: [{ id: 'aud-vol', label: 'Pengali Volume (Contoh: 2 = 200%)', type: 'number', placeholder: '2' }] },
     'audio-noise-reduction': { title: 'Noise Reduction', desc: 'Kurangi bising latar belakang.', icon: 'fa-wave-square', color: 'text-indigo-500', accept: 'audio/*', multi: false },
     'audio-speed': { title: 'Audio Speed', desc: 'Percepat tempo lagu.', icon: 'fa-forward', color: 'text-teal-500', accept: 'audio/*', multi: false, settings: [{ id: 'aud-speed', label: 'Kecepatan (Contoh: 1.5)', type: 'number', placeholder: '1.5' }] },
 
@@ -1894,8 +1894,8 @@ function playBreakRoomGame(gameId, gameTitle) {
     document.getElementById('breakRoomPlayer').classList.add('flex');
     document.getElementById('playingGameTitle').innerHTML = `<i class="fas fa-gamepad mr-2 text-indigo-500"></i> ${gameTitle}`;
     
-    // Iframe src akan menuju ke root /games/Nama-Folder/ sesuai instruksi
-    document.getElementById('gameIframe').src = `/games/${gameId}/`;
+    // PERBAIKAN: Menambahkan /index.html secara eksplisit agar Vercel/server tidak merespons 404
+    document.getElementById('gameIframe').src = `/games/${gameId}/index.html`;
 }
 
 function closeBreakRoomGame() {
