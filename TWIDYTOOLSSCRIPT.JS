@@ -101,7 +101,7 @@ const toolConfig = {
     'audio-convert': { title: 'Convert Audio', desc: 'Ubah format jadi mp3.', icon: 'fa-exchange-alt', color: 'text-blue-500', accept: 'audio/*', multi: false },
     'audio-trim': { title: 'Trim Audio', desc: 'Potong bagian lagu.', icon: 'fa-cut', color: 'text-red-500', accept: 'audio/*', multi: false, settings: [{ id: 'aud-trim-start', label: 'Waktu Mulai (Detik)', type: 'number', placeholder: '0' }, { id: 'aud-trim-dur', label: 'Durasi Potongan (Detik)', type: 'number', placeholder: '15' }] },
     'audio-merge': { title: 'Merge Audio', desc: 'Gabungkan lagu secara seri.', icon: 'fa-object-group', color: 'text-green-500', accept: 'audio/*', multi: true },
-    'audio-volume': { title: 'Volume Booster', desc: 'Keraskan volume volume lagu.', icon: 'fa-volume-up', color: 'text-amber-500', accept: 'audio/*', multi: false, settings: [{ id: 'aud-vol', label: 'Pengali Volume (Contoh: 2 = 200%)', type: 'number', placeholder: '2' }] },
+    'audio-volume': { title: 'Volume Booster', desc: 'Keraskan volume lagu.', icon: 'fa-volume-up', color: 'text-amber-500', accept: 'audio/*', multi: false, settings: [{ id: 'aud-vol', label: 'Pengali Volume (Contoh: 2 = 200%)', type: 'number', placeholder: '2' }] },
     'audio-noise-reduction': { title: 'Noise Reduction', desc: 'Kurangi bising latar belakang.', icon: 'fa-wave-square', color: 'text-indigo-500', accept: 'audio/*', multi: false },
     'audio-speed': { title: 'Audio Speed', desc: 'Percepat tempo lagu.', icon: 'fa-forward', color: 'text-teal-500', accept: 'audio/*', multi: false, settings: [{ id: 'aud-speed', label: 'Kecepatan (Contoh: 1.5)', type: 'number', placeholder: '1.5' }] },
 
@@ -232,7 +232,6 @@ function selectTool(toolId) {
     let qrContainer = document.getElementById('qrGeneratorContainer');
     let breakRoomContainer = document.getElementById('breakRoomContainer');
 
-    // Sembunyikan container khusus setiap kali mengganti tool
     if (breakRoomContainer) breakRoomContainer.classList.add('hidden');
     if (transContainer) transContainer.classList.add('hidden');
     if (qrContainer) qrContainer.classList.add('hidden');
@@ -301,7 +300,6 @@ function goBack() {
     const breakRoomContainer = document.getElementById('breakRoomContainer');
     if (breakRoomContainer) breakRoomContainer.classList.add('hidden');
     
-    // Pastikan iframe internal game juga berhenti berjalan ketika ditekan tombol kembali
     const gameIframe = document.getElementById('gameIframe');
     if (gameIframe) gameIframe.src = '';
     
@@ -484,7 +482,6 @@ async function processFiles() {
         else if (currentTool === 'compare-pdf') { await executeComparePdf(); }
         else if (currentTool === 'pdf-to-markdown') { await executePdfToMarkdown(); }
 
-        // --- IMAGE, VIDEO, AUDIO TOOLS ---
         else if (currentTool === 'image-crop') { await executeImageCrop(); }
         else if (currentTool === 'image-remove-bg') { await executeRemoveBgAPI(); }
         else if (currentTool.startsWith('image-') || currentTool.includes('-to-png') || currentTool.includes('-to-jpg') || currentTool === 'image-to-ico') {
@@ -1669,7 +1666,6 @@ function renderTranslatorUI() {
         </div>
     `;
 
-    // Event Listener: Mengembalikan pilihan teks "Deteksi Bahasa" saat user mengetik teks baru
     setTimeout(() => {
         const inputEl = document.getElementById('trans-input');
         const sourceSel = document.getElementById('trans-source-lang');
@@ -1701,7 +1697,6 @@ async function executeTextTranslation() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menerjemahkan...';
     btn.disabled = true;
 
-    // Logika Prompt: Jika otomatis, kita suruh AI memisahkan nama bahasa dan hasilnya.
     const prompt = sourceLang === 'Otomatis'
         ? `Tugas Anda sebagai penerjemah profesional: Deteksi bahasa asli dari teks di bawah ini, lalu terjemahkan teks tersebut ke bahasa ${targetLang}. \n\nOutput HANYA boleh menggunakan format persis seperti ini (tanpa penjelasan atau basa-basi tambahan):\n[Nama Bahasa Asli]\n===SPLIT===\n[Hasil Terjemahan]\n\nTeks:\n${inputText}`
         : `Anda adalah mesin penerjemah profesional. Terjemahkan teks berikut dari bahasa ${sourceLang} ke bahasa ${targetLang}. \nAturan ketat: Berikan HANYA hasil terjemahannya saja. Dilarang memberikan penjelasan, pembukaan, atau catatan tambahan. \n\nTeks:\n${inputText}`;
@@ -1724,17 +1719,14 @@ async function executeTextTranslation() {
 
         let aiOutput = data.result || "";
 
-        // Logika Ekstraksi Format dari Gemini
         if (sourceLang === 'Otomatis' && aiOutput.includes('===SPLIT===')) {
             let parts = aiOutput.split('===SPLIT===');
             let detectedLang = parts[0].replace(/\[|\]/g, '').trim(); 
             let finalTranslation = parts[1].trim();
 
-            // Ubah teks menu dropdown menjadi dinamis berdasarkan bahasa yang terdeteksi
             document.getElementById('trans-source-lang').options[0].text = `${detectedLang} - Terdeteksi`;
             document.getElementById('trans-output').value = finalTranslation;
         } else {
-            // Hapus pemisah jika kebetulan bocor ke output mode biasa
             document.getElementById('trans-output').value = aiOutput.replace('===SPLIT===', '').trim();
         }
         
@@ -1820,8 +1812,6 @@ function downloadQrCode() {
 // NEW FEATURE: TWIDY BREAK ROOM
 // ==========================================
 
-// Anda hanya perlu menambahkan object baru ke array ini untuk menambah daftar game.
-// Path otomatis mengambil dari /games/{id}/
 const breakRoomGames = [
     { 
         id: 'Flappy-Bird', 
@@ -1882,7 +1872,8 @@ function renderBreakRoomUI() {
                     <i class="fas fa-circle-notch fa-spin text-4xl text-indigo-300 mb-2"></i>
                     <p class="text-sm text-slate-400 font-medium">Memuat Game...</p>
                 </div>
-                <iframe id="gameIframe" src="" class="w-full h-full border-0 relative z-10 rounded-xl" loading="lazy" allow="autoplay; fullscreen"></iframe>
+                <!-- PERHATIAN PADA BAGIAN INI: Penambahan scrolling="no" dan style touch-action -->
+                <iframe id="gameIframe" src="" class="w-full h-full border-0 relative z-10 rounded-xl" scrolling="no" loading="lazy" allow="autoplay; fullscreen" style="touch-action: none;"></iframe>
             </div>
         </div>
     `;
@@ -1894,7 +1885,6 @@ function playBreakRoomGame(gameId, gameTitle) {
     document.getElementById('breakRoomPlayer').classList.add('flex');
     document.getElementById('playingGameTitle').innerHTML = `<i class="fas fa-gamepad mr-2 text-indigo-500"></i> ${gameTitle}`;
     
-    // PERBAIKAN: Menambahkan /index.html secara eksplisit agar Vercel/server tidak merespons 404
     document.getElementById('gameIframe').src = `/games/${gameId}/index.html`;
 }
 
