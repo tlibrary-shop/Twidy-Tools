@@ -1,5 +1,5 @@
 var ctx = myCanvas.getContext("2d");
-var FPS = 40;
+var FPS = 60; // Ditingkatkan dari 40 menjadi 60 agar pergerakan mulus
 var jump_amount = -10;
 var max_fall_speed = +10;
 var acceleration = 1;
@@ -69,6 +69,7 @@ function Got_Player_Input(MyEvent) {
 addEventListener("touchstart", Got_Player_Input);
 addEventListener("mousedown", Got_Player_Input);
 addEventListener("keydown", Got_Player_Input);
+
 function make_bird_slow_and_fall() {
   if (bird.velocity_y < max_fall_speed) {
     bird.velocity_y = bird.velocity_y + acceleration;
@@ -98,6 +99,7 @@ function add_pipe(x_pos, top_of_gap, gap_width) {
   bottom_pipe.velocity_x = pipe_speed;
   pipes.push(bottom_pipe);
 }
+
 function make_bird_tilt_appropriately() {
   if (bird.velocity_y < 0) {
     bird.angle = -15;
@@ -105,15 +107,18 @@ function make_bird_tilt_appropriately() {
     bird.angle = bird.angle + 4;
   }
 }
+
 function show_the_pipes() {
   for (var i = 0; i < pipes.length; i++) {
     pipes[i].Do_Frame_Things();
   }
 }
+
 function check_for_end_game() {
   for (var i = 0; i < pipes.length; i++)
     if (ImagesTouching(bird, pipes[i])) game_mode = "over";
 }
+
 function display_intro_instructions() {
   ctx.font = "25px Arial";
   ctx.fillStyle = "red";
@@ -124,6 +129,7 @@ function display_intro_instructions() {
     myCanvas.height / 4
   );
 }
+
 function display_game_over() {
   var score = 0;
   for (var i = 0; i < pipes.length; i++)
@@ -136,6 +142,7 @@ function display_game_over() {
   ctx.font = "20px Arial";
   ctx.fillText("Click, touch, or press to play again", myCanvas.width / 2, 300);
 }
+
 function display_bar_running_along_bottom() {
   if (bottom_bar_offset < -23) bottom_bar_offset = 0;
   ctx.drawImage(
@@ -144,12 +151,14 @@ function display_bar_running_along_bottom() {
     myCanvas.height - bottom_bar.height
   );
 }
+
 function reset_game() {
   bird.y = myCanvas.height / 2;
   bird.angle = 0;
-  pipes = []; // erase all the pipes from the array
-  add_all_my_pipes(); // and load them back in their starting positions
+  pipes = []; 
+  add_all_my_pipes(); 
 }
+
 function add_all_my_pipes() {
   add_pipe(500, 100, 140);
   add_pipe(800, 50, 140);
@@ -169,9 +178,11 @@ function add_all_my_pipes() {
   finish_line.velocity_x = pipe_speed;
   pipes.push(finish_line);
 }
+
 var pipe_piece = new Image();
 pipe_piece.onload = add_all_my_pipes;
 pipe_piece.src = "http://s2js.com/img/etc/flappypipe.png";
+
 function Do_a_Frame() {
   ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);
   bird.Do_Frame_Things();
@@ -197,6 +208,7 @@ function Do_a_Frame() {
     }
   }
 }
+
 var bottom_bar = new Image();
 bottom_bar.src = "http://s2js.com/img/etc/flappybottom.png";
 
@@ -204,4 +216,18 @@ var bird = new MySprite("http://s2js.com/img/etc/flappybird.png");
 bird.x = myCanvas.width / 3;
 bird.y = myCanvas.height / 2;
 
-setInterval(Do_a_Frame, 1000 / FPS);
+// IMPLEMENTASI REQUEST ANIMATION FRAME AGAR SMOOTH
+var fpsInterval = 1000 / FPS;
+var then = Date.now();
+
+function gameLoop() {
+    requestAnimationFrame(gameLoop);
+    var now = Date.now();
+    var elapsed = now - then;
+    
+    if (elapsed > fpsInterval) {
+        then = now - (elapsed % fpsInterval);
+        Do_a_Frame();
+    }
+}
+gameLoop();
