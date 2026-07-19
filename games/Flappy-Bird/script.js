@@ -147,8 +147,8 @@ function display_bar_running_along_bottom() {
 function reset_game() {
   bird.y = myCanvas.height / 2;
   bird.angle = 0;
-  pipes = []; 
-  add_all_my_pipes(); 
+  pipes = []; // erase all the pipes from the array
+  add_all_my_pipes(); // and load them back in their starting positions
 }
 function add_all_my_pipes() {
   add_pipe(500, 100, 140);
