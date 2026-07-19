@@ -1,27 +1,22 @@
-body {
-  font-family: "Pacifico", sans-serif;
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Mencegah layar ter-scroll saat main */
+  touch-action: none; /* Mencegah aksi zoom double-tap bawaan browser HP */
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  margin: 0;
-  /* Mencegah layar ikut ter-scroll ke atas/bawah saat main di HP */
-  overflow: hidden; 
-  /* Memberi warna latar belakang senada jika layar lebih besar dari canvas */
-  background-color: #70c5ce; 
+  background-color: #70c5ce;
 }
 
 canvas {
-  /* KUNCI UTAMA: Membuat kanvas mengecil otomatis di layar HP tanpa mengubah script */
-  max-width: 100%;
+  width: 100% !important; /* Memaksa lebar 100% dari kontainer */
+  height: auto !important; /* Tinggi akan menyesuaikan agar gambar tidak gepeng */
   max-height: 100vh;
-  
-  /* Menjaga agar rasio gambar tidak gepeng */
-  object-fit: contain; 
-  
-  /* Mencegah browser HP melakukan double-tap zoom atau pull-to-refresh saat user tap layar */
-  touch-action: none; 
-  
+  object-fit: contain;
+  touch-action: none; /* Kunci sentuhan khusus pada canvas */
   border-radius: 8px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
