@@ -8,6 +8,7 @@ const toolConfig = {
     'twidy-bill': { title: 'TwidyBill', desc: 'Generate tagihan siap kirim dalam hitungan detik.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.netlify.app/' },
     'twidy-ai': { title: 'Twidy AI', desc: 'Asisten AI pintar untuk membantu berbagai tugas digital Anda secara langsung.', icon: 'fa-robot', color: 'text-purple-500', isIframe: true, iframeUrl: 'https://twidyai.vercel.app/' },
     'twidy-translator': { title: 'Twidy Translator', desc: 'Terjemahkan teks dengan AI yang memahami konteks, bahasa sehari-hari, dan berbagai gaya penulisan.', icon: 'fa-language', color: 'text-sky-500', isCustomUI: true },
+    'twidy-break-room': { title: 'Twidy Break Room', desc: 'Istirahat sejenak dengan mini games dan hiburan ringan sebelum kembali bekerja.', icon: 'fa-coffee', color: 'text-amber-700', isCustomUI: true },
 
     // === PDF TOOLS ===
     'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop).', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
@@ -110,7 +111,7 @@ const toolConfig = {
 };
 
 const categories = {
-    'TWIDY ECOSYSTEM': ['twidy-bill', 'twidy-ai', 'twidy-translator'],
+    'TWIDY ECOSYSTEM': ['twidy-bill', 'twidy-ai', 'twidy-translator', 'twidy-break-room'],
     'ORGANIZE PDF': ['pdf-merge', 'pdf-split', 'remove-pages', 'extract-pages', 'organize-pdf', 'scan-to-pdf'],
     'OPTIMIZE PDF': ['pdf-compress', 'repair-pdf', 'ocr-pdf'],
     'CONVERT TO PDF': ['image-to-pdf', 'word-to-pdf', 'ppt-to-pdf', 'excel-to-pdf', 'html-to-pdf', 'txt-to-pdf', 'rtf-to-pdf'],
@@ -229,26 +230,30 @@ function selectTool(toolId) {
 
     let transContainer = document.getElementById('translatorContainer');
     let qrContainer = document.getElementById('qrGeneratorContainer');
+    let breakRoomContainer = document.getElementById('breakRoomContainer');
+
+    // Sembunyikan container khusus setiap kali mengganti tool
+    if (breakRoomContainer) breakRoomContainer.classList.add('hidden');
+    if (transContainer) transContainer.classList.add('hidden');
+    if (qrContainer) qrContainer.classList.add('hidden');
 
     if (config.isIframe) {
         dropZone.classList.add('hidden'); settingsPanel.classList.add('hidden'); fileListArea.classList.add('hidden'); actionBtnArea.classList.add('hidden');
-        if (transContainer) transContainer.classList.add('hidden');
-        if (qrContainer) qrContainer.classList.add('hidden');
         iframeContainer.classList.remove('hidden'); appIframe.src = config.iframeUrl; 
     } else if (config.isCustomUI && currentTool === 'twidy-translator') {
         iframeContainer.classList.add('hidden'); appIframe.src = '';
         dropZone.classList.add('hidden'); settingsPanel.classList.add('hidden'); fileListArea.classList.add('hidden'); actionBtnArea.classList.add('hidden');
-        if (qrContainer) qrContainer.classList.add('hidden');
         renderTranslatorUI();
     } else if (config.isCustomUI && currentTool === 'qr-generator') {
         iframeContainer.classList.add('hidden'); appIframe.src = '';
         dropZone.classList.add('hidden'); settingsPanel.classList.add('hidden'); fileListArea.classList.add('hidden'); actionBtnArea.classList.add('hidden');
-        if (transContainer) transContainer.classList.add('hidden');
         renderQrGeneratorUI();
+    } else if (config.isCustomUI && currentTool === 'twidy-break-room') {
+        iframeContainer.classList.add('hidden'); appIframe.src = '';
+        dropZone.classList.add('hidden'); settingsPanel.classList.add('hidden'); fileListArea.classList.add('hidden'); actionBtnArea.classList.add('hidden');
+        renderBreakRoomUI();
     } else {
         iframeContainer.classList.add('hidden'); appIframe.src = ''; 
-        if (transContainer) transContainer.classList.add('hidden');
-        if (qrContainer) qrContainer.classList.add('hidden');
         dropZone.classList.remove('hidden'); fileListArea.classList.remove('hidden');
         
         const fInput = document.getElementById('fileInput');
@@ -292,6 +297,13 @@ function goBack() {
 
     const qrContainer = document.getElementById('qrGeneratorContainer');
     if (qrContainer) qrContainer.classList.add('hidden');
+    
+    const breakRoomContainer = document.getElementById('breakRoomContainer');
+    if (breakRoomContainer) breakRoomContainer.classList.add('hidden');
+    
+    // Pastikan iframe internal game juga berhenti berjalan ketika ditekan tombol kembali
+    const gameIframe = document.getElementById('gameIframe');
+    if (gameIframe) gameIframe.src = '';
     
     clearFiles();
     if (window.innerWidth < 768) {
@@ -1745,7 +1757,7 @@ function copyTranslation() {
 }
 
 // ==========================================
-// NEW FEATURE: QR GENERATOR 
+// QR GENERATOR 
 // ==========================================
 
 function renderQrGeneratorUI() {
@@ -1802,4 +1814,93 @@ function downloadQrCode() {
     canvas.toBlob(function(blob) {
         triggerDownload(blob, 'Twidy_QRCode.png');
     });
+}
+
+// ==========================================
+// NEW FEATURE: TWIDY BREAK ROOM
+// ==========================================
+
+// Anda hanya perlu menambahkan object baru ke array ini untuk menambah daftar game.
+// Path otomatis mengambil dari /games/{id}/
+const breakRoomGames = [
+    { 
+        id: 'Flappy-Bird', 
+        title: 'Flappy Bird', 
+        desc: 'Terbangkan burung melewati rintangan pipa tanpa terjatuh atau menabrak.', 
+        icon: 'fa-gamepad', 
+        color: 'text-green-500' 
+    }
+];
+
+function renderBreakRoomUI() {
+    let container = document.getElementById('breakRoomContainer');
+
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'breakRoomContainer';
+        container.className = 'w-full flex flex-col gap-4 animate-fade-in mt-4';
+        const dropZone = document.getElementById('dropZone');
+        dropZone.parentNode.insertBefore(container, dropZone.nextSibling);
+    }
+
+    container.classList.remove('hidden');
+
+    let gamesHTML = '';
+    breakRoomGames.forEach(game => {
+        gamesHTML += `
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center text-center group hover:shadow-md transition-all hover:border-indigo-300 dark:hover:border-indigo-600">
+                <div class="w-14 h-14 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fas ${game.icon} text-2xl ${game.color}"></i>
+                </div>
+                <h4 class="font-bold text-lg text-slate-900 dark:text-white mb-1">${game.title}</h4>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">${game.desc}</p>
+                <button onclick="playBreakRoomGame('${game.id}', '${game.title}')" class="mt-auto w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold transition shadow-sm">
+                    <i class="fas fa-play mr-1"></i> Mainkan
+                </button>
+            </div>
+        `;
+    });
+
+    container.innerHTML = `
+        <div id="breakRoomMenu" class="w-full">
+            <div class="text-center mb-6">
+                <p class="text-slate-500 dark:text-slate-400 font-medium">Lepaskan penat sejenak sebelum kembali produktif.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                ${gamesHTML}
+            </div>
+        </div>
+        <div id="breakRoomPlayer" class="hidden w-full flex-col">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-200 dark:border-slate-700 pb-3">
+                <h3 id="playingGameTitle" class="text-xl font-bold text-slate-800 dark:text-white"><i class="fas fa-gamepad mr-2 text-indigo-500"></i> Memainkan Game</h3>
+                <button onclick="closeBreakRoomGame()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg font-bold transition flex items-center gap-2">
+                    <i class="fas fa-arrow-left"></i> Kembali ke Menu
+                </button>
+            </div>
+            <div class="w-full h-[70vh] bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-inner relative">
+                <div class="absolute inset-0 flex flex-col items-center justify-center -z-10">
+                    <i class="fas fa-circle-notch fa-spin text-4xl text-indigo-300 mb-2"></i>
+                    <p class="text-sm text-slate-400 font-medium">Memuat Game...</p>
+                </div>
+                <iframe id="gameIframe" src="" class="w-full h-full border-0 relative z-10 rounded-xl" loading="lazy" allow="autoplay; fullscreen"></iframe>
+            </div>
+        </div>
+    `;
+}
+
+function playBreakRoomGame(gameId, gameTitle) {
+    document.getElementById('breakRoomMenu').classList.add('hidden');
+    document.getElementById('breakRoomPlayer').classList.remove('hidden');
+    document.getElementById('breakRoomPlayer').classList.add('flex');
+    document.getElementById('playingGameTitle').innerHTML = `<i class="fas fa-gamepad mr-2 text-indigo-500"></i> ${gameTitle}`;
+    
+    // Iframe src akan menuju ke root /games/Nama-Folder/ sesuai instruksi
+    document.getElementById('gameIframe').src = `/games/${gameId}/`;
+}
+
+function closeBreakRoomGame() {
+    document.getElementById('gameIframe').src = '';
+    document.getElementById('breakRoomPlayer').classList.add('hidden');
+    document.getElementById('breakRoomPlayer').classList.remove('flex');
+    document.getElementById('breakRoomMenu').classList.remove('hidden');
 }
