@@ -2,7 +2,6 @@
   "use strict";
 
   // Level: grid size, box dimensions, and clue count range
-  // Easy: no box/region check (row + column only); Medium/Hard: full Sudoku with boxes
   const LEVEL_CONFIG = {
     easy:   { size: 4, boxRows: 2, boxCols: 2, cluesMin: 8,  cluesMax: 10, checkBox: false },
     medium: { size: 6, boxRows: 2, boxCols: 3, cluesMin: 18, cluesMax: 22, checkBox: true },
@@ -16,7 +15,7 @@
     size: 4,
     boxRows: 2,
     boxCols: 2,
-    checkBox: false,  // easy: row+column only; medium/hard: also box
+    checkBox: false, 
     solution: null,
     puzzle: null,
     given: null,
@@ -227,7 +226,7 @@
     buttons.forEach((btn) => {
       const num = parseInt(btn.dataset.num, 10);
       if (num === 0) {
-        btn.style.display = ""; // Clear always visible
+        btn.style.display = ""; 
         return;
       }
       btn.style.display = num <= size ? "" : "none";
