@@ -1835,6 +1835,7 @@ function renderImageGeneratorUI() {
     
     container.classList.remove('hidden');
 
+    // Menambahkan Menu Dropdown untuk Pemilihan Aspect Ratio
     container.innerHTML = `
         <div class="w-full max-w-2xl bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
             <div class="flex items-center justify-between mb-4">
@@ -1844,6 +1845,16 @@ function renderImageGeneratorUI() {
             
             <textarea id="img-gen-input" rows="4" placeholder="Contoh: Kucing lucu memakai kacamata hitam sedang berjemur di pinggir pantai saat matahari terbenam, gaya render 3D resolusi tinggi..." class="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-fuchsia-500 mb-4"></textarea>
             
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Pilih Aspect Ratio</label>
+                <select id="img-gen-ratio" class="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-fuchsia-500 cursor-pointer">
+                    <option value="1:1">Persegi (1:1) - Cocok untuk Feed/Profile</option>
+                    <option value="16:9" selected>Lanskap (16:9) - Cocok untuk YouTube/Desktop</option>
+                    <option value="9:16">Potret (9:16) - Cocok untuk Story/Reels/TikTok</option>
+                    <option value="4:3">Klasik (4:3) - Cocok untuk Presentasi</option>
+                </select>
+            </div>
+
             <button id="btn-generate-img" onclick="generateImageAI()" class="w-full px-4 py-3 bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white rounded-xl font-bold transition shadow-lg flex items-center justify-center gap-2 transform hover:-translate-y-1">
                 <i class="fas fa-paint-brush"></i> Buat Gambar Sekarang
             </button>
@@ -1872,6 +1883,22 @@ async function generateImageAI() {
     const loadingDiv = document.getElementById('img-gen-loading');
     const imgResult = document.getElementById('img-gen-result');
     const btn = document.getElementById('btn-generate-img');
+    const ratio = document.getElementById('img-gen-ratio').value; // Mengambil nilai aspect ratio
+
+    // Tentukan dimensi (lebar dan tinggi) berdasarkan aspect ratio yang dipilih
+    let width = 1024;
+    let height = 1024;
+
+    if (ratio === '16:9') {
+        width = 1280;
+        height = 720;
+    } else if (ratio === '9:16') {
+        width = 720;
+        height = 1280;
+    } else if (ratio === '4:3') {
+        width = 1024;
+        height = 768;
+    }
 
     outputDiv.classList.remove('hidden');
     loadingDiv.classList.remove('hidden');
@@ -1879,9 +1906,8 @@ async function generateImageAI() {
     btn.disabled = true;
     btn.classList.add('opacity-70');
     
-    // Karena Gemini Flash Lite tidak mendukung pembuatan gambar, 
-    // sistem mem-bypass secara otomatis ke API gratis (Pollinations) di sisi frontend.
-    const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&enhance=true&width=1280&height=720`;
+    // URL API yang diperbarui dengan dimensi yang telah diatur
+    const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&enhance=true&width=${width}&height=${height}`;
     
     const img = new Image();
     img.onload = () => {
