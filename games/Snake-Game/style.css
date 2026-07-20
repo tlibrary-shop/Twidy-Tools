@@ -1,79 +1,153 @@
-/* Import Google font */
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
+
 body {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: #E3F2FD;
-}
-.wrapper {
-  width: 65vmin;
-  height: 70vmin;
-  display: flex;
+  background: #0f172a; /* Warna dark modern */
+  touch-action: none; /* Mencegah layar memantul/scroll di HP */
   overflow: hidden;
-  flex-direction: column;
-  justify-content: center;
-  border-radius: 5px;
-  background: #293447;
-  box-shadow: 0 20px 40px rgba(52, 87, 220, 0.2);
-}
-.game-details {
-  color: #B8C6DC;
-  font-weight: 500;
-  font-size: 1.2rem;
-  padding: 20px 27px;
-  display: flex;
-  justify-content: space-between;
-}
-.play-board {
-  height: 100%;
-  width: 100%;
-  display: grid;
-  background: #212837;
-  grid-template: repeat(30, 1fr) / repeat(30, 1fr);
-}
-.play-board .food {
-  background: #FF003D;
-}
-.play-board .head {
-  background: #60CBFF;
+  user-select: none;
 }
 
+.wrapper {
+  width: 100%;
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 15px;
+  background: #1e293b;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.game-details {
+  color: #e2e8f0;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 15px 25px;
+  display: flex;
+  justify-content: space-between;
+  background: #334155;
+  border-radius: 15px 15px 0 0;
+}
+
+.play-board {
+  width: 100%;
+  aspect-ratio: 1; /* Menjaga grid tetap kotak proporsional */
+  display: grid;
+  background: #0f172a;
+  grid-template: repeat(30, 1fr) / repeat(30, 1fr);
+  border: 2px solid #334155;
+}
+
+/* --- Tampilan Makanan (Apel) --- */
+.play-board .food {
+  background: #ef4444;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ef4444; /* Efek menyala */
+  transform: scale(0.85);
+}
+
+/* --- Tampilan Tubuh Ular --- */
+.play-board .head {
+  background: #3b82f6;
+  border-radius: 4px; /* Sudut agak membulat */
+  border: 1px solid #1d4ed8;
+  transform: scale(0.95); /* Memberi celah antar ruas tubuh ular */
+}
+
+/* --- Kontrol HP --- */
 .controls {
   display: none;
-  justify-content: space-between;
+  justify-content: space-around;
+  padding: 15px;
+  background: #334155;
+  border-radius: 0 0 15px 15px;
 }
+
 .controls i {
-  padding: 25px 0;
-  text-align: center;
-  font-size: 1.3rem;
-  color: #B8C6DC;
-  width: calc(100% / 4);
+  padding: 15px;
+  font-size: 1.5rem;
+  color: #94a3b8;
+  background: #1e293b;
+  border-radius: 10px;
   cursor: pointer;
-  border-right: 1px solid #171B26;
+  transition: all 0.2s;
+  width: 60px;
+  text-align: center;
+}
+
+.controls i:active {
+  background: #3b82f6;
+  color: #fff;
+  transform: scale(0.9);
+}
+
+/* --- Game Over Popup --- */
+.game-over {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    z-index: 10;
+    color: white;
+}
+
+.game-over.hidden {
+    display: none;
+}
+
+.game-over h2 {
+    font-size: 2.5rem;
+    color: #ef4444;
+    margin-bottom: 5px;
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+.game-over p {
+    font-size: 1.2rem;
+    margin-bottom: 25px;
+    color: #94a3b8;
+}
+
+.game-over button {
+    padding: 12px 25px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    background: #3b82f6;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.game-over button:hover {
+    background: #2563eb;
 }
 
 @media screen and (max-width: 800px) {
   .wrapper {
-    width: 90vmin;
-    height: 115vmin;
-  }
-  .game-details {
-    font-size: 1rem;
-    padding: 15px 27px;
+    max-width: 95vw;
   }
   .controls {
     display: flex;
-  }
-  .controls i {
-    padding: 15px 0;
-    font-size: 1rem;
   }
 }
