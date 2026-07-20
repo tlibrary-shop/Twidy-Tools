@@ -2,38 +2,35 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title>Talha - Snake Game</title>
-
-    <!-- 👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻-->
-    <!-- Also uploaded the demo of this code in a gif : https://c.tenor.com/x8v1oNUOmg4AAAAd/tenor.gif-->
-    <!-- 👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻-->
-
-    <!-- 👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻-->
-    <!-- More html-css-js Games Calculators Games Cards Elements Projects on https://www.github.com/he-is-talha --> 
-    <!-- 👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻-->
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Twidy Break Room - Snake</title>
     <link rel="icon" href="https://i.ibb.co/M6KTWnf/pic.jpg">
-
     <link rel="stylesheet" href="style.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
     <script src="script.js" defer></script>
   </head>
   <body>
- 
     <div class="wrapper">
       <div class="game-details">
-        <span class="score">Score: 0</span>
-        <span class="high-score">High Score: 0</span>
+        <span class="score"><i class="fas fa-star" style="color: #fbbf24;"></i> Score: 0</span>
+        <span class="high-score"><i class="fas fa-trophy" style="color: #f97316;"></i> High Score: 0</span>
       </div>
-      <div class="play-board"></div>
+      
+      <div class="play-board" id="playBoard"></div>
+      
       <div class="controls">
-        <i data-key="ArrowLeft" class="fa-solid fa-arrow-left-long"></i>
-        <i data-key="ArrowUp" class="fa-solid fa-arrow-up-long"></i>
-        <i data-key="ArrowRight" class="fa-solid fa-arrow-right-long"></i>
-        <i data-key="ArrowDown" class="fa-solid fa-arrow-down-long"></i>
+        <i data-key="ArrowLeft" class="fa-solid fa-arrow-left"></i>
+        <i data-key="ArrowUp" class="fa-solid fa-arrow-up"></i>
+        <i data-key="ArrowRight" class="fa-solid fa-arrow-right"></i>
+        <i data-key="ArrowDown" class="fa-solid fa-arrow-down"></i>
+      </div>
+
+      <!-- Popup Game Over Custom -->
+      <div id="gameOverScreen" class="game-over hidden">
+          <h2>GAME OVER</h2>
+          <p id="finalScore">Skor Anda: 0</p>
+          <button onclick="restartGame()"><i class="fas fa-redo"></i> Main Lagi</button>
       </div>
     </div>
-
-  
-</body></html>
+  </body>
+</html>
