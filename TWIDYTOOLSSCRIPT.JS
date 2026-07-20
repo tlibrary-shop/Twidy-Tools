@@ -1814,11 +1814,32 @@ function downloadQrCode() {
 
 const breakRoomGames = [
     { 
-        id: 'Flappy-Bird', 
-        title: 'Flappy Bird', 
-        desc: 'Terbangkan burung melewati rintangan pipa tanpa terjatuh atau menabrak.', 
+        id: 'Candy-Crush-Game', 
+        title: 'Candy Crush', 
+        desc: 'Cocokkan permen warna-warni dan raih skor tertinggi.', 
+        icon: 'fa-candy-cane', 
+        color: 'text-pink-500' 
+    },
+    { 
+        id: 'Chess-Game', 
+        title: 'Chess', 
+        desc: 'Latih otak Anda dengan permainan catur klasik.', 
+        icon: 'fa-chess', 
+        color: 'text-slate-700 dark:text-slate-300' 
+    },
+    { 
+        id: 'Snake-Game', 
+        title: 'Snake', 
+        desc: 'Makan apel dan tumbuh sepanjang mungkin tanpa menabrak dinding.', 
         icon: 'fa-gamepad', 
-        color: 'text-green-500' 
+        color: 'text-emerald-500' 
+    },
+    { 
+        id: 'Sudoku-Game', 
+        title: 'Sudoku', 
+        desc: 'Pecahkan teka-teki angka yang menguji ketajaman logika Anda.', 
+        icon: 'fa-table', 
+        color: 'text-blue-500' 
     }
 ];
 
@@ -1872,7 +1893,6 @@ function renderBreakRoomUI() {
                     <i class="fas fa-circle-notch fa-spin text-4xl text-indigo-300 mb-2"></i>
                     <p class="text-sm text-slate-400 font-medium">Memuat Game...</p>
                 </div>
-                <!-- PERHATIAN PADA BAGIAN INI: Penambahan scrolling="no" dan style touch-action -->
                 <iframe id="gameIframe" src="" class="w-full h-full border-0 relative z-10 rounded-xl" scrolling="no" loading="lazy" allow="autoplay; fullscreen" style="touch-action: none;"></iframe>
             </div>
         </div>
