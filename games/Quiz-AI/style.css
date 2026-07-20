@@ -1,4 +1,4 @@
-/* CSS REVISI 2 - Super Ramping & Fix Terpotong */
+/* CSS REVISI FINAL - Super Ramping, Fix Terpotong, & Terminal Result */
 :root {
     --primary: #4F46E5;
     --primary-hover: #4338CA;
@@ -21,7 +21,7 @@
     max-width: 550px;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    padding: 15px; /* Padding luar dirampingkan */
+    padding: 15px; 
     margin: 0 auto 40px auto; 
     color: var(--text-main);
     
@@ -81,7 +81,7 @@ button {
 .question-text { font-size: 15px; margin-bottom: 12px; line-height: 1.4; font-weight: 600; }
 
 /* OPSI JAWABAN */
-.options-grid { display: grid; gap: 8px; } /* Jarak antar tombol opsi diperkecil */
+.options-grid { display: grid; gap: 8px; }
 .opsi-btn {
     background: white; border: 2px solid #E5E7EB; padding: 10px 12px;
     border-radius: 8px; text-align: left; font-size: 14px; cursor: pointer; margin: 0;
@@ -98,15 +98,21 @@ button {
 .feedback p { margin: 0; line-height: 1.3; color: var(--text-muted); font-size: 12px; }
 .hidden { display: none !important; }
 
-/* HASIL AKHIR */
-#result-screen { text-align: center; padding: 15px 0; }
-#result-screen h2 { margin: 0 0 10px 0; font-size: 20px; }
-.score-circle {
-    width: 100px; height: 100px; background: var(--primary); color: white;
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 32px; font-weight: bold; margin: 15px auto;
+/* HASIL AKHIR - TERMINAL STYLE */
+#result-screen { padding: 10px 0; }
+
+.terminal-result {
+    background-color: #1A1A1A;
+    color: #D4D4D4;
+    font-family: 'Courier New', Courier, monospace;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: left;
+    font-size: 15px;
+    line-height: 1.5;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
 }
-.stats { margin-bottom: 15px; font-size: 14px; font-weight: bold; }
-.stats p { margin: 5px 0; }
-.text-green { color: var(--success); }
-.text-red { color: var(--danger); }
+
+.terminal-result p { margin: 0; }
+.text-orange { color: #FDBA74; font-weight: bold; }
+.text-green { color: #86EFAC; font-style: italic; }
