@@ -1858,15 +1858,16 @@ function renderBreakRoomUI() {
 
     let gamesHTML = '';
     breakRoomGames.forEach(game => {
+        // PERBAIKAN: Padding dikecilkan, ukuran font diperkecil agar pas berjejer 2 di HP
         gamesHTML += `
-            <div class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center text-center group hover:shadow-md transition-all hover:border-indigo-300 dark:hover:border-indigo-600">
-                <div class="w-14 h-14 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <i class="fas ${game.icon} text-2xl ${game.color}"></i>
+            <div class="bg-white dark:bg-slate-800 p-3 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center text-center group hover:shadow-md transition-all hover:border-indigo-300 dark:hover:border-indigo-600">
+                <div class="w-10 h-10 sm:w-14 sm:h-14 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center mb-2 sm:mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fas ${game.icon} text-lg sm:text-2xl ${game.color}"></i>
                 </div>
-                <h4 class="font-bold text-lg text-slate-900 dark:text-white mb-1">${game.title}</h4>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">${game.desc}</p>
-                <button onclick="playBreakRoomGame('${game.id}', '${game.title}')" class="mt-auto w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold transition shadow-sm">
-                    <i class="fas fa-play mr-1"></i> Mainkan
+                <h4 class="font-bold text-sm sm:text-lg text-slate-900 dark:text-white mb-1 leading-tight">${game.title}</h4>
+                <p class="text-[10px] sm:text-sm text-slate-500 dark:text-slate-400 mb-3 sm:mb-4 line-clamp-2 leading-tight">${game.desc}</p>
+                <button onclick="playBreakRoomGame('${game.id}', '${game.title}')" class="mt-auto w-full px-2 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-base bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold transition shadow-sm">
+                    <i class="fas fa-play sm:mr-1"></i> <span class="hidden sm:inline">Mainkan</span><span class="sm:hidden">Main</span>
                 </button>
             </div>
         `;
@@ -1874,10 +1875,11 @@ function renderBreakRoomUI() {
 
     container.innerHTML = `
         <div id="breakRoomMenu" class="w-full">
-            <div class="text-center mb-6">
-                <p class="text-slate-500 dark:text-slate-400 font-medium">Lepaskan penat sejenak sebelum kembali produktif.</p>
+            <div class="text-center mb-4 sm:mb-6">
+                <p class="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium">Lepaskan penat sejenak sebelum kembali produktif.</p>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- PERBAIKAN: grid-cols-1 diubah menjadi grid-cols-2 agar berjejer di mobile -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                 ${gamesHTML}
             </div>
         </div>
