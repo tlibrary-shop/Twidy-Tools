@@ -1835,7 +1835,7 @@ const breakRoomGames = [
         color: 'text-blue-500' 
     },
     { 
-        id: 'quiz-ai', 
+        id: 'Quiz-AI', 
         title: 'Quiz AI', 
         desc: 'Uji pengetahuan Anda dengan kuis cerdas berbasis AI.', 
         icon: 'fa-brain', 
