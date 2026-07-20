@@ -80,7 +80,8 @@ const toolConfig = {
     'qr-generator': { title: 'QR Generator', desc: 'Buat QR Code dari teks atau link dengan cepat.', icon: 'fa-qrcode', color: 'text-indigo-500', isCustomUI: true },
 
     // IMAGE AI
-    'ai-upscale-image': { title: 'Upscale Image', desc: 'Membutuhkan Model Ekstra.', icon: 'fa-magic', color: 'text-slate-400', accept: 'image/*', multi: false },
+    'ai-image-generator': { title: 'Image Generator', desc: 'Ketik imajinasi Anda dan AI akan melukisnya menjadi gambar (Kuota Terbatas).', icon: 'fa-magic', color: 'text-fuchsia-500', isCustomUI: true },
+    'ai-upscale-image': { title: 'Upscale Image', desc: 'Membutuhkan Model Ekstra.', icon: 'fa-expand-arrows-alt', color: 'text-slate-400', accept: 'image/*', multi: false },
     'ai-colorize-bw': { title: 'Colorize B&W', desc: 'Membutuhkan Model Ekstra.', icon: 'fa-palette', color: 'text-slate-400', accept: 'image/*', multi: false },
     'ai-remove-object': { title: 'Remove Object', desc: 'Membutuhkan Model Ekstra.', icon: 'fa-quidditch', color: 'text-slate-400', accept: 'image/*', multi: false },
     'ai-image-caption': { title: 'AI Caption', desc: 'Biarkan AI mendeskripsikan gambar.', icon: 'fa-closed-captioning', color: 'text-teal-500', accept: 'image/*', multi: false },
@@ -121,7 +122,7 @@ const categories = {
     'PDF INTELLIGENCE': ['ai-summarizer', 'translate-pdf', 'ai-proofread', 'ai-extract', 'ai-quiz', 'ai-sentiment', 'ai-chat', 'pdf-to-markdown'],
     
     'IMAGE TOOLS': ['image-resize', 'image-compress', 'image-crop', 'image-rotate', 'image-flip', 'image-remove-bg', 'image-blur-face', 'image-watermark', 'image-to-ico', 'ico-to-png', 'avif-to-png', 'heic-to-jpg', 'webp-to-png', 'svg-to-png', 'qr-generator'],
-    'IMAGE AI': ['ai-upscale-image', 'ai-colorize-bw', 'ai-remove-object', 'ai-image-caption'],
+    'IMAGE AI': ['ai-image-generator', 'ai-upscale-image', 'ai-colorize-bw', 'ai-remove-object', 'ai-image-caption'],
     'VIDEO TOOLS': ['video-compress', 'video-trim', 'video-rotate', 'video-speed', 'video-to-audio', 'video-remove-audio', 'video-merge', 'video-extract-frames', 'video-to-gif', 'gif-to-mp4'],
     'AUDIO TOOLS': ['audio-convert', 'audio-trim', 'audio-merge', 'audio-volume', 'audio-noise-reduction', 'audio-speed'],
     'AUDIO AI': ['ai-speech-to-text', 'ai-text-to-speech']
@@ -231,10 +232,12 @@ function selectTool(toolId) {
     let transContainer = document.getElementById('translatorContainer');
     let qrContainer = document.getElementById('qrGeneratorContainer');
     let breakRoomContainer = document.getElementById('breakRoomContainer');
+    let imgGenContainer = document.getElementById('imageGeneratorContainer');
 
     if (breakRoomContainer) breakRoomContainer.classList.add('hidden');
     if (transContainer) transContainer.classList.add('hidden');
     if (qrContainer) qrContainer.classList.add('hidden');
+    if (imgGenContainer) imgGenContainer.classList.add('hidden');
 
     if (config.isIframe) {
         dropZone.classList.add('hidden'); settingsPanel.classList.add('hidden'); fileListArea.classList.add('hidden'); actionBtnArea.classList.add('hidden');
@@ -251,6 +254,10 @@ function selectTool(toolId) {
         iframeContainer.classList.add('hidden'); appIframe.src = '';
         dropZone.classList.add('hidden'); settingsPanel.classList.add('hidden'); fileListArea.classList.add('hidden'); actionBtnArea.classList.add('hidden');
         renderBreakRoomUI();
+    } else if (config.isCustomUI && currentTool === 'ai-image-generator') {
+        iframeContainer.classList.add('hidden'); appIframe.src = '';
+        dropZone.classList.add('hidden'); settingsPanel.classList.add('hidden'); fileListArea.classList.add('hidden'); actionBtnArea.classList.add('hidden');
+        renderImageGeneratorUI();
     } else {
         iframeContainer.classList.add('hidden'); appIframe.src = ''; 
         dropZone.classList.remove('hidden'); fileListArea.classList.remove('hidden');
@@ -300,6 +307,9 @@ function goBack() {
     const breakRoomContainer = document.getElementById('breakRoomContainer');
     if (breakRoomContainer) breakRoomContainer.classList.add('hidden');
     
+    const imgGenContainer = document.getElementById('imageGeneratorContainer');
+    if (imgGenContainer) imgGenContainer.classList.add('hidden');
+
     const gameIframe = document.getElementById('gameIframe');
     if (gameIframe) gameIframe.src = '';
     
@@ -1809,7 +1819,107 @@ function downloadQrCode() {
 }
 
 // ==========================================
-// NEW FEATURE: TWIDY BREAK ROOM
+// AI IMAGE GENERATOR 
+// ==========================================
+
+function renderImageGeneratorUI() {
+    let container = document.getElementById('imageGeneratorContainer');
+    
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'imageGeneratorContainer';
+        container.className = 'w-full flex flex-col gap-4 animate-fade-in mt-4 items-center';
+        const dropZone = document.getElementById('dropZone');
+        dropZone.parentNode.insertBefore(container, dropZone.nextSibling);
+    }
+    
+    container.classList.remove('hidden');
+
+    container.innerHTML = `
+        <div class="w-full max-w-2xl bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300">Deskripsikan Gambar (Prompt)</label>
+                <span class="text-xs font-bold text-rose-600 bg-rose-100 dark:bg-rose-900/30 px-3 py-1 rounded-full"><i class="fas fa-exclamation-circle mr-1"></i> Kuota Terbatas</span>
+            </div>
+            
+            <textarea id="img-gen-input" rows="4" placeholder="Contoh: Kucing lucu memakai kacamata hitam sedang berjemur di pinggir pantai saat matahari terbenam, gaya render 3D resolusi tinggi..." class="w-full p-4 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-fuchsia-500 mb-4"></textarea>
+            
+            <button id="btn-generate-img" onclick="generateImageAI()" class="w-full px-4 py-3 bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white rounded-xl font-bold transition shadow-lg flex items-center justify-center gap-2 transform hover:-translate-y-1">
+                <i class="fas fa-paint-brush"></i> Buat Gambar Sekarang
+            </button>
+            
+            <div id="img-gen-output" class="mt-8 flex flex-col items-center hidden animate-fade-in w-full">
+                <div class="w-full aspect-square md:aspect-video bg-slate-100 dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 mb-4 flex items-center justify-center relative shadow-inner">
+                    <div id="img-gen-loading" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-100/90 dark:bg-slate-900/90 z-10 hidden">
+                        <i class="fas fa-circle-notch fa-spin text-4xl text-fuchsia-500 mb-3"></i>
+                        <p class="text-sm font-bold text-slate-600 dark:text-slate-300">AI Sedang Melukis Imajinasi Anda...</p>
+                    </div>
+                    <img id="img-gen-result" src="" class="max-w-full max-h-full object-contain hidden" />
+                </div>
+                <button onclick="downloadGeneratedImage()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition shadow-lg flex items-center gap-2">
+                    <i class="fas fa-download"></i> Unduh Hasil Gambar
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+async function generateImageAI() {
+    const prompt = document.getElementById('img-gen-input').value.trim();
+    if (!prompt) return alertUser('Harap masukkan deskripsi gambar terlebih dahulu.', 'error');
+
+    const outputDiv = document.getElementById('img-gen-output');
+    const loadingDiv = document.getElementById('img-gen-loading');
+    const imgResult = document.getElementById('img-gen-result');
+    const btn = document.getElementById('btn-generate-img');
+
+    outputDiv.classList.remove('hidden');
+    loadingDiv.classList.remove('hidden');
+    imgResult.classList.add('hidden');
+    btn.disabled = true;
+    btn.classList.add('opacity-70');
+    
+    // Karena Gemini Flash Lite tidak mendukung pembuatan gambar, 
+    // sistem mem-bypass secara otomatis ke API gratis (Pollinations) di sisi frontend.
+    const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&enhance=true&width=1280&height=720`;
+    
+    const img = new Image();
+    img.onload = () => {
+        imgResult.src = imgUrl;
+        imgResult.classList.remove('hidden');
+        loadingDiv.classList.add('hidden');
+        btn.disabled = false;
+        btn.classList.remove('opacity-70');
+        alertUser('Gambar berhasil dibuat!', 'success');
+        
+        setTimeout(() => { imgResult.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100);
+    };
+    img.onerror = () => {
+        loadingDiv.classList.add('hidden');
+        btn.disabled = false;
+        btn.classList.remove('opacity-70');
+        alertUser('Gagal memuat gambar dari server AI.', 'error');
+    };
+    img.src = imgUrl;
+}
+
+async function downloadGeneratedImage() {
+    const imgResult = document.getElementById('img-gen-result');
+    if(!imgResult.src) return;
+    try {
+        updateProgress(50, 'Menyiapkan unduhan...');
+        const response = await fetch(imgResult.src);
+        const blob = await response.blob();
+        triggerDownload(blob, `Twidy_AI_Image_${Date.now()}.jpg`);
+        hideProgress();
+    } catch(e) {
+        alertUser('Gagal mengunduh gambar. Silakan coba tekan dan tahan gambar lalu pilih "Save Image".', 'error');
+        hideProgress();
+    }
+}
+
+// ==========================================
+// TWIDY BREAK ROOM
 // ==========================================
 
 const breakRoomGames = [
@@ -1858,7 +1968,6 @@ function renderBreakRoomUI() {
 
     let gamesHTML = '';
     breakRoomGames.forEach(game => {
-        // PERBAIKAN: Padding dikecilkan, ukuran font diperkecil agar pas berjejer 2 di HP
         gamesHTML += `
             <div class="bg-white dark:bg-slate-800 p-3 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center text-center group hover:shadow-md transition-all hover:border-indigo-300 dark:hover:border-indigo-600">
                 <div class="w-10 h-10 sm:w-14 sm:h-14 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center mb-2 sm:mb-4 group-hover:scale-110 transition-transform">
@@ -1878,7 +1987,6 @@ function renderBreakRoomUI() {
             <div class="text-center mb-4 sm:mb-6">
                 <p class="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium">Lepaskan penat sejenak sebelum kembali produktif.</p>
             </div>
-            <!-- PERBAIKAN: grid-cols-1 diubah menjadi grid-cols-2 agar berjejer di mobile -->
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                 ${gamesHTML}
             </div>
