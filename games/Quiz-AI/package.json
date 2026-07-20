@@ -1,0 +1,8 @@
+{
+  "name": "quiz-ai-full",
+  "version": "1.0.0",
+  "description": "Game Kuis AI Cerdas Lengkap dengan Skor",
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0"
+  }
+}
