@@ -1,4 +1,3 @@
-// Navigasi Layar
 const screens = {
     home: document.getElementById('home-screen'),
     loading: document.getElementById('loading-screen'),
@@ -11,14 +10,12 @@ function switchScreen(screenName) {
     screens[screenName].classList.add('active');
 }
 
-// Variabel State Game
 let soalData = [];
 let currentIndex = 0;
 let skorSatuSoal = 0;
 let totalBenar = 0;
 let totalSalah = 0;
 
-// Elemen UI
 const btnStart = document.getElementById('btn-start');
 const soalCounter = document.getElementById('soal-counter');
 const skorLive = document.getElementById('skor-live');
@@ -30,18 +27,16 @@ const feedbackDesc = document.getElementById('feedback-desc');
 const btnNext = document.getElementById('btn-next');
 const btnRestart = document.getElementById('btn-restart');
 
-// Memulai Kuis
 btnStart.addEventListener('click', async () => {
     const tingkat = document.getElementById('tingkat').value;
     const kesulitan = document.getElementById('kesulitan').value;
     const jumlah = parseInt(document.getElementById('jumlah-soal').value);
 
-    // Reset State
     soalData = [];
     currentIndex = 0;
     totalBenar = 0;
     totalSalah = 0;
-    skorSatuSoal = 100 / jumlah; // Hitung bobot per soal
+    skorSatuSoal = 100 / jumlah; 
 
     switchScreen('loading');
 
@@ -69,11 +64,9 @@ btnStart.addEventListener('click', async () => {
     }
 });
 
-// Memuat Pertanyaan ke Layar
 function loadSoal() {
     const soal = soalData[currentIndex];
     
-    // Update Header
     soalCounter.textContent = `Soal ${currentIndex + 1} / ${soalData.length}`;
     skorLive.textContent = `Skor: ${Math.round(totalBenar * skorSatuSoal)}`;
     
@@ -81,7 +74,6 @@ function loadSoal() {
     opsiContainer.innerHTML = '';
     feedbackBox.classList.add('hidden');
 
-    // Acak posisi opsi agar tidak ketahuan posisinya
     const opsiAcak = [...soal.opsi].sort(() => Math.random() - 0.5);
 
     opsiAcak.forEach(opsi => {
@@ -93,9 +85,7 @@ function loadSoal() {
     });
 }
 
-// Mengecek Jawaban
 function verifikasiJawaban(tombolTerpilih, jawabanUser, jawabanBenar, penjelasan) {
-    // Matikan interaksi opsi
     const semuaTombol = document.querySelectorAll('.opsi-btn');
     semuaTombol.forEach(btn => btn.disabled = true);
 
@@ -112,20 +102,15 @@ function verifikasiJawaban(tombolTerpilih, jawabanUser, jawabanBenar, penjelasan
         feedbackBox.style.borderLeftColor = 'var(--danger)';
         totalSalah++;
         
-        // Tunjukkan tombol mana yang seharusnya benar
         semuaTombol.forEach(btn => {
             if (btn.textContent === jawabanBenar) btn.classList.add('correct');
         });
     }
 
-    // Update skor live langsung
     skorLive.textContent = `Skor: ${Math.round(totalBenar * skorSatuSoal)}`;
-
-    // Tampilkan Penjelasan
     feedbackDesc.textContent = penjelasan;
     feedbackBox.classList.remove('hidden');
     
-    // Ubah teks tombol next jika ini soal terakhir
     if (currentIndex === soalData.length - 1) {
         btnNext.textContent = 'Lihat Hasil Akhir 🏆';
     } else {
@@ -133,7 +118,6 @@ function verifikasiJawaban(tombolTerpilih, jawabanUser, jawabanBenar, penjelasan
     }
 }
 
-// Tombol Next Ditekan
 btnNext.addEventListener('click', () => {
     currentIndex++;
     if (currentIndex < soalData.length) {
@@ -143,23 +127,29 @@ btnNext.addEventListener('click', () => {
     }
 });
 
-// Layar Hasil Akhir
+// Layar Hasil Akhir bergaya Terminal
 function tampilkanHasil() {
     switchScreen('result');
     const skorAkhir = Math.round(totalBenar * skorSatuSoal);
     
-    document.getElementById('final-score').textContent = skorAkhir;
+    document.getElementById('final-score-text').textContent = `${skorAkhir}/100`;
     document.getElementById('stat-benar').textContent = totalBenar;
     document.getElementById('stat-salah').textContent = totalSalah;
 
-    // Ubah warna lingkaran skor berdasarkan nilai
-    const circle = document.querySelector('.score-circle');
-    if(skorAkhir >= 80) circle.style.background = 'var(--success)';
-    else if(skorAkhir >= 50) circle.style.background = '#F59E0B'; // Kuning (Warning)
-    else circle.style.background = 'var(--danger)';
+    let insight = "";
+    if (skorAkhir >= 90) {
+        insight = '"Luar biasa! Logika dan pemahamanmu sangat tajam bak AI. Pertahankan!"';
+    } else if (skorAkhir >= 70) {
+        insight = '"Kerja bagus! Kamu menguasai materi dengan baik, tinggal asah ketelitianmu."';
+    } else if (skorAkhir >= 50) {
+        insight = '"Lumayan! Pengetahuan dasarmu sudah ada, tapi masih butuh banyak latihan."';
+    } else {
+        insight = '"Jangan menyerah! Setiap kesalahan adalah proses belajar. Yuk coba lagi!"';
+    }
+    
+    document.getElementById('ai-insight').textContent = insight;
 }
 
-// Tombol Main Lagi
 btnRestart.addEventListener('click', () => {
     switchScreen('home');
 });
