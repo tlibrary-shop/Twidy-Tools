@@ -1,71 +1,59 @@
 /* General Styling */
 body {
   background-image: url('https://raw.githubusercontent.com/arpit456jain/Amazing-Js-Projects/master/Candy%20Crush/utils/bg.png');
+  background-size: cover;
+  background-position: center;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  margin: 0;
   font-family: 'Montserrat', sans-serif;
   color: #85796b;
+  overflow: hidden; /* Mencegah layar HP scrolling/bouncing saat menggeser permen */
+  touch-action: none;
 }
 
-.grid {
+.game-container {
   display: flex;
-  flex-wrap: wrap;
-  height: 560px;
-  width: 560px;
-  background-color: rgba(109, 127, 151, 0.5);
-  padding: 5px;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) inset, 0 1px 0 #fff;
-  margin-left: 80px;
-  margin-top: 50px;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
 }
 
-.grid div {
-  height: 70px;
-  width: 70px;
-  background-size: cover;
-  background-position: center;
-  border-radius: 5px;
-  transition: transform 0.2s ease; /* Smooth animation for interactions */
-}
-
-/* Hover effect for interactivity */
-.grid div:hover {
-    transform: scale(1.05); /* Slightly enlarge on hover */
-}
-
-/* Scoreboard Styling */
+/* Scoreboard Styling Mobile-Friendly */
 .scoreBoard {
   background-color: cyan;
   border-radius: 20px;
-  margin-top: 200px;
-  margin-left: 200px;
-  width: auto;
-  height: 120px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
+  width: 90%;
+  max-width: 480px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  display: none; /* Dinyalakan JS saat game mulai */
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  text-align: center;
-  color: #85796b;
+  box-sizing: border-box;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.score-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 h3, h1 {
   font-family: 'Montserrat', sans-serif;
   text-transform: uppercase;
   margin: 0;
+  color: #85796b;
 }
 
-h1 {
-  margin-top: -10px;
-}
-
-.grid div:hover {
-    transform: scale(1.05); /* Slightly enlarge on hover */
-}
+h3 { font-size: 14px; }
+h1 { font-size: 24px; margin-top: 5px; }
 
 /* Mode Selection Styling */
 #modeSelection {
@@ -74,8 +62,7 @@ h1 {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background-color: #f0f0f0;
-  font-family: 'Montserrat', sans-serif;
+  background-color: rgba(240, 240, 240, 0.95);
   position: absolute;
   top: 0;
   left: 0;
@@ -90,32 +77,60 @@ h1 {
 
 #modeSelection button {
   margin: 10px;
-  padding: 10px 20px;
+  padding: 15px 30px;
   font-size: 16px;
+  font-weight: bold;
   cursor: pointer;
   background-color: #87ceeb;
   border: none;
-  border-radius: 5px;
+  border-radius: 10px;
   color: white;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-/* Timer and Change Mode Button */
 #timer {
-  font-size: 18px;
-  margin-top: 10px;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 #changeMode {
-  margin-top: 10px;
-  padding: 5px 10px;
+  padding: 10px 15px;
   background-color: #ff6347;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-weight: bold;
 }
 
-/* Initially Hide Game Elements */
-.grid, .scoreBoard {
-  display: none;
+/* Grid Responsif */
+.grid {
+  display: none; /* Dinyalakan JS saat game mulai */
+  grid-template-columns: repeat(8, 1fr);
+  width: 95vw;
+  max-width: 480px;
+  height: 95vw;
+  max-height: 480px;
+  background-color: rgba(109, 127, 151, 0.5);
+  padding: 5px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) inset, 0 1px 0 #fff;
+  box-sizing: border-box;
+  gap: 2px; /* Jarak antar permen */
+}
+
+.grid div {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  border-radius: 5px;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+/* Interactivity */
+.grid div:hover, .grid div:active {
+  transform: scale(1.1);
+  z-index: 2;
 }
