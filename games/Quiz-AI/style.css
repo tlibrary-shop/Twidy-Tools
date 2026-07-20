@@ -1,16 +1,15 @@
-/* CSS REVISI - Dioptimalkan untuk Mobile dan Web Utama */
+/* CSS REVISI 2 - Super Ramping & Fix Terpotong */
 :root {
     --primary: #4F46E5;
     --primary-hover: #4338CA;
     --success: #10B981;
     --danger: #EF4444;
-    --bg-color: #F3F4F6;
+    --bg-color: transparent;
     --card-bg: #FFFFFF;
     --text-main: #1F2937;
     --text-muted: #6B7280;
 }
 
-/* Hapus styling global pada body agar tidak merusak layout web TwidyTools */
 .app-container * { 
     box-sizing: border-box; 
     font-family: 'Segoe UI', system-ui, sans-serif; 
@@ -20,85 +19,94 @@
     background: var(--card-bg);
     width: 100%;
     max-width: 550px;
-    border-radius: 16px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    padding: 20px 15px; /* Padding lebih ramping untuk mobile */
-    margin: 0 auto 30px auto; /* Tambahan margin bawah agar tidak terpotong footer */
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    padding: 15px; /* Padding luar dirampingkan */
+    margin: 0 auto 40px auto; 
     color: var(--text-main);
-    overflow: visible; /* Penting: mencegah elemen terpotong */
+    
+    /* FIX TERPOTONG: Paksa tinggi dinamis mengikuti konten */
+    height: auto !important; 
+    min-height: min-content;
+    overflow: visible !important; 
+    display: block; 
 }
 
-.screen { display: none; animation: fadeIn 0.4s ease-in-out; }
+.screen { display: none; animation: fadeIn 0.3s ease-in-out; }
 .screen.active { display: block; }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-.header { text-align: center; margin-bottom: 20px; }
-.header h1 { margin: 0 0 8px; color: var(--primary); font-size: 24px; }
-.header p { margin: 0; color: var(--text-muted); font-size: 14px; }
+/* HEADER HOME */
+.header { text-align: center; margin-bottom: 15px; }
+.header h1 { margin: 0 0 5px; color: var(--primary); font-size: 22px; }
+.header p { margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.3; }
 
-.form-group { margin-bottom: 15px; }
-.form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
+/* FORM */
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 13px; }
 .form-group select { 
-    width: 100%; padding: 10px; border: 2px solid #E5E7EB; 
-    border-radius: 8px; font-size: 15px; outline: none; transition: 0.3s;
-    background-color: #F9FAFB;
+    width: 100%; padding: 8px 10px; border: 1px solid #E5E7EB; 
+    border-radius: 8px; font-size: 14px; outline: none; background-color: #F9FAFB;
 }
 .form-group select:focus { border-color: var(--primary); }
 
+/* TOMBOL GLOBAL */
 button {
-    width: 100%; padding: 14px; border: none; border-radius: 10px;
-    font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s;
-    margin-top: 10px; margin-bottom: 10px; /* Jarak aman di mobile */
+    width: 100%; padding: 12px; border: none; border-radius: 8px;
+    font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.2s;
 }
-.btn-primary { background: var(--primary); color: white; }
-.btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
-.btn-secondary { background: var(--text-main); color: white; margin-top: 15px; }
+.btn-primary { background: var(--primary); color: white; margin-top: 10px; }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-secondary { background: var(--text-main); color: white; margin-top: 10px; padding: 10px; }
 
-/* LOADING SCREEN */
-#loading-screen { text-align: center; padding: 40px 0; }
+/* LOADING */
+#loading-screen { text-align: center; padding: 30px 0; }
 .loader {
-    border: 5px solid #f3f3f3; border-top: 5px solid var(--primary);
-    border-radius: 50%; width: 40px; height: 40px;
-    animation: spin 1s linear infinite; margin: 0 auto 15px;
+    border: 4px solid #f3f3f3; border-top: 4px solid var(--primary);
+    border-radius: 50%; width: 35px; height: 35px;
+    animation: spin 1s linear infinite; margin: 0 auto 10px;
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+#loading-text { font-size: 14px; margin: 0; }
 
-/* QUIZ SCREEN */
-.quiz-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
-.badge { background: #E5E7EB; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 13px; }
+/* QUIZ HEADER & SOAL */
+.quiz-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+.badge { background: #E5E7EB; padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 12px; }
 .badge.bg-green { background: #D1FAE5; color: #065F46; }
 
-.question-text { font-size: 18px; margin-bottom: 20px; line-height: 1.4; font-weight: 600; }
+.question-text { font-size: 15px; margin-bottom: 12px; line-height: 1.4; font-weight: 600; }
 
-.options-grid { display: grid; gap: 10px; }
+/* OPSI JAWABAN */
+.options-grid { display: grid; gap: 8px; } /* Jarak antar tombol opsi diperkecil */
 .opsi-btn {
-    background: white; border: 2px solid #E5E7EB; padding: 12px 15px;
-    border-radius: 10px; text-align: left; font-size: 15px; cursor: pointer; transition: 0.2s;
-    margin: 0;
+    background: white; border: 2px solid #E5E7EB; padding: 10px 12px;
+    border-radius: 8px; text-align: left; font-size: 14px; cursor: pointer; margin: 0;
 }
 .opsi-btn:hover:not(:disabled) { border-color: var(--primary); background: #EEF2FF; }
-.opsi-btn:disabled { cursor: not-allowed; opacity: 0.9; }
+.opsi-btn:disabled { cursor: not-allowed; opacity: 1; }
 
-.opsi-btn.correct { background: #D1FAE5; border-color: var(--success); color: #065F46; }
+.opsi-btn.correct { background: #D1FAE5; border-color: var(--success); color: #065F46; font-weight: 600; }
 .opsi-btn.wrong { background: #FEE2E2; border-color: var(--danger); color: #991B1B; }
 
-.feedback { margin-top: 20px; padding: 15px; background: #F9FAFB; border-radius: 10px; border-left: 5px solid var(--primary); }
-.feedback h3 { margin: 0 0 8px; font-size: 16px; }
-.feedback p { margin: 0; line-height: 1.4; color: var(--text-muted); font-size: 14px; }
+/* FEEDBACK BOX */
+.feedback { margin-top: 12px; padding: 12px; background: #F9FAFB; border-radius: 8px; border-left: 4px solid var(--primary); }
+.feedback h3 { margin: 0 0 5px; font-size: 14px; }
+.feedback p { margin: 0; line-height: 1.3; color: var(--text-muted); font-size: 12px; }
 .hidden { display: none !important; }
 
-/* RESULT SCREEN */
-#result-screen { text-align: center; padding: 20px 0; }
+/* HASIL AKHIR */
+#result-screen { text-align: center; padding: 15px 0; }
+#result-screen h2 { margin: 0 0 10px 0; font-size: 20px; }
 .score-circle {
-    width: 120px; height: 120px; background: var(--primary); color: white;
+    width: 100px; height: 100px; background: var(--primary); color: white;
     border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 40px; font-weight: bold; margin: 20px auto;
-    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+    font-size: 32px; font-weight: bold; margin: 15px auto;
 }
-.stats { margin-bottom: 25px; font-size: 16px; font-weight: bold; }
+.stats { margin-bottom: 15px; font-size: 14px; font-weight: bold; }
+.stats p { margin: 5px 0; }
 .text-green { color: var(--success); }
 .text-red { color: var(--danger); }
