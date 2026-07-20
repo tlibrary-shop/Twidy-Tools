@@ -1828,18 +1828,18 @@ const breakRoomGames = [
         color: 'text-slate-700 dark:text-slate-300' 
     },
     { 
-        id: 'Snake-Game', 
-        title: 'Snake', 
-        desc: 'Makan apel dan tumbuh sepanjang mungkin tanpa menabrak dinding.', 
-        icon: 'fa-gamepad', 
-        color: 'text-emerald-500' 
-    },
-    { 
         id: 'Sudoku-Game', 
         title: 'Sudoku', 
         desc: 'Pecahkan teka-teki angka yang menguji ketajaman logika Anda.', 
         icon: 'fa-table', 
         color: 'text-blue-500' 
+    },
+    { 
+        id: 'quiz-ai', 
+        title: 'Quiz AI', 
+        desc: 'Uji pengetahuan Anda dengan kuis cerdas berbasis AI.', 
+        icon: 'fa-brain', 
+        color: 'text-purple-500' 
     }
 ];
 
