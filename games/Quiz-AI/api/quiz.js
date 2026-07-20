@@ -14,7 +14,7 @@ module.exports = async function handler(req, res) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite' });
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
 
     // Prompt cerdas untuk memastikan balasan murni JSON Array
     const prompt = `Buatkan ${jumlah} pertanyaan kuis pilihan ganda yang edukatif, bervariasi, dan menantang untuk tingkat ${tingkat} dengan tingkat kesulitan ${kesulitan}.
