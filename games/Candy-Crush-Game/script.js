@@ -1,136 +1,287 @@
-/* General Styling */
-body {
-  background-image: url('https://raw.githubusercontent.com/arpit456jain/Amazing-Js-Projects/master/Candy%20Crush/utils/bg.png');
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  margin: 0;
-  font-family: 'Montserrat', sans-serif;
-  color: #85796b;
-  overflow: hidden; /* Mencegah layar HP scrolling/bouncing saat menggeser permen */
-  touch-action: none;
-}
+document.addEventListener("DOMContentLoaded", () => {
+    candyCrushGame();
+});
 
-.game-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 500px;
-}
+function candyCrushGame() {
+    // DOM Elements
+    const grid = document.querySelector(".grid");
+    const scoreDisplay = document.getElementById("score");
+    const timerDisplay = document.getElementById("timer");
+    const modeSelection = document.getElementById("modeSelection");
+    const endlessButton = document.getElementById("endlessMode");
+    const timedButton = document.getElementById("timedMode");
+    const changeModeButton = document.getElementById("changeMode");
 
-/* Scoreboard Styling Mobile-Friendly */
-.scoreBoard {
-  background-color: cyan;
-  border-radius: 20px;
-  width: 90%;
-  max-width: 480px;
-  padding: 15px 20px;
-  margin-bottom: 20px;
-  display: none; /* Dinyalakan JS saat game mulai */
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  box-sizing: border-box;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
+    // Game State Variables
+    const width = 8;
+    const squares = [];
+    let score = 0;
+    let currentMode = null;
+    let timeLeft = 0;
+    let gameInterval = null;
+    let timerInterval = null;
 
-.score-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+    const candyColors = [
+        "url(https://raw.githubusercontent.com/arpit456jain/Amazing-Js-Projects/master/Candy%20Crush/utils/red-candy.png)",
+        "url(https://raw.githubusercontent.com/arpit456jain/Amazing-Js-Projects/master/Candy%20Crush/utils/blue-candy.png)",
+        "url(https://raw.githubusercontent.com/arpit456jain/Amazing-Js-Projects/master/Candy%20Crush/utils/green-candy.png)",
+        "url(https://raw.githubusercontent.com/arpit456jain/Amazing-Js-Projects/master/Candy%20Crush/utils/yellow-candy.png)",
+        "url(https://raw.githubusercontent.com/arpit456jain/Amazing-Js-Projects/master/Candy%20Crush/utils/orange-candy.png)",
+        "url(https://raw.githubusercontent.com/arpit456jain/Amazing-Js-Projects/master/Candy%20Crush/utils/purple-candy.png)",
+    ];
 
-h3, h1 {
-  font-family: 'Montserrat', sans-serif;
-  text-transform: uppercase;
-  margin: 0;
-  color: #85796b;
-}
+    function createBoard() {
+        grid.innerHTML = "";
+        squares.length = 0;  
+        for (let i = 0; i < width * width; i++) {
+            const square = document.createElement("div");
+            square.setAttribute("draggable", true);
+            square.setAttribute("id", i);
+            let randomColor = Math.floor(Math.random() * candyColors.length);
+            square.style.backgroundImage = candyColors[randomColor];
+            grid.appendChild(square);
+            squares.push(square);
+        }
+        
+        // Mouse Events (Desktop)
+        squares.forEach(square => square.addEventListener("dragstart", dragStart));
+        squares.forEach(square => square.addEventListener("dragend", dragEnd));
+        squares.forEach(square => square.addEventListener("dragover", dragOver));
+        squares.forEach(square => square.addEventListener("dragenter", dragEnter));
+        squares.forEach(square => square.addEventListener("dragleave", dragLeave));
+        squares.forEach(square => square.addEventListener("drop", dragDrop));
 
-h3 { font-size: 14px; }
-h1 { font-size: 24px; margin-top: 5px; }
+        // Touch Events (Mobile/Tablet)
+        squares.forEach(square => square.addEventListener("touchstart", handleTouchStart, {passive: false}));
+        squares.forEach(square => square.addEventListener("touchmove", handleTouchMove, {passive: false}));
+        squares.forEach(square => square.addEventListener("touchend", handleTouchEnd));
+    }
 
-/* Mode Selection Styling */
-#modeSelection {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background-color: rgba(240, 240, 240, 0.95);
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 10;
-}
+    let colorBeingDragged, colorBeingReplaced, squareIdBeingDragged, squareIdBeingReplaced;
+    let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0;
 
-#modeSelection h2 {
-  margin-bottom: 20px;
-  color: #333;
-}
+    // --- MOBILE TOUCH CONTROLS ---
+    function handleTouchStart(e) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        colorBeingDragged = this.style.backgroundImage;
+        squareIdBeingDragged = parseInt(this.id);
+    }
 
-#modeSelection button {
-  margin: 10px;
-  padding: 15px 30px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  background-color: #87ceeb;
-  border: none;
-  border-radius: 10px;
-  color: white;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
+    function handleTouchMove(e) {
+        e.preventDefault(); // Cegah layar HP scroll saat menggeser permen
+        touchEndX = e.touches[0].clientX;
+        touchEndY = e.touches[0].clientY;
+    }
 
-#timer {
-  font-size: 16px;
-  font-weight: bold;
-}
+    function handleTouchEnd(e) {
+        if (!touchEndX || !touchEndY) return; 
 
-#changeMode {
-  padding: 10px 15px;
-  background-color: #ff6347;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-}
+        let diffX = touchStartX - touchEndX;
+        let diffY = touchStartY - touchEndY;
+        let swipeDir = '';
 
-/* Grid Responsif */
-.grid {
-  display: none; /* Dinyalakan JS saat game mulai */
-  grid-template-columns: repeat(8, 1fr);
-  width: 95vw;
-  max-width: 480px;
-  height: 95vw;
-  max-height: 480px;
-  background-color: rgba(109, 127, 151, 0.5);
-  padding: 5px;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) inset, 0 1px 0 #fff;
-  box-sizing: border-box;
-  gap: 2px; /* Jarak antar permen */
-}
+        // Deteksi arah swipe
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+            swipeDir = diffX > 0 ? 'left' : 'right';
+        } else {
+            swipeDir = diffY > 0 ? 'up' : 'down';
+        }
 
-.grid div {
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  border-radius: 5px;
-  transition: transform 0.2s ease;
-  cursor: pointer;
-}
+        let isLeftEdge = squareIdBeingDragged % width === 0;
+        let isRightEdge = squareIdBeingDragged % width === width - 1;
 
-/* Interactivity */
-.grid div:hover, .grid div:active {
-  transform: scale(1.1);
-  z-index: 2;
+        if (swipeDir === 'left' && !isLeftEdge) squareIdBeingReplaced = squareIdBeingDragged - 1;
+        else if (swipeDir === 'right' && !isRightEdge) squareIdBeingReplaced = squareIdBeingDragged + 1;
+        else if (swipeDir === 'up') squareIdBeingReplaced = squareIdBeingDragged - width;
+        else if (swipeDir === 'down') squareIdBeingReplaced = squareIdBeingDragged + width;
+        else return;
+
+        if (squareIdBeingReplaced >= 0 && squareIdBeingReplaced < width * width) {
+            let targetSquare = squares[squareIdBeingReplaced];
+            colorBeingReplaced = targetSquare.style.backgroundImage;
+
+            targetSquare.style.backgroundImage = colorBeingDragged;
+            squares[squareIdBeingDragged].style.backgroundImage = colorBeingReplaced;
+
+            dragEnd(); 
+        }
+
+        touchEndX = 0;
+        touchEndY = 0;
+    }
+
+    // --- DESKTOP DRAG CONTROLS ---
+    function dragStart() {
+        colorBeingDragged = this.style.backgroundImage;
+        squareIdBeingDragged = parseInt(this.id);
+    }
+    function dragOver(e) { e.preventDefault(); }
+    function dragEnter(e) { e.preventDefault(); }
+    function dragLeave() {}
+
+    function dragDrop() {
+        colorBeingReplaced = this.style.backgroundImage;
+        squareIdBeingReplaced = parseInt(this.id);
+        this.style.backgroundImage = colorBeingDragged;
+        squares[squareIdBeingDragged].style.backgroundImage = colorBeingReplaced;
+    }
+
+    function dragEnd() {
+        let validMoves = [
+            squareIdBeingDragged - 1,
+            squareIdBeingDragged - width,
+            squareIdBeingDragged + 1,
+            squareIdBeingDragged + width
+        ];
+        let validMove = validMoves.includes(squareIdBeingReplaced);
+
+        // Perbaikan bug index 0 yang dianggap false jika tidak menggunakan typeof
+        if (typeof squareIdBeingReplaced !== 'undefined' && squareIdBeingReplaced !== null && validMove) {
+            squareIdBeingReplaced = null; 
+        } else if (typeof squareIdBeingReplaced !== 'undefined' && squareIdBeingReplaced !== null && !validMove) {
+            squares[squareIdBeingReplaced].style.backgroundImage = colorBeingReplaced;
+            squares[squareIdBeingDragged].style.backgroundImage = colorBeingDragged;
+        } else {
+            squares[squareIdBeingDragged].style.backgroundImage = colorBeingDragged;
+        }
+    }
+
+    function moveIntoSquareBelow() {
+        for (let i = 0; i < width; i++) {
+            if (squares[i].style.backgroundImage === "") {
+                let randomColor = Math.floor(Math.random() * candyColors.length);
+                squares[i].style.backgroundImage = candyColors[randomColor];
+            }
+        }
+        for (let i = 0; i < width * (width - 1); i++) {
+            if (squares[i + width].style.backgroundImage === "") {
+                squares[i + width].style.backgroundImage = squares[i].style.backgroundImage;
+                squares[i].style.backgroundImage = "";
+            }
+        }
+    }
+
+    function checkRowForFour() {
+        for (let i = 0; i < 60; i++) {
+            if (i % width >= width - 3) continue; 
+            let rowOfFour = [i, i + 1, i + 2, i + 3];
+            let decidedColor = squares[i].style.backgroundImage;
+            const isBlank = squares[i].style.backgroundImage === "";
+            if (rowOfFour.every(index => squares[index].style.backgroundImage === decidedColor && !isBlank)) {
+                score += 4;
+                scoreDisplay.innerHTML = score;
+                rowOfFour.forEach(index => squares[index].style.backgroundImage = "");
+            }
+        }
+    }
+
+    function checkColumnForFour() {
+        for (let i = 0; i < 40; i++) {
+            let columnOfFour = [i, i + width, i + 2 * width, i + 3 * width];
+            let decidedColor = squares[i].style.backgroundImage;
+            const isBlank = squares[i].style.backgroundImage === "";
+            if (columnOfFour.every(index => squares[index].style.backgroundImage === decidedColor && !isBlank)) {
+                score += 4;
+                scoreDisplay.innerHTML = score;
+                columnOfFour.forEach(index => squares[index].style.backgroundImage = "");
+            }
+        }
+    }
+
+    function checkRowForThree() {
+        for (let i = 0; i < 62; i++) {
+            if (i % width >= width - 2) continue; 
+            let rowOfThree = [i, i + 1, i + 2];
+            let decidedColor = squares[i].style.backgroundImage;
+            const isBlank = squares[i].style.backgroundImage === "";
+            if (rowOfThree.every(index => squares[index].style.backgroundImage === decidedColor && !isBlank)) {
+                score += 3;
+                scoreDisplay.innerHTML = score;
+                rowOfThree.forEach(index => squares[index].style.backgroundImage = "");
+            }
+        }
+    }
+
+    function checkColumnForThree() {
+        for (let i = 0; i < 48; i++) {
+            let columnOfThree = [i, i + width, i + 2 * width];
+            let decidedColor = squares[i].style.backgroundImage;
+            const isBlank = squares[i].style.backgroundImage === "";
+            if (columnOfThree.every(index => squares[index].style.backgroundImage === decidedColor && !isBlank)) {
+                score += 3;
+                scoreDisplay.innerHTML = score;
+                columnOfThree.forEach(index => squares[index].style.backgroundImage = "");
+            }
+        }
+    }
+
+    function gameLoop() {
+        checkRowForFour();
+        checkColumnForFour();
+        checkRowForThree();
+        checkColumnForThree();
+        moveIntoSquareBelow();
+    }
+
+    function startGame(mode) {
+        currentMode = mode;
+        modeSelection.style.display = "none";
+        
+        // Sesuaikan dengan display layout CSS yang baru dirombak
+        grid.style.display = "grid"; 
+        scoreDisplay.parentElement.parentElement.style.display = "flex"; 
+        
+        createBoard();
+        score = 0;
+        scoreDisplay.innerHTML = score;
+        gameInterval = setInterval(gameLoop, 100);
+
+        if (mode === "timed") {
+            timeLeft = 120; 
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    endGame();
+                }
+            }, 1000);
+        } else {
+            timerDisplay.innerHTML = ""; 
+        }
+    }
+
+    function updateTimerDisplay() {
+        if (currentMode === "timed") {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            timerDisplay.innerHTML = `Time Left: ${minutes}:${seconds.toString().padStart(2, "0")}`;
+        } else {
+            timerDisplay.innerHTML = "";
+        }
+    }
+
+    function endGame() {
+        clearInterval(gameInterval);
+        squares.forEach(square => square.setAttribute("draggable", false));
+        // Remove touch event to prevent further play
+        squares.forEach(square => square.removeEventListener("touchstart", handleTouchStart));
+        alert(`Time's Up! Your score is ${score}`);
+    }
+
+    function changeMode() {
+        clearInterval(gameInterval);
+        if (currentMode === "timed") {
+            clearInterval(timerInterval);
+        }
+        grid.style.display = "none";
+        scoreDisplay.parentElement.parentElement.style.display = "none";
+        modeSelection.style.display = "flex"; 
+    }
+
+    endlessButton.addEventListener("click", () => startGame("endless"));
+    timedButton.addEventListener("click", () => startGame("timed"));
+    changeModeButton.addEventListener("click", changeMode);
 }
