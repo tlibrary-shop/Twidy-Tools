@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Quiz Master</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- LAYAR UTAMA (HOME) -->
+        <div id="home-screen" class="screen active">
+            <div class="header">
+                <h1>AI Quiz Master 🧠</h1>
+                <p>Tantang pengetahuanmu dengan soal tak terbatas dari AI!</p>
+            </div>
+            
+            <div class="form-group">
+                <label>Tingkat Pendidikan:</label>
+                <select id="tingkat">
+                    <option value="SD">SD</option>
+                    <option value="SMP">SMP</option>
+                    <option value="SMA">SMA</option>
+                    <option value="Umum">Umum</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Tingkat Kesulitan:</label>
+                <select id="kesulitan">
+                    <option value="Mudah">Mudah (Easy)</option>
+                    <option value="Sedang" selected>Sedang (Medium)</option>
+                    <option value="Sulit">Sulit (Hard)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Jumlah Soal:</label>
+                <select id="jumlah-soal">
+                    <option value="5">5 Soal</option>
+                    <option value="10">10 Soal</option>
+                </select>
+            </div>
+            
+            <button id="btn-start" class="btn-primary">Mulai Kuis Sekarang 🚀</button>
+        </div>
+
+        <!-- LAYAR LOADING -->
+        <div id="loading-screen" class="screen">
+            <div class="loader"></div>
+            <h3 id="loading-text">Menyusun soal dengan AI...</h3>
+        </div>
+
+        <!-- LAYAR KUIS -->
+        <div id="quiz-screen" class="screen">
+            <div class="quiz-header">
+                <span id="soal-counter" class="badge">Soal 1 / 5</span>
+                <span id="skor-live" class="badge bg-green">Skor: 0</span>
+            </div>
+            
+            <h2 id="pertanyaan" class="question-text"></h2>
+            
+            <div id="opsi-container" class="options-grid">
+                <!-- Tombol opsi dimuat via JS -->
+            </div>
+            
+            <div id="feedback-box" class="feedback hidden">
+                <h3 id="feedback-title"></h3>
+                <p id="feedback-desc"></p>
+                <button id="btn-next" class="btn-secondary">Soal Selanjutnya ➡️</button>
+            </div>
+        </div>
+
+        <!-- LAYAR HASIL -->
+        <div id="result-screen" class="screen">
+            <h2>Kuis Selesai! 🎉</h2>
+            
+            <div class="score-circle">
+                <span id="final-score">100</span>
+            </div>
+            
+            <div class="stats">
+                <p>✅ Benar: <span id="stat-benar" class="text-green">0</span></p>
+                <p>❌ Salah: <span id="stat-salah" class="text-red">0</span></p>
+            </div>
+            
+            <button id="btn-restart" class="btn-primary">Main Lagi 🔄</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
