@@ -71,20 +71,20 @@
             </div>
         </div>
 
-        <!-- LAYAR HASIL -->
+        <!-- LAYAR HASIL (TERMINAL STYLE) -->
         <div id="result-screen" class="screen">
-            <h2>Kuis Selesai! 🎉</h2>
-            
-            <div class="score-circle">
-                <span id="final-score">100</span>
+            <div class="terminal-result">
+                <p>🎉 Quiz Selesai!</p>
+                <br>
+                <p>Skor: <span id="final-score-text" class="text-orange">0/100</span></p>
+                <p>Benar: <span id="stat-benar">0</span></p>
+                <p>Salah: <span id="stat-salah">0</span></p>
+                <br>
+                <p>AI Insight:</p>
+                <p id="ai-insight" class="text-green">"..."</p>
             </div>
             
-            <div class="stats">
-                <p>✅ Benar: <span id="stat-benar" class="text-green">0</span></p>
-                <p>❌ Salah: <span id="stat-salah" class="text-red">0</span></p>
-            </div>
-            
-            <button id="btn-restart" class="btn-primary">Main Lagi 🔄</button>
+            <button id="btn-restart" class="btn-primary" style="margin-top: 20px;">Main Lagi 🔄</button>
         </div>
     </div>
 
