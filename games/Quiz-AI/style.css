@@ -1,3 +1,4 @@
+/* CSS REVISI - Dioptimalkan untuk Mobile dan Web Utama */
 :root {
     --primary: #4F46E5;
     --primary-hover: #4338CA;
@@ -9,28 +10,22 @@
     --text-muted: #6B7280;
 }
 
-* { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-
-body { 
-    background-color: var(--bg-color); 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    min-height: 100vh; 
-    margin: 0; 
-    padding: 20px;
-    color: var(--text-main);
+/* Hapus styling global pada body agar tidak merusak layout web TwidyTools */
+.app-container * { 
+    box-sizing: border-box; 
+    font-family: 'Segoe UI', system-ui, sans-serif; 
 }
 
 .app-container {
     background: var(--card-bg);
     width: 100%;
     max-width: 550px;
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-    overflow: hidden;
-    position: relative;
-    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    padding: 20px 15px; /* Padding lebih ramping untuk mobile */
+    margin: 0 auto 30px auto; /* Tambahan margin bawah agar tidak terpotong footer */
+    color: var(--text-main);
+    overflow: visible; /* Penting: mencegah elemen terpotong */
 }
 
 .screen { display: none; animation: fadeIn 0.4s ease-in-out; }
@@ -41,23 +36,25 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-.header { text-align: center; margin-bottom: 30px; }
-.header h1 { margin: 0 0 10px; color: var(--primary); font-size: 28px; }
-.header p { margin: 0; color: var(--text-muted); }
+.header { text-align: center; margin-bottom: 20px; }
+.header h1 { margin: 0 0 8px; color: var(--primary); font-size: 24px; }
+.header p { margin: 0; color: var(--text-muted); font-size: 14px; }
 
-.form-group { margin-bottom: 20px; }
-.form-group label { display: block; font-weight: 600; margin-bottom: 8px; }
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
 .form-group select { 
-    width: 100%; padding: 12px; border: 2px solid #E5E7EB; 
-    border-radius: 10px; font-size: 16px; outline: none; transition: 0.3s;
+    width: 100%; padding: 10px; border: 2px solid #E5E7EB; 
+    border-radius: 8px; font-size: 15px; outline: none; transition: 0.3s;
+    background-color: #F9FAFB;
 }
 .form-group select:focus { border-color: var(--primary); }
 
 button {
     width: 100%; padding: 14px; border: none; border-radius: 10px;
     font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s;
+    margin-top: 10px; margin-bottom: 10px; /* Jarak aman di mobile */
 }
-.btn-primary { background: var(--primary); color: white; margin-top: 10px; }
+.btn-primary { background: var(--primary); color: white; }
 .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
 .btn-secondary { background: var(--text-main); color: white; margin-top: 15px; }
 
@@ -65,22 +62,23 @@ button {
 #loading-screen { text-align: center; padding: 40px 0; }
 .loader {
     border: 5px solid #f3f3f3; border-top: 5px solid var(--primary);
-    border-radius: 50%; width: 50px; height: 50px;
-    animation: spin 1s linear infinite; margin: 0 auto 20px;
+    border-radius: 50%; width: 40px; height: 40px;
+    animation: spin 1s linear infinite; margin: 0 auto 15px;
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 /* QUIZ SCREEN */
-.quiz-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
-.badge { background: #E5E7EB; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+.quiz-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+.badge { background: #E5E7EB; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 13px; }
 .badge.bg-green { background: #D1FAE5; color: #065F46; }
 
-.question-text { font-size: 20px; margin-bottom: 25px; line-height: 1.4; }
+.question-text { font-size: 18px; margin-bottom: 20px; line-height: 1.4; font-weight: 600; }
 
-.options-grid { display: grid; gap: 12px; }
+.options-grid { display: grid; gap: 10px; }
 .opsi-btn {
-    background: white; border: 2px solid #E5E7EB; padding: 15px;
-    border-radius: 12px; text-align: left; font-size: 16px; cursor: pointer; transition: 0.2s;
+    background: white; border: 2px solid #E5E7EB; padding: 12px 15px;
+    border-radius: 10px; text-align: left; font-size: 15px; cursor: pointer; transition: 0.2s;
+    margin: 0;
 }
 .opsi-btn:hover:not(:disabled) { border-color: var(--primary); background: #EEF2FF; }
 .opsi-btn:disabled { cursor: not-allowed; opacity: 0.9; }
@@ -88,19 +86,19 @@ button {
 .opsi-btn.correct { background: #D1FAE5; border-color: var(--success); color: #065F46; }
 .opsi-btn.wrong { background: #FEE2E2; border-color: var(--danger); color: #991B1B; }
 
-.feedback { margin-top: 25px; padding: 20px; background: #F9FAFB; border-radius: 12px; border-left: 5px solid var(--primary); }
-.feedback h3 { margin: 0 0 10px; }
-.feedback p { margin: 0; line-height: 1.5; color: var(--text-muted); }
+.feedback { margin-top: 20px; padding: 15px; background: #F9FAFB; border-radius: 10px; border-left: 5px solid var(--primary); }
+.feedback h3 { margin: 0 0 8px; font-size: 16px; }
+.feedback p { margin: 0; line-height: 1.4; color: var(--text-muted); font-size: 14px; }
 .hidden { display: none !important; }
 
 /* RESULT SCREEN */
 #result-screen { text-align: center; padding: 20px 0; }
 .score-circle {
-    width: 150px; height: 150px; background: var(--primary); color: white;
+    width: 120px; height: 120px; background: var(--primary); color: white;
     border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 48px; font-weight: bold; margin: 30px auto;
-    box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+    font-size: 40px; font-weight: bold; margin: 20px auto;
+    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
 }
-.stats { margin-bottom: 30px; font-size: 18px; font-weight: bold; }
+.stats { margin-bottom: 25px; font-size: 16px; font-weight: bold; }
 .text-green { color: var(--success); }
 .text-red { color: var(--danger); }
