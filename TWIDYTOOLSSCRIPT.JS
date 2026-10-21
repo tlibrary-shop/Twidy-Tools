@@ -5,7 +5,7 @@ let selectedFiles = [];
 
 const toolConfig = {
     // === TWIDY ECOSYSTEM ===
-    'twidy-bill': { title: 'TwidyBill', desc: 'Generate tagihan siap kirim dalam hitungan detik.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.netlify.app/' },
+    'twidy-bill': { title: 'TwidyBill', desc: 'Generate tagihan siap kirim dalam hitungan detik.', icon: 'fa-file-invoice-dollar', color: 'text-emerald-500', isIframe: true, iframeUrl: 'https://twidybill.vercel.app/' },
     'twidy-ai': { title: 'Twidy AI', desc: 'Asisten AI pintar untuk membantu berbagai tugas digital Anda secara langsung.', icon: 'fa-robot', color: 'text-purple-500', isIframe: true, iframeUrl: 'https://twidyai.vercel.app/' },
     'twidy-translator': { title: 'Twidy Translator', desc: 'Terjemahkan teks dengan AI yang memahami konteks, bahasa sehari-hari, dan berbagai gaya penulisan.', icon: 'fa-language', color: 'text-sky-500', isCustomUI: true },
     'twidy-break-room': { title: 'Twidy Break Room', desc: 'Istirahat sejenak dengan mini games dan hiburan ringan sebelum kembali bekerja.', icon: 'fa-coffee', color: 'text-amber-700', isCustomUI: true },
