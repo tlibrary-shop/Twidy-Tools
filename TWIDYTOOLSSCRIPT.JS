@@ -294,7 +294,7 @@ const categories = {
 };
 
 document.addEventListener('DOMContentLoaded', function() {
-    currentLanguage = localStorage.getItem('twidytools-language') === 'en' ? 'en' : 'id';
+    currentLanguage = supportedLanguages.includes(localStorage.getItem('twidytools-language')) ? localStorage.getItem('twidytools-language') : 'id';
     languageObserver.observe(document.body, { childList: true, subtree: true });
     renderDashboard();
     setupDropZone();
@@ -312,7 +312,7 @@ function updateDateTime() {
     const now = new Date();
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
     const dtElement = document.getElementById('liveDateTime');
-    if (dtElement) { dtElement.textContent = now.toLocaleDateString(currentLanguage === 'en' ? 'en-US' : 'id-ID', options).replace(/\./g, ':'); }
+    if (dtElement) { const locales = {id:'id-ID',en:'en-US',ja:'ja-JP','zh-CN':'zh-CN',th:'th-TH',ko:'ko-KR',es:'es-ES',pt:'pt-BR',fr:'fr-FR',ar:'ar-SA',de:'de-DE',vi:'vi-VN'}; dtElement.textContent = now.toLocaleDateString(locales[currentLanguage] || 'id-ID', options).replace(/\./g, ':'); }
 }
 
 function renderDashboard() {
