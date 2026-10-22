@@ -1,6 +1,123 @@
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 let currentTool = null;
+
+let currentLanguage = 'id';
+const uiEN = {
+'Dashboard Utama':'Main Dashboard','Semua kebutuhan digital,':'All your digital needs,','dalam satu tempat.':'in one place.',
+'Kelola dokumen, olah file, dan selesaikan pekerjaan lebih cepat dengan alat digital yang praktis—gratis, langsung dari browser.':'Manage documents, process files, and get things done faster with practical digital tools—free, right in your browser.',
+'Praktis & aman':'Easy & secure','Tanpa instalasi':'No installation','Tanpa login':'No login required','TOOLS POPULER':'POPULAR TOOLS',
+'Super Cepat':'Super Fast','Proses instan, tanpa ribet.':'Instant processing, no hassle.','Aman & Privat':'Secure & Private','Kerjakan file langsung dari browser.':'Work on files directly in your browser.',
+'Langsung pakai, tanpa daftar.':'Ready to use, no sign-up.','Semua Perangkat':'All Devices','Desktop, tablet, dan mobile.':'Desktop, tablet, and mobile.',
+'Kembali ke Menu':'Back to Menu','Mainkan':'Play','Main':'Play','Memainkan Game':'Playing Game','Memuat Game...':'Loading game...',
+'Lepaskan penat sejenak sebelum kembali produktif.':'Take a short break before getting back to work.',
+'Masukkan Teks atau URL':'Enter text or URL','Buat QR Code':'Generate QR Code','Unduh QR Code':'Download QR Code',
+'Terjemahkan Sekarang':'Translate Now','Hasil terjemahan akan muncul di sini...':'Your translation will appear here...',
+'Deteksi Bahasa':'Detect language','Seret dan lepas file di sini':'Drag and drop files here','atau klik untuk memilih file':'or click to browse',
+'Proses Sekarang':'Process Now','Pilih File':'Choose files','Pilih file':'Choose files'
+};
+const descEN = {
+'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop).':'Merge PDFs and arrange file order using drag and drop.',
+'Gabungkan beberapa file PDF menjadi satu.':'Combine multiple PDF files into one.',
+'Pisahkan dokumen PDF menjadi beberapa bagian.':'Split a PDF document into multiple parts.',
+'Hapus halaman tertentu dari dokumen PDF.':'Remove selected pages from a PDF document.',
+'Dapatkan dokumen baru berisi halaman yang Anda ekstrak.':'Create a new document containing the pages you extract.',
+'Susun ulang urutan halaman PDF.':'Reorder PDF pages.','Kurangi ukuran file PDF.':'Reduce PDF file size.',
+'Pulihkan struktur file PDF yang rusak ringan.':'Repair mildly damaged PDF structure.',
+'Ubah teks gambar pada halaman PDF menjadi teks digital.':'Convert text in PDF page images into digital text.',
+'Konversi gambar ke PDF.':'Convert images to PDF.','Konversi DOCX ke PDF.':'Convert DOCX to PDF.',
+'Konversi PPTX ke PDF.':'Convert PPTX to PDF.','Konversi XLSX ke PDF.':'Convert XLSX to PDF.',
+'Konversi halaman web HTML ke PDF.':'Convert an HTML web page to PDF.','Konversi TXT ke PDF.':'Convert TXT to PDF.',
+'Konversi RTF ke PDF.':'Convert RTF to PDF.','Ekstrak setiap halaman PDF ke JPG.':'Extract each PDF page as a JPG.',
+'Konversi PDF ke DOCX.':'Convert PDF to DOCX.','Ubah PDF Anda menjadi presentasi PPTX.':'Convert your PDF into a PPTX presentation.',
+'Tarik data dari PDF ke spreadsheet EXCEL.':'Extract data from a PDF into an Excel spreadsheet.',
+'Putar PDF sesuka Anda.':'Rotate your PDF as needed.','Tambahkan nomor halaman ke PDF.':'Add page numbers to a PDF.',
+'Stempel teks ke PDF.':'Stamp text onto a PDF.','Pangkas margin PDF.':'Crop PDF margins.',
+'Preview dokumen di browser.':'Preview the document in your browser.','Buat formulir interaktif.':'Create interactive forms.',
+'Gabungkan dua halaman menjadi satu.':'Combine two pages into one.','Hapus pembatasan enkripsi PDF standar.':'Remove standard PDF encryption restrictions.',
+'Amankan dokumen dengan kata sandi.':'Protect documents with a password.','Tambahkan tanda tangan.':'Add a signature.',
+'Tutup area teks sensitif.':'Cover sensitive text areas.','Bandingkan dua file PDF.':'Compare two PDF files.',
+'Dapatkan ringkasan otomatis.':'Generate an automatic summary.','Terjemahkan seluruh isi PDF.':'Translate the entire PDF.',
+'Perbaiki tata bahasa.':'Improve grammar.','Otomatis temukan informasi penting.':'Automatically find key information.',
+'Buat 5 soal latihan.':'Generate 5 practice questions.','Analisis gaya bahasa/nada.':'Analyze writing style and tone.',
+'Tanya jawab tentang dokumen.':'Ask questions about the document.','Ubah PDF menjadi Markdown.':'Convert PDF to Markdown.',
+'Ubah resolusi dan dimensi gambar.':'Change image resolution and dimensions.','Kecilkan ukuran file gambar.':'Reduce image file size.',
+'Potong area gambar.':'Crop an image.','Balik gambar (Mirror).':'Flip or mirror an image.',
+'Hapus latar belakang foto dengan presisi AI.':'Remove photo backgrounds with AI precision.',
+'Beri efek blur.':'Apply a blur effect.','Buat QR Code dari teks atau link dengan cepat.':'Quickly create a QR code from text or a link.',
+'Ketik imajinasi Anda dan AI akan melukisnya menjadi gambar (Kuota Terbatas).':'Describe your idea and AI will turn it into an image (limited quota).',
+'Membutuhkan Model Ekstra.':'Requires an additional model.','Biarkan AI mendeskripsikan gambar.':'Let AI describe the image.',
+'Kecilkan ukuran video.':'Reduce video file size.','Potong durasi video.':'Trim video duration.',
+'Putar video 90 derajat.':'Rotate video by 90 degrees.','Ubah kecepatan video.':'Change video speed.',
+'Konversi Video ke mp3.':'Convert video to MP3.','Bungkam suara asli video.':'Mute the original video audio.',
+'Gabungkan beberapa klip video.':'Merge multiple video clips.','Ambil gambar per-detik video.':'Extract frames from a video.',
+'Jadikan video animasi GIF.':'Convert video into an animated GIF.','Ubah GIF menjadi MP4.':'Convert GIF to MP4.',
+'Ubah format jadi mp3.':'Convert to MP3 format.','Potong bagian lagu.':'Trim part of an audio track.',
+'Gabungkan lagu secara seri.':'Join audio tracks in sequence.','Keraskan volume lagu.':'Increase audio volume.',
+'Kurangi bising latar belakang.':'Reduce background noise.','Percepat tempo lagu.':'Speed up audio playback.',
+'Transkrip suara pakai AI.':'Transcribe audio with AI.','Membutuhkan API TTS.':'Requires a TTS API.',
+'Generate tagihan siap kirim dalam hitungan detik.':'Generate invoices ready to send in seconds.',
+'Asisten AI pintar untuk membantu berbagai tugas digital Anda secara langsung.':'A smart AI assistant to help with your digital tasks.',
+'Terjemahkan teks dengan AI yang memahami konteks, bahasa sehari-hari, dan berbagai gaya penulisan.':'Translate text with AI that understands context, everyday language, and different writing styles.',
+'Istirahat sejenak dengan mini games dan hiburan ringan sebelum kembali bekerja.':'Take a break with mini-games and light entertainment before returning to work.'
+};
+function tr(value) {
+ if (!value || currentLanguage !== 'en') return value;
+ const s = String(value);
+ if (uiEN[s.trim()]) return s.replace(s.trim(), uiEN[s.trim()]);
+ if (descEN[s.trim()]) return s.replace(s.trim(), descEN[s.trim()]);
+ const pairs = [
+ ['Harap masukkan','Please enter'],['terlebih dahulu.',' first.'],['berhasil dibuat!','created successfully!'],
+ ['berhasil disalin!','copied successfully!'],['Gagal memuat','Failed to load'],['Gagal mengunduh','Failed to download'],
+ ['Teks Watermark','Watermark text'],['Halaman yang dihapus','Pages to remove'],['Halaman yang diambil','Pages to extract'],
+ ['Rentang Halaman','Page range'],['Kosongkan untuk memisah tiap halaman','Leave blank to split every page'],
+ ['Urutan Halaman Baru','New page order'],['Teks Tanda Tangan','Signature text'],['Masukkan Kata Kunci (Password)','Enter password'],
+ ['Lebar Baru','New width'],['Tinggi Baru','New height'],['Kualitas','Quality'],['Derajat Rotasi','Rotation angle'],
+ ['Waktu Mulai','Start time'],['Durasi Potongan','Clip duration'],['Durasi GIF','GIF duration'],['Kecepatan','Speed'],
+ ['Detik','Seconds'],['Poin','Points'],['Contoh','Example'],['Ketik Teks','Enter text'],
+ ['Deskripsikan Gambar','Describe the image'],['Pilih Aspect Ratio','Choose aspect ratio'],
+ ['Buat Gambar Sekarang','Generate Image'],['Unduh Hasil Gambar','Download Image'],
+ ['AI Sedang Melukis Imajinasi Anda...','AI is creating your image...'],['Kuota Terbatas','Limited quota'],
+ ['Persegi','Square'],['Lanskap','Landscape'],['Potret','Portrait'],['Klasik','Classic'],
+ ['Salin Terjemahan','Copy translation'],['Menyiapkan unduhan...','Preparing download...'],
+ ['bawah','bottom'],['Ketik halaman di sini','Enter page numbers here'],['Ketik urutan baru','Enter new order']
+ ];
+ let out=s; pairs.forEach(([a,b])=>out=out.split(a).join(b)); return out;
+}
+const originalText = new WeakMap();
+function translateTextNode(n) {
+ if(n.nodeType!==Node.TEXT_NODE || !n.parentElement || n.parentElement.closest('script,style,code,pre')) return;
+ if(!originalText.has(n)) originalText.set(n,n.nodeValue);
+ const orig=originalText.get(n), translated=tr(orig);
+ if(n.nodeValue!==translated) n.nodeValue=translated;
+}
+function applyLanguage(lang) {
+ currentLanguage=lang==='en'?'en':'id';
+ document.documentElement.lang=currentLanguage;
+ const sel=document.getElementById('languageSelect'); if(sel) sel.value=currentLanguage;
+ document.querySelectorAll('body *').forEach(el=>{
+  if(el.children.length===0) {
+   if(el.hasAttribute('placeholder')) { if(!el.dataset.origPlaceholder) el.dataset.origPlaceholder=el.getAttribute('placeholder'); el.setAttribute('placeholder',tr(el.dataset.origPlaceholder)); }
+   ['title','aria-label'].forEach(a=>{ if(el.hasAttribute(a)){ const k='orig'+a; if(!el.dataset[k]) el.dataset[k]=el.getAttribute(a); el.setAttribute(a,tr(el.dataset[k])); }});
+  }
+ });
+ const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT); let n; while((n=w.nextNode())) translateTextNode(n);
+ updateDateTime();
+}
+function setLanguage(lang) {
+ localStorage.setItem('twidytools-language',lang==='en'?'en':'id');
+ applyLanguage(lang); renderDashboard();
+ if(currentTool && toolConfig[currentTool]) selectTool(currentTool);
+ applyLanguage(currentLanguage);
+}
+const languageObserver = new MutationObserver(ms=>{
+ if(currentLanguage!=='en') return;
+ ms.forEach(m=>m.addedNodes.forEach(n=>{
+  if(n.nodeType===Node.TEXT_NODE) translateTextNode(n);
+  else if(n.nodeType===Node.ELEMENT_NODE){const w=document.createTreeWalker(n,NodeFilter.SHOW_TEXT);let c;while((c=w.nextNode()))translateTextNode(c);}
+ }));
+});
+
 let selectedFiles = [];
 
 const toolConfig = {
@@ -129,12 +246,15 @@ const categories = {
 };
 
 document.addEventListener('DOMContentLoaded', function() {
+    currentLanguage = localStorage.getItem('twidytools-language') === 'en' ? 'en' : 'id';
+    languageObserver.observe(document.body, { childList: true, subtree: true });
     renderDashboard();
     setupDropZone();
     setupFileInput();
     initTheme();
     setInterval(updateDateTime, 1000);
     updateDateTime();
+    applyLanguage(currentLanguage);
     
     const hash = window.location.hash.substring(1);
     if (hash && toolConfig[hash]) { selectTool(hash); }
@@ -144,7 +264,7 @@ function updateDateTime() {
     const now = new Date();
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
     const dtElement = document.getElementById('liveDateTime');
-    if (dtElement) { dtElement.textContent = now.toLocaleDateString('id-ID', options).replace(/\./g, ':'); }
+    if (dtElement) { dtElement.textContent = now.toLocaleDateString(currentLanguage === 'en' ? 'en-US' : 'id-ID', options).replace(/\./g, ':'); }
 }
 
 function renderDashboard() {
@@ -154,7 +274,7 @@ function renderDashboard() {
     for (const [catName, tools] of Object.entries(categories)) {
         let catHTML = `
             <div class="mb-8 sm:mb-10">
-                <h3 class="text-base sm:text-xl font-bold text-slate-700 dark:text-slate-200 mb-3 sm:mb-5 border-b pb-2 border-slate-200 dark:border-slate-700">${catName}</h3>
+                <h3 class="text-base sm:text-xl font-bold text-slate-700 dark:text-slate-200 mb-3 sm:mb-5 border-b pb-2 border-slate-200 dark:border-slate-700">${tr(catName)}</h3>
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
         `;
         tools.forEach(toolId => {
@@ -163,8 +283,8 @@ function renderDashboard() {
                 catHTML += `
                     <div onclick="selectTool('${toolId}')" class="group bg-white dark:bg-darkCard p-3 sm:p-6 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col justify-start">
                         <div class="${t.color} text-2xl sm:text-4xl mb-2 sm:mb-4 transition-transform group-hover:scale-110"><i class="fas ${t.icon}"></i></div>
-                        <h4 class="font-bold text-sm sm:text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 mb-1 leading-tight">${t.title}</h4>
-                        <p class="text-slate-500 dark:text-slate-400 text-[10px] sm:text-sm leading-snug line-clamp-3 sm:line-clamp-none">${t.desc}</p>
+                        <h4 class="font-bold text-sm sm:text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 mb-1 leading-tight">${tr(t.title)}</h4>
+                        <p class="text-slate-500 dark:text-slate-400 text-[10px] sm:text-sm leading-snug line-clamp-3 sm:line-clamp-none">${tr(t.desc)}</p>
                     </div>
                 `;
             }
@@ -192,12 +312,6 @@ function toggleSidebar() {
     }
 }
 
-function translatePage() {
-    const pageUrl = window.location.href;
-    const translateUrl = 'https://translate.google.com/translate?sl=auto&tl=id&u=' + encodeURIComponent(pageUrl);
-    window.open(translateUrl, '_blank', 'noopener,noreferrer');
-}
-
 function toggleDarkMode() {
     document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
@@ -219,14 +333,14 @@ function selectTool(toolId) {
     if (!config) return;
     
     window.location.hash = toolId;
-    document.title = config.title + " - TwidyTools";
+    document.title = tr(config.title) + " - TwidyTools";
     
     document.getElementById('toolsSection').classList.add('hidden');
     document.getElementById('uploadSection').classList.remove('hidden');
     document.getElementById('aiResultContainer').classList.add('hidden');
     
-    document.getElementById('toolTitle').textContent = config.title;
-    document.getElementById('toolDescription').textContent = config.desc;
+    document.getElementById('toolTitle').textContent = tr(config.title);
+    document.getElementById('toolDescription').textContent = tr(config.desc);
 
     const dropZone = document.getElementById('dropZone');
     const iframeContainer = document.getElementById('iframeContainer');
@@ -278,8 +392,8 @@ function selectTool(toolId) {
             config.settings.forEach(set => {
                 sContent.innerHTML += `
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">${set.label}</label>
-                        <input type="${set.type}" id="${set.id}" placeholder="${set.placeholder}" class="w-full text-sm px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">${tr(set.label)}</label>
+                        <input type="${set.type}" id="${set.id}" placeholder="${tr(set.placeholder)}" class="w-full text-sm px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
                     </div>
                 `;
             });
