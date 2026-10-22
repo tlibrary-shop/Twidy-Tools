@@ -97,11 +97,21 @@ const descEN = {
 'Terjemahkan teks dengan AI yang memahami konteks, bahasa sehari-hari, dan berbagai gaya penulisan.':'Translate text with AI that understands context, everyday language, and different writing styles.',
 'Istirahat sejenak dengan mini games dan hiburan ringan sebelum kembali bekerja.':'Take a break with mini-games and light entertainment before returning to work.'
 };
+const supportedLanguages = ['id','en','ja','zh-CN','th','ko','es','pt','fr','ar','de','vi'];
+const uiMulti = {"ja":{"Dashboard Utama":"メインダッシュボード","TOOLS POPULER":"人気のツール","Praktis & aman":"簡単で安全","Tanpa instalasi":"インストール不要","Tanpa login":"ログイン不要","Super Cepat":"超高速","Aman & Privat":"安全・プライベート","Semua Perangkat":"すべてのデバイス","Kembali ke Menu":"メニューに戻る","Masukkan Teks atau URL":"テキストまたはURLを入力","Buat QR Code":"QRコードを作成","Terjemahkan Sekarang":"今すぐ翻訳","Proses Sekarang":"今すぐ処理","Pilih File":"ファイルを選択","Gabungkan beberapa dokumen PDF.":"複数のPDF文書を結合します。","Bantu mengurangi ukuran file.":"ファイルサイズを縮小します。","Ubah gambar menjadi PDF.":"画像をPDFに変換します。","Buat QR code untuk tautan atau teks.":"リンクやテキストからQRコードを作成します。"},"zh-CN":{"Dashboard Utama":"主控制面板","TOOLS POPULER":"热门工具","Praktis & aman":"方便且安全","Tanpa instalasi":"无需安装","Tanpa login":"无需登录","Super Cepat":"极速处理","Aman & Privat":"安全与隐私","Semua Perangkat":"支持所有设备","Kembali ke Menu":"返回菜单","Masukkan Teks atau URL":"输入文本或网址","Buat QR Code":"生成二维码","Terjemahkan Sekarang":"立即翻译","Proses Sekarang":"立即处理","Pilih File":"选择文件","Gabungkan beberapa dokumen PDF.":"合并多个 PDF 文档。","Bantu mengurangi ukuran file.":"帮助减小文件大小。","Ubah gambar menjadi PDF.":"将图片转换为 PDF。","Buat QR code untuk tautan atau teks.":"为链接或文本生成二维码。"},"th":{"Dashboard Utama":"แดชบอร์ดหลัก","TOOLS POPULER":"เครื่องมือยอดนิยม","Praktis & aman":"สะดวกและปลอดภัย","Tanpa instalasi":"ไม่ต้องติดตั้ง","Tanpa login":"ไม่ต้องเข้าสู่ระบบ","Super Cepat":"รวดเร็วเป็นพิเศษ","Aman & Privat":"ปลอดภัยและเป็นส่วนตัว","Semua Perangkat":"ทุกอุปกรณ์","Kembali ke Menu":"กลับไปที่เมนู","Masukkan Teks atau URL":"ป้อนข้อความหรือ URL","Buat QR Code":"สร้าง QR Code","Terjemahkan Sekarang":"แปลตอนนี้","Proses Sekarang":"เริ่มประมวลผล","Pilih File":"เลือกไฟล์","Gabungkan beberapa dokumen PDF.":"รวมเอกสาร PDF หลายไฟล์","Bantu mengurangi ukuran file.":"ช่วยลดขนาดไฟล์","Ubah gambar menjadi PDF.":"แปลงรูปภาพเป็น PDF","Buat QR code untuk tautan atau teks.":"สร้าง QR Code สำหรับลิงก์หรือข้อความ"},"ko":{"Dashboard Utama":"메인 대시보드","TOOLS POPULER":"인기 도구","Praktis & aman":"간편하고 안전함","Tanpa instalasi":"설치 불필요","Tanpa login":"로그인 불필요","Super Cepat":"초고속","Aman & Privat":"안전 및 개인정보 보호","Semua Perangkat":"모든 기기","Kembali ke Menu":"메뉴로 돌아가기","Masukkan Teks atau URL":"텍스트 또는 URL 입력","Buat QR Code":"QR 코드 만들기","Terjemahkan Sekarang":"지금 번역","Proses Sekarang":"지금 처리","Pilih File":"파일 선택","Gabungkan beberapa dokumen PDF.":"여러 PDF 문서를 하나로 합칩니다.","Bantu mengurangi ukuran file.":"파일 크기를 줄입니다.","Ubah gambar menjadi PDF.":"이미지를 PDF로 변환합니다.","Buat QR code untuk tautan atau teks.":"링크나 텍스트로 QR 코드를 만듭니다."},"es":{"Dashboard Utama":"Panel principal","TOOLS POPULER":"HERRAMIENTAS POPULARES","Praktis & aman":"Fácil y seguro","Tanpa instalasi":"Sin instalación","Tanpa login":"Sin iniciar sesión","Super Cepat":"Súper rápido","Aman & Privat":"Seguro y privado","Semua Perangkat":"Todos los dispositivos","Kembali ke Menu":"Volver al menú","Masukkan Teks atau URL":"Introduce texto o URL","Buat QR Code":"Crear código QR","Terjemahkan Sekarang":"Traducir ahora","Proses Sekarang":"Procesar ahora","Pilih File":"Elegir archivos","Gabungkan beberapa dokumen PDF.":"Combina varios documentos PDF.","Bantu mengurangi ukuran file.":"Ayuda a reducir el tamaño del archivo.","Ubah gambar menjadi PDF.":"Convierte imágenes a PDF.","Buat QR code untuk tautan atau teks.":"Crea un código QR para un enlace o texto."},"pt":{"Dashboard Utama":"Painel principal","TOOLS POPULER":"FERRAMENTAS POPULARES","Praktis & aman":"Prático e seguro","Tanpa instalasi":"Sem instalação","Tanpa login":"Sem login","Super Cepat":"Super rápido","Aman & Privat":"Seguro e privado","Semua Perangkat":"Todos os dispositivos","Kembali ke Menu":"Voltar ao menu","Masukkan Teks atau URL":"Digite texto ou URL","Buat QR Code":"Criar QR Code","Terjemahkan Sekarang":"Traduzir agora","Proses Sekarang":"Processar agora","Pilih File":"Escolher arquivos","Gabungkan beberapa dokumen PDF.":"Combine vários documentos PDF.","Bantu mengurangi ukuran file.":"Ajuda a reduzir o tamanho do arquivo.","Ubah gambar menjadi PDF.":"Converta imagens para PDF.","Buat QR code untuk tautan atau teks.":"Crie um QR Code para um link ou texto."},"fr":{"Dashboard Utama":"Tableau de bord","TOOLS POPULER":"OUTILS POPULAIRES","Praktis & aman":"Simple et sécurisé","Tanpa instalasi":"Sans installation","Tanpa login":"Sans connexion","Super Cepat":"Ultra rapide","Aman & Privat":"Sécurisé et privé","Semua Perangkat":"Tous les appareils","Kembali ke Menu":"Retour au menu","Masukkan Teks atau URL":"Saisissez du texte ou une URL","Buat QR Code":"Créer un QR code","Terjemahkan Sekarang":"Traduire maintenant","Proses Sekarang":"Traiter maintenant","Pilih File":"Choisir des fichiers","Gabungkan beberapa dokumen PDF.":"Fusionnez plusieurs documents PDF.","Bantu mengurangi ukuran file.":"Aide à réduire la taille du fichier.","Ubah gambar menjadi PDF.":"Convertissez des images en PDF.","Buat QR code untuk tautan atau teks.":"Créez un QR code pour un lien ou du texte."},"ar":{"Dashboard Utama":"لوحة التحكم الرئيسية","TOOLS POPULER":"الأدوات الشائعة","Praktis & aman":"سهل وآمن","Tanpa instalasi":"بدون تثبيت","Tanpa login":"بدون تسجيل دخول","Super Cepat":"سريع جدًا","Aman & Privat":"آمن وخصوصي","Semua Perangkat":"جميع الأجهزة","Kembali ke Menu":"العودة إلى القائمة","Masukkan Teks atau URL":"أدخل نصًا أو رابطًا","Buat QR Code":"إنشاء رمز QR","Terjemahkan Sekarang":"ترجم الآن","Proses Sekarang":"ابدأ المعالجة","Pilih File":"اختيار الملفات","Gabungkan beberapa dokumen PDF.":"ادمج عدة مستندات PDF.","Bantu mengurangi ukuran file.":"يساعد في تقليل حجم الملف.","Ubah gambar menjadi PDF.":"حوّل الصور إلى PDF.","Buat QR code untuk tautan atau teks.":"أنشئ رمز QR لرابط أو نص."},"de":{"Dashboard Utama":"Hauptübersicht","TOOLS POPULER":"BELIEBTE TOOLS","Praktis & aman":"Einfach und sicher","Tanpa instalasi":"Keine Installation","Tanpa login":"Keine Anmeldung","Super Cepat":"Superschnell","Aman & Privat":"Sicher und privat","Semua Perangkat":"Alle Geräte","Kembali ke Menu":"Zurück zum Menü","Masukkan Teks atau URL":"Text oder URL eingeben","Buat QR Code":"QR-Code erstellen","Terjemahkan Sekarang":"Jetzt übersetzen","Proses Sekarang":"Jetzt verarbeiten","Pilih File":"Dateien auswählen","Gabungkan beberapa dokumen PDF.":"Mehrere PDF-Dokumente zusammenführen.","Bantu mengurangi ukuran file.":"Hilft, die Dateigröße zu reduzieren.","Ubah gambar menjadi PDF.":"Bilder in PDF umwandeln.","Buat QR code untuk tautan atau teks.":"Einen QR-Code für einen Link oder Text erstellen."},"vi":{"Dashboard Utama":"Bảng điều khiển chính","TOOLS POPULER":"CÔNG CỤ PHỔ BIẾN","Praktis & aman":"Tiện lợi và an toàn","Tanpa instalasi":"Không cần cài đặt","Tanpa login":"Không cần đăng nhập","Super Cepat":"Siêu nhanh","Aman & Privat":"An toàn và riêng tư","Semua Perangkat":"Mọi thiết bị","Kembali ke Menu":"Quay lại menu","Masukkan Teks atau URL":"Nhập văn bản hoặc URL","Buat QR Code":"Tạo mã QR","Terjemahkan Sekarang":"Dịch ngay","Proses Sekarang":"Xử lý ngay","Pilih File":"Chọn tệp","Gabungkan beberapa dokumen PDF.":"Gộp nhiều tài liệu PDF.","Bantu mengurangi ukuran file.":"Giúp giảm kích thước tệp.","Ubah gambar menjadi PDF.":"Chuyển hình ảnh thành PDF.","Buat QR code untuk tautan atau teks.":"Tạo mã QR cho liên kết hoặc văn bản."}};
 function tr(value) {
- if (!value || currentLanguage !== 'en') return value;
- const s = String(value);
- if (uiEN[s.trim()]) return s.replace(s.trim(), uiEN[s.trim()]);
- if (descEN[s.trim()]) return s.replace(s.trim(), descEN[s.trim()]);
+ if (!value) return value;
+ const s = String(value), key = s.trim();
+ if (currentLanguage === 'id') return value;
+ if (currentLanguage !== 'en') {
+  const translated = (uiMulti[currentLanguage] || {})[key];
+  if (translated) return s.replace(key, translated);
+  if (uiEN[key]) return s.replace(key, uiEN[key]);
+  if (descEN[key]) return s.replace(key, descEN[key]);
+  return value;
+ }
+ if (uiEN[key]) return s.replace(key, uiEN[key]);
+ if (descEN[key]) return s.replace(key, descEN[key]);
  const pairs = [
  ['Harap masukkan','Please enter'],['terlebih dahulu.',' first.'],['berhasil dibuat!','created successfully!'],
  ['berhasil disalin!','copied successfully!'],['Gagal memuat','Failed to load'],['Gagal mengunduh','Failed to download'],
@@ -128,9 +138,10 @@ function translateTextNode(n) {
  if(n.nodeValue!==translated) n.nodeValue=translated;
 }
 function applyLanguage(lang) {
- currentLanguage=lang==='en'?'en':'id';
+ currentLanguage=supportedLanguages.includes(lang)?lang:'id';
  document.documentElement.lang=currentLanguage;
  const sel=document.getElementById('languageSelect'); if(sel) sel.value=currentLanguage;
+ document.documentElement.dir=currentLanguage==='ar'?'rtl':'ltr';
  document.querySelectorAll('body *').forEach(el=>{
   if(el.children.length===0) {
    if(el.hasAttribute('placeholder')) { if(!el.dataset.origPlaceholder) el.dataset.origPlaceholder=el.getAttribute('placeholder'); el.setAttribute('placeholder',tr(el.dataset.origPlaceholder)); }
@@ -141,13 +152,14 @@ function applyLanguage(lang) {
  updateDateTime();
 }
 function setLanguage(lang) {
- localStorage.setItem('twidytools-language',lang==='en'?'en':'id');
+ lang=supportedLanguages.includes(lang)?lang:'id';
+ localStorage.setItem('twidytools-language',lang);
  applyLanguage(lang); renderDashboard();
  if(currentTool && toolConfig[currentTool]) selectTool(currentTool);
  applyLanguage(currentLanguage);
 }
 const languageObserver = new MutationObserver(ms=>{
- if(currentLanguage!=='en') return;
+ if(currentLanguage==='id') return;
  ms.forEach(m=>m.addedNodes.forEach(n=>{
   if(n.nodeType===Node.TEXT_NODE) translateTextNode(n);
   else if(n.nodeType===Node.ELEMENT_NODE){const w=document.createTreeWalker(n,NodeFilter.SHOW_TEXT);let c;while((c=w.nextNode()))translateTextNode(c);}
