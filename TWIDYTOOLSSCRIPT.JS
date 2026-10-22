@@ -192,6 +192,12 @@ function toggleSidebar() {
     }
 }
 
+function translatePage() {
+    const pageUrl = window.location.href;
+    const translateUrl = 'https://translate.google.com/translate?sl=auto&tl=id&u=' + encodeURIComponent(pageUrl);
+    window.open(translateUrl, '_blank', 'noopener,noreferrer');
+}
+
 function toggleDarkMode() {
     document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
