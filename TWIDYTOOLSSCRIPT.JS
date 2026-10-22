@@ -19,6 +19,11 @@ const uiEN = {
 const descEN = {
 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop).':'Merge PDFs and arrange file order using drag and drop.',
 'Gabungkan beberapa file PDF menjadi satu.':'Combine multiple PDF files into one.',
+'Gabungkan beberapa dokumen PDF.':'Merge multiple PDF documents.',
+'Bantu mengurangi ukuran file.':'Help reduce file size.',
+'Ubah gambar menjadi PDF.':'Convert images to PDF.',
+'Buat QR code untuk tautan atau teks.':'Create a QR code for a link or text.',
+
 'Pisahkan dokumen PDF menjadi beberapa bagian.':'Split a PDF document into multiple parts.',
 'Hapus halaman tertentu dari dokumen PDF.':'Remove selected pages from a PDF document.',
 'Dapatkan dokumen baru berisi halaman yang Anda ekstrak.':'Create a new document containing the pages you extract.',
