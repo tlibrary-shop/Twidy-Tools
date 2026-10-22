@@ -137,6 +137,84 @@ function translateTextNode(n) {
  const orig=originalText.get(n), translated=tr(orig);
  if(n.nodeValue!==translated) n.nodeValue=translated;
 }
+
+const autoTranslationCache = (() => {
+ try { return JSON.parse(localStorage.getItem('twidytools-auto-translations') || '{}'); }
+ catch (_) { return {}; }
+})();
+let autoTranslationQueue = Promise.resolve();
+const translationInFlight = new Map();
+function saveAutoTranslationCache() {
+ try {
+  const keys=Object.keys(autoTranslationCache);
+  if(keys.length>1800) keys.slice(0,keys.length-1800).forEach(k=>delete autoTranslationCache[k]);
+  localStorage.setItem('twidytools-auto-translations',JSON.stringify(autoTranslationCache));
+ } catch (_) {}
+}
+async function translateMissingTextNode(node, langAtStart=currentLanguage) {
+ if(!node || node.nodeType!==Node.TEXT_NODE || !node.parentElement || node.parentElement.closest('script,style,code,pre,textarea,[contenteditable="true"]')) return;
+ const source=(originalText.has(node)?originalText.get(node):node.nodeValue || '').trim();
+ if(!source || source.length<2 || langAtStart==='id' || !supportedLanguages.includes(langAtStart)) return;
+ if(/^[\d\s.,:;!?%+\-_/()#]+$/.test(source)) return;
+ const key=langAtStart+'|'+source;
+ if(autoTranslationCache[key]) {
+  const current=node.nodeValue.trim();
+  if(current===source || current===tr(source)) node.nodeValue=node.nodeValue.replace(current,autoTranslationCache[key]);
+  return;
+ }
+ if(translationInFlight.has(key)) {
+  const translated=await translationInFlight.get(key);
+  if(translated && currentLanguage===langAtStart && node.isConnected) {
+   const current=node.nodeValue.trim();
+   if(current===source || current===tr(source)) node.nodeValue=node.nodeValue.replace(current,translated);
+  }
+  return;
+ }
+ const task=(async()=>{
+  try {
+   const url='https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl='+encodeURIComponent(langAtStart)+'&dt=t&q='+encodeURIComponent(source);
+   const response=await fetch(url,{method:'GET'});
+   if(!response.ok) throw new Error('Translation service unavailable');
+   const data=await response.json();
+   const translated=Array.isArray(data[0])?data[0].map(part=>part && part[0] || '').join(''): '';
+   if(translated && translated.trim() && translated.trim()!==source) {
+    autoTranslationCache[key]=translated.trim();
+    saveAutoTranslationCache();
+    return translated.trim();
+   }
+  } catch (_) {}
+  return null;
+ })();
+ translationInFlight.set(key,task);
+ const translated=await task;
+ translationInFlight.delete(key);
+ if(translated && currentLanguage===langAtStart && node.isConnected) {
+  const current=node.nodeValue.trim();
+  if(current===source || current===tr(source)) node.nodeValue=node.nodeValue.replace(current,translated);
+ }
+}
+function translateMissingText(root=document.body, langAtStart=currentLanguage) {
+ if(!root || langAtStart==='id') return;
+ const nodes=[];
+ if(root.nodeType===Node.TEXT_NODE) nodes.push(root);
+ else if(root.nodeType===Node.ELEMENT_NODE || root===document) {
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+  let n; while((n=walker.nextNode())) nodes.push(n);
+ }
+ const unique=new Map();
+ nodes.forEach(n=>{
+  if(!n.parentElement || n.parentElement.closest('script,style,code,pre,textarea,[contenteditable="true"]')) return;
+  const original=originalText.has(n)?originalText.get(n):n.nodeValue;
+  const key=String(original||'').trim();
+  if(key && key.length>=2 && !autoTranslationCache[langAtStart+'|'+key]) unique.set(n,true);
+ });
+ const batch=[...unique.keys()];
+ let cursor=0;
+ const worker=async()=>{while(cursor<batch.length){const node=batch[cursor++];await translateMissingTextNode(node,langAtStart);}};
+ autoTranslationQueue=autoTranslationQueue.then(()=>Promise.all(Array.from({length:4},worker))).catch(()=>{});
+ return autoTranslationQueue;
+}
+
 function applyLanguage(lang) {
  currentLanguage=supportedLanguages.includes(lang)?lang:'id';
  document.documentElement.lang=currentLanguage;
@@ -150,6 +228,7 @@ function applyLanguage(lang) {
  });
  const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT); let n; while((n=w.nextNode())) translateTextNode(n);
  updateDateTime();
+ translateMissingText(document.body,currentLanguage);
 }
 function setLanguage(lang) {
  lang=supportedLanguages.includes(lang)?lang:'id';
@@ -163,6 +242,7 @@ const languageObserver = new MutationObserver(ms=>{
  ms.forEach(m=>m.addedNodes.forEach(n=>{
   if(n.nodeType===Node.TEXT_NODE) translateTextNode(n);
   else if(n.nodeType===Node.ELEMENT_NODE){const w=document.createTreeWalker(n,NodeFilter.SHOW_TEXT);let c;while((c=w.nextNode()))translateTextNode(c);}
+  translateMissingText(m.target && m.target.nodeType===Node.ELEMENT_NODE ? m.target : document.body,currentLanguage);
  }));
 });
 
