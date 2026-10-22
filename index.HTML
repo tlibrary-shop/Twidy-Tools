@@ -36,11 +36,23 @@
         .dark ::-webkit-scrollbar-thumb { background:#475569; }
         .sortable-ghost { opacity:.4; background-color:#f8fafc; }
         body { letter-spacing:-.01em; }
-        #sidebar { background:#fff; border-color:#e6eaf2; }
+        #sidebar { background:linear-gradient(180deg,#111d36 0%,#101a30 100%); border-color:#263450; color:#e5edff; }
+        #sidebar h4 { color:#8292b6 !important; }
+        #sidebar button { color:#e5edff; }
+        #sidebar button:hover { background:rgba(99,102,241,.18); }
         #sidebar button { transition:background .18s ease,color .18s ease; }
         #sidebar h4 { letter-spacing:.09em; }
         header { box-shadow:0 1px 0 rgba(15,23,42,.02); }
-        .twidy-hero { position:relative; overflow:hidden; border:1px solid #e6eaf3; background:linear-gradient(115deg,#fff 0%,#f8faff 58%,#f2f4ff 100%); border-radius:22px; padding:clamp(22px,3vw,36px); }
+        .twidy-hero { position:relative; display:grid; grid-template-columns:minmax(0,1.15fr) minmax(180px,.65fr) minmax(230px,.8fr); align-items:center; gap:20px; overflow:hidden; border:1px solid #e6eaf3; background:linear-gradient(115deg,#fff 0%,#f8faff 58%,#f2f4ff 100%); border-radius:22px; padding:clamp(22px,2.5vw,34px); }
+        .twidy-hero-art { min-height:150px; position:relative; align-items:center; justify-content:center; }
+        .hero-orbit { position:absolute;width:220px;height:100px;border:2px solid #d9e3ff;border-left-color:#8caeff;border-radius:50%;transform:rotate(-15deg); }
+        .hero-float { position:absolute;display:flex;align-items:center;justify-content:center;width:62px;height:68px;border-radius:17px;background:white;box-shadow:0 12px 30px rgba(76,94,160,.14);font-size:28px;transform:rotate(-8deg); }
+        .hero-doc { left:13%;top:25%;color:#5285f5; } .hero-image { left:42%;top:35%;color:#8b5cf6;transform:rotate(8deg);background:#f7f2ff; } .hero-qr { right:8%;top:26%;color:#10b981;transform:rotate(9deg); }
+        .hero-spark { position:absolute;color:#8ba9ff;font-size:22px; } .spark-one {top:5%;right:20%;}.spark-two {bottom:8%;left:18%;}
+        .twidy-benefits { border:1px solid #e3eaf8;border-radius:16px;padding:8px 14px;background:rgba(255,255,255,.55); }
+        .twidy-benefits>div {display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #edf1f8;} .twidy-benefits>div:last-child {border-bottom:0;}
+        .benefit-icon {display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#edf2ff;font-size:16px;flex-shrink:0;}
+        .twidy-benefits b {display:block;font-size:12px;color:#243653;} .twidy-benefits small {display:block;margin-top:2px;font-size:10px;color:#71809b;}
         .twidy-hero:after { content:""; position:absolute; width:240px;height:240px;right:-65px;top:-100px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,.12),rgba(99,102,241,0) 70%);pointer-events:none; }
         .twidy-eyebrow { display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#eef2ff;color:#4f46e5;font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase; }
         .twidy-section-title { color:#263550;font-size:15px;font-weight:800;letter-spacing:.015em; }
@@ -52,12 +64,14 @@
         .tool-shortcut { border:1px solid #e2e8f0;border-radius:16px;background:#fff;padding:18px;min-width:0;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease; }
         .tool-shortcut:hover { transform:translateY(-3px);box-shadow:0 12px 26px rgba(15,23,42,.07);border-color:#c7d2fe; }
         .dark .twidy-hero { background:linear-gradient(115deg,#172033,#18223a 65%,#202747);border-color:#334155; }
+        .dark .twidy-benefits {background:rgba(15,23,42,.45);border-color:#334155;} .dark .twidy-benefits b {color:#e2e8f0;} .dark .twidy-benefits small {color:#94a3b8;} .dark .twidy-benefits>div {border-color:#334155;}
         .dark .twidy-section-title { color:#e2e8f0; }
         .dark .twidy-section-line { background:#334155; }
         .dark .ecosystem-card,.dark .tool-shortcut { background:#1e293b;border-color:#334155; }
         .dark .ecosystem-card:hover,.dark .tool-shortcut:hover { border-color:#6366f1; }
         .dark .twidy-eyebrow { background:#312e81;color:#c7d2fe; }
-        @media(max-width:639px) {
+        @media(max-width:1023px) { .twidy-hero { grid-template-columns:minmax(0,1fr) minmax(150px,.55fr); } .twidy-benefits { display:none !important; } }
+        @media(max-width:639px) { .twidy-hero { display:block; } .twidy-hero-art { display:none !important; } .ecosystem-card { min-height:150px; } .ecosystem-card p { font-size:11px; }
           main { padding:16px !important; }
           .twidy-hero { border-radius:18px;padding:22px 18px; }
           .ecosystem-card { min-height:140px;padding:14px;border-radius:15px; }
@@ -284,47 +298,49 @@
                             <h1 class="mt-4 text-[27px] leading-tight sm:text-4xl font-extrabold tracking-tight text-slate-950 dark:text-white">Semua kebutuhan digital,<br class="hidden sm:block"> dalam satu tempat.</h1>
                             <p class="mt-3 max-w-2xl text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300">Kelola dokumen, olah file, dan selesaikan pekerjaan lebih cepat dengan alat digital yang praktis—gratis, langsung dari browser.</p>
                             <div class="mt-5 flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-500 dark:text-slate-300">
-                                <span class="inline-flex items-center gap-2"><i class="fas fa-shield-alt text-emerald-500"></i> File diproses dengan praktis</span>
+                                <span class="inline-flex items-center gap-2"><i class="fas fa-shield-alt text-emerald-500"></i> Praktis &amp; aman</span>
                                 <span class="inline-flex items-center gap-2"><i class="fas fa-bolt text-amber-500"></i> Tanpa instalasi</span>
+                                <span class="inline-flex items-center gap-2"><i class="fas fa-user-check text-indigo-500"></i> Tanpa login</span>
                             </div>
+                        </div>
+                        <div class="twidy-hero-art hidden lg:flex" aria-hidden="true">
+                            <div class="hero-orbit"></div><span class="hero-float hero-doc"><i class="fas fa-file-alt"></i></span><span class="hero-float hero-image"><i class="fas fa-image"></i></span><span class="hero-float hero-qr"><i class="fas fa-qrcode"></i></span><span class="hero-spark spark-one">✦</span><span class="hero-spark spark-two">✦</span>
+                        </div>
+                        <div class="twidy-benefits hidden xl:block">
+                            <div><span class="benefit-icon text-blue-600"><i class="fas fa-bolt"></i></span><span><b>Super Cepat</b><small>Proses instan, tanpa ribet.</small></span></div>
+                            <div><span class="benefit-icon text-indigo-600"><i class="fas fa-shield-alt"></i></span><span><b>Aman &amp; Privat</b><small>Kerjakan file langsung dari browser.</small></span></div>
+                            <div><span class="benefit-icon text-sky-600"><i class="fas fa-cloud"></i></span><span><b>Tanpa Login</b><small>Langsung pakai, tanpa daftar.</small></span></div>
+                            <div><span class="benefit-icon text-violet-600"><i class="fas fa-mobile-alt"></i></span><span><b>Semua Perangkat</b><small>Desktop, tablet, dan mobile.</small></span></div>
                         </div>
                     </section>
 
                     <section aria-labelledby="ecosystem-heading" class="mb-8 sm:mb-10">
-                        <div class="mb-4 flex items-center gap-3">
-                            <h2 id="ecosystem-heading" class="twidy-section-title text-base sm:text-lg">TWIDY ECOSYSTEM</h2>
-                            <span class="twidy-section-line"></span>
-                            <span class="hidden sm:inline text-xs text-slate-400">Satu ekosistem, banyak kemungkinan</span>
-                        </div>
-                        <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
-                            <a class="ecosystem-card" href="https://twidybill.netlify.app/" target="_blank" rel="noopener noreferrer" aria-label="Buka TwidyBill">
-                                <span class="ecosystem-icon bg-emerald-50 text-emerald-600"><i class="fas fa-file-invoice-dollar"></i></span>
-                                <h3 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white">TwidyBill</h3>
-                                <p class="mt-1 text-xs sm:text-sm leading-relaxed text-slate-500 dark:text-slate-400">Buat tagihan dan bagi biaya dengan mudah.</p>
-                                <span class="eco-arrow">Buka layanan <i class="fas fa-arrow-up-right-from-square text-[10px]"></i></span>
-                            </a>
-                            <a class="ecosystem-card" href="https://twidyshop.my.id/" target="_blank" rel="noopener noreferrer" aria-label="Buka TwidyShop">
-                                <span class="ecosystem-icon bg-violet-50 text-violet-600"><i class="fas fa-store"></i></span>
-                                <h3 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white">TwidyShop</h3>
-                                <p class="mt-1 text-xs sm:text-sm leading-relaxed text-slate-500 dark:text-slate-400">Topup, layanan digital, dan produk pilihan.</p>
-                                <span class="eco-arrow">Buka layanan <i class="fas fa-arrow-up-right-from-square text-[10px]"></i></span>
-                            </a>
-                            <a class="ecosystem-card" href="https://tplaysansekai.vercel.app/" target="_blank" rel="noopener noreferrer" aria-label="Buka TPLAY">
-                                <span class="ecosystem-icon bg-rose-50 text-rose-600"><i class="fas fa-play"></i></span>
-                                <h3 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white">TPLAY</h3>
-                                <p class="mt-1 text-xs sm:text-sm leading-relaxed text-slate-500 dark:text-slate-400">Streaming drama pendek dan anime.</p>
-                                <span class="eco-arrow">Buka layanan <i class="fas fa-arrow-up-right-from-square text-[10px]"></i></span>
-                            </a>
-                            <a class="ecosystem-card" href="https://tlibrary.my.id/" target="_blank" rel="noopener noreferrer" aria-label="Buka TLIBRARY">
-                                <span class="ecosystem-icon bg-sky-50 text-sky-600"><i class="fas fa-book-open"></i></span>
-                                <h3 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white">TLIBRARY</h3>
-                                <p class="mt-1 text-xs sm:text-sm leading-relaxed text-slate-500 dark:text-slate-400">Temukan ebook dan koleksi bacaan digital.</p>
-                                <span class="eco-arrow">Buka layanan <i class="fas fa-arrow-up-right-from-square text-[10px]"></i></span>
-                            </a>
-                        </div>
-                    </section>
+  <div class="mb-4 flex items-center gap-3">
+    <span class="text-indigo-600 text-xl"><i class="fas fa-share-alt"></i></span>
+    <div><h2 id="ecosystem-heading" class="twidy-section-title text-base sm:text-lg">TWIDY ECOSYSTEM</h2><p class="text-xs text-slate-500 dark:text-slate-400">Satu ekosistem, banyak solusi untuk kebutuhan digitalmu.</p></div>
+    <span class="twidy-section-line"></span>
+  </div>
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+    <button type="button" class="ecosystem-card text-left" onclick="selectTool('twidy-bill')">
+      <div class="flex items-center gap-3"><span class="ecosystem-icon bg-emerald-50 text-emerald-600 !mb-0"><i class="fas fa-file-invoice-dollar"></i></span><div class="min-w-0"><h3 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white">TwidyBill</h3><p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Tagihan &amp; split bill</p></div><span class="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700"><i class="fas fa-arrow-right text-xs"></i></span></div>
+      <p class="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">Kelola tagihan, bagi biaya, dan hitung split bill dengan mudah.</p>
+    </button>
+    <button type="button" class="ecosystem-card text-left" onclick="selectTool('twidy-ai')">
+      <div class="flex items-center gap-3"><span class="ecosystem-icon bg-violet-50 text-violet-600 !mb-0"><i class="fas fa-robot"></i></span><div class="min-w-0"><h3 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white">Twidy AI</h3><p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Asisten AI</p></div><span class="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-100 text-violet-700"><i class="fas fa-arrow-right text-xs"></i></span></div>
+      <p class="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">Bantu menyelesaikan tugas dan kebutuhan digital lebih cepat.</p>
+    </button>
+    <button type="button" class="ecosystem-card text-left" onclick="selectTool('twidy-translator')">
+      <div class="flex items-center gap-3"><span class="ecosystem-icon bg-sky-50 text-sky-600 !mb-0"><i class="fas fa-language"></i></span><div class="min-w-0"><h3 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white">Twidy Translator</h3><p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Terjemahan AI</p></div><span class="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-700"><i class="fas fa-arrow-right text-xs"></i></span></div>
+      <p class="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">Terjemahkan teks dengan memperhatikan konteks dan gaya bahasa.</p>
+    </button>
+    <button type="button" class="ecosystem-card text-left" onclick="selectTool('twidy-break-room')">
+      <div class="flex items-center gap-3"><span class="ecosystem-icon bg-amber-50 text-amber-600 !mb-0"><i class="fas fa-gamepad"></i></span><div class="min-w-0"><h3 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white">Twidy Games</h3><p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Mini games &amp; hiburan</p></div><span class="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700"><i class="fas fa-arrow-right text-xs"></i></span></div>
+      <p class="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">Istirahat sejenak dengan permainan ringan di sela pekerjaan.</p>
+    </button>
+  </div>
+</section>
 
-                    <section aria-labelledby="popular-tools-heading" class="mb-8 sm:mb-10">
+<section aria-labelledby="popular-tools-heading" class="mb-8 sm:mb-10">
                         <div class="mb-4 flex items-center gap-3">
                             <h2 id="popular-tools-heading" class="twidy-section-title text-base sm:text-lg">TOOLS POPULER</h2>
                             <span class="twidy-section-line"></span>
