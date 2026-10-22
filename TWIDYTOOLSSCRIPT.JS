@@ -254,6 +254,8 @@ const toolConfig = {
     'twidy-ai': { title: 'Twidy AI', desc: 'Asisten AI pintar untuk membantu berbagai tugas digital Anda secara langsung.', icon: 'fa-robot', color: 'text-purple-500', isIframe: true, iframeUrl: 'https://twidyai.vercel.app/' },
     'twidy-translator': { title: 'Twidy Translator', desc: 'Terjemahkan teks dengan AI yang memahami konteks, bahasa sehari-hari, dan berbagai gaya penulisan.', icon: 'fa-language', color: 'text-sky-500', isCustomUI: true },
     'twidy-break-room': { title: 'Twidy Break Room', desc: 'Istirahat sejenak dengan mini games dan hiburan ringan sebelum kembali bekerja.', icon: 'fa-coffee', color: 'text-amber-700', isCustomUI: true },
+    'tplay': { title: 'TPLAY', desc: 'Temukan hiburan drama pendek dan serial pilihan dalam satu tempat. Buka TPLAY untuk menjelajahi cerita favorit dan lanjutkan tontonan langsung dari browser.', icon: 'fa-play-circle', color: 'text-fuchsia-500', isIframe: true, iframeUrl: 'https://www.tplay.my.id/' },
+    'tlibrary': { title: 'TLIBRARY', desc: 'Jelajahi dunia komik dengan beragam manga, manhwa, dan manhua. Buka TLIBRARY untuk menemukan judul menarik dan membaca chapter pilihan dengan nyaman.', icon: 'fa-book-open', color: 'text-violet-500', isIframe: true, iframeUrl: 'https://komiktlib.vercel.app/' },
 
     // === PDF TOOLS ===
     'pdf-merge': { title: 'Merge PDF', desc: 'Gabungkan PDF dan atur urutan file dengan menarik (drag & drop).', icon: 'fa-object-group', color: 'text-red-500', accept: '.pdf', multi: true },
@@ -357,7 +359,7 @@ const toolConfig = {
 };
 
 const categories = {
-    'TWIDY ECOSYSTEM': ['twidy-bill', 'twidy-ai', 'twidy-translator', 'twidy-break-room'],
+    'TWIDY ECOSYSTEM': ['twidy-bill', 'twidy-ai', 'twidy-translator', 'twidy-break-room', 'tplay', 'tlibrary'],
     'ORGANIZE PDF': ['pdf-merge', 'pdf-split', 'remove-pages', 'extract-pages', 'organize-pdf', 'scan-to-pdf'],
     'OPTIMIZE PDF': ['pdf-compress', 'repair-pdf', 'ocr-pdf'],
     'CONVERT TO PDF': ['image-to-pdf', 'word-to-pdf', 'ppt-to-pdf', 'excel-to-pdf', 'html-to-pdf', 'txt-to-pdf', 'rtf-to-pdf'],
